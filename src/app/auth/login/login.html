@@ -1,0 +1,118 @@
+<div class="login-page">
+
+  <!-- LEFT PANEL: Branding -->
+  <div class="login-panel-left">
+    <div class="login-brand">
+      <div class="login-brand-icon">
+        <i class="bi bi-archive-fill"></i>
+      </div>
+      <h1>SIAPLEM</h1>
+      <p class="brand-tagline">
+        Sistema Integral de Archivos del<br>
+        Poder Legislativo del Estado de México
+      </p>
+    </div>
+
+    <div class="login-features">
+      <div class="feature-item">
+        <div class="feature-item-icon">
+          <i class="bi bi-folder2-open"></i>
+        </div>
+        <div>
+          <h6>Archivo de Trámite</h6>
+          <small>Gestión de expedientes activos y préstamos</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-icon">
+          <i class="bi bi-archive"></i>
+        </div>
+        <div>
+          <h6>Archivo de Concentración</h6>
+          <small>Control de expedientes semi-activos</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-icon">
+          <i class="bi bi-book"></i>
+        </div>
+        <div>
+          <h6>Archivo Histórico</h6>
+          <small>Preservación del patrimonio documental</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-footer-brand">
+      <i class="bi bi-building me-2"></i>Poder Legislativo del Estado de México &copy; {{ currentYear }}
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Login form -->
+  <div class="login-panel-right">
+    <div class="login-form-wrap">
+      <div class="login-form-header">
+        <h2>Bienvenido</h2>
+        <p>Ingrese sus credenciales para acceder al sistema</p>
+      </div>
+
+      <form (ngSubmit)="onLogin()" #loginForm="ngForm" autocomplete="off">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Usuario</label>
+          <div class="input-group login-input-group">
+            <span class="input-group-text">
+              <i class="bi bi-person"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="credentials.username"
+              name="username"
+              placeholder="Ingrese su usuario"
+              required>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold small">Contraseña</label>
+          <div class="input-group login-input-group">
+            <span class="input-group-text">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [(ngModel)]="credentials.password"
+              name="password"
+              placeholder="Ingrese su contraseña"
+              required>
+            <button class="btn toggle-pass-btn" type="button" (click)="togglePassword()" tabindex="-1">
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+          <i class="bi bi-box-arrow-in-right me-2"></i>
+          Iniciar Sesión
+        </button>
+
+        <div class="text-center mt-3">
+          <a href="#" class="forgot-link">
+            <i class="bi bi-question-circle me-1"></i>¿Olvidó su contraseña?
+          </a>
+        </div>
+
+      </form>
+
+      <div class="login-form-footer">
+        <p class="mb-0">
+          <i class="bi bi-shield-lock me-1"></i>
+          Acceso restringido al personal autorizado · v1.0.0
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>

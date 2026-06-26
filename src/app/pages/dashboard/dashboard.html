@@ -1,0 +1,274 @@
+<!-- ===== WELCOME BANNER ===== -->
+<div class="welcome-banner">
+  <div>
+    <div class="welcome-greeting">{{ greeting() }},</div>
+    <div class="welcome-name">Admin Usuario</div>
+    <div class="welcome-role"><i class="bi bi-shield-fill me-1"></i>Administrador del Sistema</div>
+  </div>
+  <div class="welcome-clock">
+    <div class="clock-time">{{ currentTime() }}</div>
+    <div class="clock-date">{{ currentDate() }}</div>
+  </div>
+</div>
+
+<!-- ===== STATS CARDS ===== -->
+<div class="row g-3 mb-4">
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card" style="border-left-color: #7B1D4C">
+      <div class="stat-card-header">
+        <div>
+          <div class="stat-value">1,284</div>
+          <div class="stat-label">Expedientes en Trámite</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(123,29,76,0.1); color:#7B1D4C">
+          <i class="bi bi-file-earmark-text-fill"></i>
+        </div>
+      </div>
+      <div class="stat-trend text-success">
+        <i class="bi bi-arrow-up-short"></i>12% este mes
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card" style="border-left-color: #0d6efd">
+      <div class="stat-card-header">
+        <div>
+          <div class="stat-value">856</div>
+          <div class="stat-label">En Concentración</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(13,110,253,0.1); color:#0d6efd">
+          <i class="bi bi-archive-fill"></i>
+        </div>
+      </div>
+      <div class="stat-trend text-muted">
+        <i class="bi bi-dash"></i>Sin cambios
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card" style="border-left-color: #198754">
+      <div class="stat-card-header">
+        <div>
+          <div class="stat-value">2,431</div>
+          <div class="stat-label">En Archivo Histórico</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(25,135,84,0.1); color:#198754">
+          <i class="bi bi-collection-fill"></i>
+        </div>
+      </div>
+      <div class="stat-trend text-success">
+        <i class="bi bi-arrow-up-short"></i>34 nuevos este año
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card" style="border-left-color: #fd7e14">
+      <div class="stat-card-header">
+        <div>
+          <div class="stat-value">23</div>
+          <div class="stat-label">Préstamos Activos</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(253,126,20,0.1); color:#fd7e14">
+          <i class="bi bi-hand-index-thumb-fill"></i>
+        </div>
+      </div>
+      <div class="stat-trend text-warning">
+        <i class="bi bi-exclamation-circle me-1"></i>5 por vencer
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== ACCESOS RÁPIDOS ===== -->
+<p class="section-title"><i class="bi bi-lightning-fill me-1"></i>Accesos Rápidos</p>
+<div class="row g-3 mb-4">
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/tramite/expedientes">
+      <div class="quick-card-icon" style="background:rgba(123,29,76,0.1); color:#7B1D4C">
+        <i class="bi bi-file-earmark-plus"></i>
+      </div>
+      <div class="quick-card-label">Nuevo<br>Expediente</div>
+    </a>
+  </div>
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/tramite/prestamos">
+      <div class="quick-card-icon" style="background:rgba(13,110,253,0.1); color:#0d6efd">
+        <i class="bi bi-search"></i>
+      </div>
+      <div class="quick-card-label">Búsqueda<br>General</div>
+    </a>
+  </div>
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/tramite/transferencias">
+      <div class="quick-card-icon" style="background:rgba(25,135,84,0.1); color:#198754">
+        <i class="bi bi-arrow-right-circle"></i>
+      </div>
+      <div class="quick-card-label">Transferencia<br>Primaria</div>
+    </a>
+  </div>
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/concentracion/prestamos">
+      <div class="quick-card-icon" style="background:rgba(253,126,20,0.1); color:#fd7e14">
+        <i class="bi bi-hand-index-thumb"></i>
+      </div>
+      <div class="quick-card-label">Préstamos<br>Pendientes</div>
+    </a>
+  </div>
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/concentracion/baja">
+      <div class="quick-card-icon" style="background:rgba(220,53,69,0.1); color:#dc3545">
+        <i class="bi bi-trash3"></i>
+      </div>
+      <div class="quick-card-label">Baja<br>Documental</div>
+    </a>
+  </div>
+
+  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <a class="quick-card" routerLink="/dashboard/reportes">
+      <div class="quick-card-icon" style="background:rgba(108,117,125,0.1); color:#6c757d">
+        <i class="bi bi-bar-chart-fill"></i>
+      </div>
+      <div class="quick-card-label">Reportes y<br>Estadísticas</div>
+    </a>
+  </div>
+
+</div>
+
+<!-- ===== ACTIVIDAD RECIENTE + ALERTAS ===== -->
+<div class="row g-3">
+
+  <!-- Actividad reciente -->
+  <div class="col-lg-8">
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Actividad Reciente
+        </span>
+        <a href="#" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem">Ver todo</a>
+      </div>
+      <div class="content-card-body" style="overflow-x:auto">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Expediente</th>
+              <th>Descripción</th>
+              <th>Área</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0842</span></td>
+              <td>Contratos de Servicios 2026</td>
+              <td>Área Jurídica</td>
+              <td><span class="status-badge status-active">Activo</span></td>
+              <td class="text-muted">26/06/2026</td>
+            </tr>
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0841</span></td>
+              <td>Nómina Quincenal – Junio</td>
+              <td>Recursos Humanos</td>
+              <td><span class="status-badge status-pending">Préstamo</span></td>
+              <td class="text-muted">25/06/2026</td>
+            </tr>
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2025-1204</span></td>
+              <td>Dictámenes Legislativos 2025</td>
+              <td>Coordinación Leg.</td>
+              <td><span class="status-badge status-transfer">Transferido</span></td>
+              <td class="text-muted">24/06/2026</td>
+            </tr>
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2024-0530</span></td>
+              <td>Actas de Sesión Plenaria</td>
+              <td>Secretaría General</td>
+              <td><span class="status-badge status-closed">Cerrado</span></td>
+              <td class="text-muted">23/06/2026</td>
+            </tr>
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0839</span></td>
+              <td>Adquisición de Equipo TI</td>
+              <td>Administración</td>
+              <td><span class="status-badge status-active">Activo</span></td>
+              <td class="text-muted">22/06/2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral -->
+  <div class="col-lg-4">
+
+    <!-- Préstamos por vencer -->
+    <div class="content-card mb-3">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
+        </span>
+        <span class="status-badge status-pending">5</span>
+      </div>
+      <div class="p-3">
+        @for (item of [
+          { exp: 'EXP-2026-0812', dias: 1 },
+          { exp: 'EXP-2026-0798', dias: 2 },
+          { exp: 'EXP-2026-0776', dias: 3 }
+        ]; track item.exp) {
+          <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
+            <div>
+              <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">{{ item.exp }}</div>
+              <div class="text-muted" style="font-size:0.72rem">Devolución en {{ item.dias }} día(s)</div>
+            </div>
+            <span class="status-badge status-pending">{{ item.dias }}d</span>
+          </div>
+        }
+        <a href="#" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+      </div>
+    </div>
+
+    <!-- Transferencias recientes -->
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-send-fill me-2" style="color:#0d6efd"></i>Transferencias
+        </span>
+      </div>
+      <div class="p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="transfer-dot" style="background:#0d6efd"></div>
+            <span class="transfer-label">Trámite → Concentración</span>
+          </div>
+          <span class="transfer-count" style="color:#0d6efd">12</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="transfer-dot" style="background:#198754"></div>
+            <span class="transfer-label">Concentración → Histórico</span>
+          </div>
+          <span class="transfer-count" style="color:#198754">4</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="transfer-dot" style="background:#dc3545"></div>
+            <span class="transfer-label">Pendientes de Baja</span>
+          </div>
+          <span class="transfer-count" style="color:#dc3545">7</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

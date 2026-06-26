@@ -1,0 +1,7 @@
+/* Component-specific overrides – layout styles live in global styles.css */
+.dropdown-menu { animation: dropIn 0.15s ease; }
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

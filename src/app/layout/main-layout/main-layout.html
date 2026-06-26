@@ -1,0 +1,261 @@
+<div class="app-wrapper" [class.sidebar-mini]="sidebarCollapsed()">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="app-sidebar">
+
+    <!-- Brand -->
+    <a class="sidebar-brand" routerLink="/dashboard">
+      <div class="sidebar-brand-icon">
+        <i class="bi bi-archive-fill"></i>
+      </div>
+      <div class="sidebar-brand-text">
+        <span class="brand-name">SIAPLEM</span>
+        <span class="brand-sub">P. Legislativo Edomex</span>
+      </div>
+    </a>
+
+    <!-- User info -->
+    <div class="sidebar-user">
+      <div class="s-user-avatar">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <div>
+        <div class="s-user-name">Admin Usuario</div>
+        <div class="s-user-role">Administrador del Sistema</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+
+      <!-- Inicio -->
+      <a routerLink="/dashboard/home" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-house-fill nav-icon"></i>
+        <span class="nav-label">Inicio</span>
+      </a>
+
+      <!-- ── ARCHIVO DE TRÁMITE ── -->
+      <div class="nav-section-label">Archivo de Trámite</div>
+
+      <button class="nav-link-item" (click)="toggleMenu('tramite')">
+        <i class="bi bi-folder2-open nav-icon"></i>
+        <span class="nav-label">Expedientes</span>
+        <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('tramite')"></i>
+      </button>
+      <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
+        <li>
+          <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Lista de Expedientes
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/tramite/nuevo-expediente" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Nuevo Expediente
+          </a>
+        </li>
+      </ul>
+
+      <a routerLink="/dashboard/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-search nav-icon"></i>
+        <span class="nav-label">Consultas y Préstamos</span>
+      </a>
+
+      <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-arrow-right-circle nav-icon"></i>
+        <span class="nav-label">Transferencia Primaria</span>
+      </a>
+
+      <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-list-check nav-icon"></i>
+        <span class="nav-label">Inventario</span>
+      </a>
+
+      <!-- ── ARCHIVO DE CONCENTRACIÓN ── -->
+      <div class="nav-section-label">Archivo de Concentración</div>
+
+      <a routerLink="/dashboard/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-inbox-fill nav-icon"></i>
+        <span class="nav-label">Expedientes Recibidos</span>
+      </a>
+
+      <a routerLink="/dashboard/concentracion/prestamos" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-hand-index-thumb nav-icon"></i>
+        <span class="nav-label">Préstamos</span>
+      </a>
+
+      <a routerLink="/dashboard/concentracion/baja" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-trash3 nav-icon"></i>
+        <span class="nav-label">Baja Documental</span>
+      </a>
+
+      <a routerLink="/dashboard/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-send nav-icon"></i>
+        <span class="nav-label">Transfer. al Histórico</span>
+      </a>
+
+      <!-- ── ARCHIVO HISTÓRICO ── -->
+      <div class="nav-section-label">Archivo Histórico</div>
+
+      <a routerLink="/dashboard/historico/fondos" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-collection nav-icon"></i>
+        <span class="nav-label">Fondo Documental</span>
+      </a>
+
+      <a routerLink="/dashboard/historico/consulta" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-eye nav-icon"></i>
+        <span class="nav-label">Consulta Pública</span>
+      </a>
+
+      <a routerLink="/dashboard/historico/digitalizacion" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-camera nav-icon"></i>
+        <span class="nav-label">Digitalización</span>
+      </a>
+
+      <a routerLink="/dashboard/historico/conservacion" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-shield-check nav-icon"></i>
+        <span class="nav-label">Conservación</span>
+      </a>
+
+      <!-- ── ADMINISTRACIÓN ── -->
+      <div class="nav-section-label">Administración</div>
+
+      <a routerLink="/dashboard/admin/usuarios" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-people-fill nav-icon"></i>
+        <span class="nav-label">Usuarios y Roles</span>
+      </a>
+
+      <a routerLink="/dashboard/admin/catalogos" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-tags nav-icon"></i>
+        <span class="nav-label">Catálogos</span>
+      </a>
+
+      <a routerLink="/dashboard/admin/series" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-diagram-3 nav-icon"></i>
+        <span class="nav-label">Series Documentales</span>
+      </a>
+
+      <a routerLink="/dashboard/admin/configuracion" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-sliders nav-icon"></i>
+        <span class="nav-label">Configuración</span>
+      </a>
+
+      <!-- ── HERRAMIENTAS ── -->
+      <div class="nav-section-label">Herramientas</div>
+
+      <a routerLink="/dashboard/reportes" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-bar-chart-fill nav-icon"></i>
+        <span class="nav-label">Reportes y Estadísticas</span>
+      </a>
+
+      <a routerLink="/dashboard/ayuda" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-question-circle nav-icon"></i>
+        <span class="nav-label">Ayuda y Soporte</span>
+      </a>
+
+    </nav>
+
+    <!-- Logout -->
+    <div class="sidebar-footer">
+      <a routerLink="/login">
+        <i class="bi bi-box-arrow-right nav-icon"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <div class="app-main">
+
+    <!-- TOPBAR -->
+    <header class="app-topbar">
+
+      <!-- Toggle sidebar -->
+      <button class="topbar-toggle" (click)="toggleSidebar()" title="Menú">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <!-- Breadcrumb -->
+      <div class="topbar-breadcrumb d-none d-md-flex">
+        <i class="bi bi-house-fill"></i>
+        <span class="bc-sep">/</span>
+        <span class="bc-active">Sistema de Archivos</span>
+      </div>
+
+      <!-- Search -->
+      <div class="topbar-search-wrap d-none d-lg-block">
+        <i class="bi bi-search topbar-search-icon"></i>
+        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos...">
+      </div>
+
+      <!-- Right actions -->
+      <div class="topbar-end">
+
+        <button class="topbar-icon-btn d-lg-none" title="Buscar">
+          <i class="bi bi-search"></i>
+        </button>
+
+        <button class="topbar-icon-btn" title="Notificaciones">
+          <i class="bi bi-bell"></i>
+          <span class="notif-badge">3</span>
+        </button>
+
+        <button class="topbar-icon-btn" title="Pantalla completa">
+          <i class="bi bi-fullscreen"></i>
+        </button>
+
+        <div class="topbar-divider"></div>
+
+        <!-- User dropdown -->
+        <div class="dropdown">
+          <button
+            class="topbar-user-btn"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <div class="topbar-avatar">AU</div>
+            <div class="d-none d-md-block">
+              <div class="topbar-uname">Admin Usuario</div>
+              <div class="topbar-urole">Administrador</div>
+            </div>
+            <i class="bi bi-chevron-down d-none d-md-inline" style="font-size:0.65rem; opacity:0.7; margin-left:2px"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-1" style="min-width:220px; border-radius:10px">
+            <li class="px-3 py-2">
+              <div class="fw-semibold" style="font-size:0.85rem">Admin Usuario</div>
+              <div class="text-muted" style="font-size:0.75rem">admin&#64;plem.gob.mx</div>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" style="font-size:0.85rem">
+                <i class="bi bi-person text-muted"></i>Mi Perfil
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" style="font-size:0.85rem">
+                <i class="bi bi-gear text-muted"></i>Configuración
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" style="font-size:0.85rem">
+                <i class="bi bi-question-circle text-muted"></i>Ayuda
+              </a>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2 text-danger" routerLink="/login" style="font-size:0.85rem">
+                <i class="bi bi-box-arrow-right"></i>Cerrar Sesión
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="app-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

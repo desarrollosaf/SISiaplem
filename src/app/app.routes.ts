@@ -1,3 +1,55 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+const PH = (title: string, section: string) => ({ title, section });
+
+export const routes: Routes = [
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+
+  {
+    path: 'login',
+    loadComponent: () => import('./auth/login/login').then(m => m.LoginComponent)
+  },
+
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      {
+        path: 'home',
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+      },
+
+      /* ── Archivo de Trámite ── */
+      { path: 'tramite/expedientes',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Lista de Expedientes', 'Archivo de Trámite') },
+      { path: 'tramite/nuevo-expediente', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Nuevo Expediente', 'Archivo de Trámite') },
+      { path: 'tramite/prestamos',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Consultas y Préstamos', 'Archivo de Trámite') },
+      { path: 'tramite/transferencias',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia Primaria', 'Archivo de Trámite') },
+      { path: 'tramite/inventario',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Inventario', 'Archivo de Trámite') },
+
+      /* ── Archivo de Concentración ── */
+      { path: 'concentracion/expedientes',  loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Expedientes Recibidos', 'Archivo de Concentración') },
+      { path: 'concentracion/prestamos',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Préstamos', 'Archivo de Concentración') },
+      { path: 'concentracion/baja',         loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Baja Documental', 'Archivo de Concentración') },
+      { path: 'concentracion/transferencias', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia al Histórico', 'Archivo de Concentración') },
+
+      /* ── Archivo Histórico ── */
+      { path: 'historico/fondos',         loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Fondo Documental', 'Archivo Histórico') },
+      { path: 'historico/consulta',       loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Consulta Pública', 'Archivo Histórico') },
+      { path: 'historico/digitalizacion', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Digitalización', 'Archivo Histórico') },
+      { path: 'historico/conservacion',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Conservación y Restauración', 'Archivo Histórico') },
+
+      /* ── Administración ── */
+      { path: 'admin/usuarios',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Usuarios y Roles', 'Administración') },
+      { path: 'admin/catalogos',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Catálogos', 'Administración') },
+      { path: 'admin/series',       loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Series Documentales', 'Administración') },
+      { path: 'admin/configuracion',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Configuración', 'Administración') },
+
+      /* ── Herramientas ── */
+      { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
+      { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },
+    ]
+  },
+
+  { path: '**', redirectTo: '/login' }
+];
