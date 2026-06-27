@@ -47,10 +47,6 @@ import { InventarioConcentracions as _InventarioConcentracions } from "./inventa
 import type { InventarioConcentracionsAttributes, InventarioConcentracionsCreationAttributes } from "./inventario_concentracions";
 import { InventarioFisicos as _InventarioFisicos } from "./inventario_fisicos";
 import type { InventarioFisicosAttributes, InventarioFisicosCreationAttributes } from "./inventario_fisicos";
-import { JobBatches as _JobBatches } from "./job_batches";
-import type { JobBatchesAttributes, JobBatchesCreationAttributes } from "./job_batches";
-import { Jobs as _Jobs } from "./jobs";
-import type { JobsAttributes, JobsCreationAttributes } from "./jobs";
 import { Members as _Members } from "./members";
 import type { MembersAttributes, MembersCreationAttributes } from "./members";
 import { Migrations as _Migrations } from "./migrations";
@@ -163,8 +159,6 @@ export {
   _Groups as Groups,
   _InventarioConcentracions as InventarioConcentracions,
   _InventarioFisicos as InventarioFisicos,
-  _JobBatches as JobBatches,
-  _Jobs as Jobs,
   _Members as Members,
   _Migrations as Migrations,
   _ModelHasPermissions as ModelHasPermissions,
@@ -259,10 +253,6 @@ export type {
   InventarioConcentracionsCreationAttributes,
   InventarioFisicosAttributes,
   InventarioFisicosCreationAttributes,
-  JobBatchesAttributes,
-  JobBatchesCreationAttributes,
-  JobsAttributes,
-  JobsCreationAttributes,
   MembersAttributes,
   MembersCreationAttributes,
   MigrationsAttributes,
@@ -376,8 +366,6 @@ export function initModels(sequelize: Sequelize) {
   const Groups = _Groups.initModel(sequelize);
   const InventarioConcentracions = _InventarioConcentracions.initModel(sequelize);
   const InventarioFisicos = _InventarioFisicos.initModel(sequelize);
-  const JobBatches = _JobBatches.initModel(sequelize);
-  const Jobs = _Jobs.initModel(sequelize);
   const Members = _Members.initModel(sequelize);
   const Migrations = _Migrations.initModel(sequelize);
   const ModelHasPermissions = _ModelHasPermissions.initModel(sequelize);
@@ -468,8 +456,6 @@ export function initModels(sequelize: Sequelize) {
     Groups: Groups,
     InventarioConcentracions: InventarioConcentracions,
     InventarioFisicos: InventarioFisicos,
-    JobBatches: JobBatches,
-    Jobs: Jobs,
     Members: Members,
     Migrations: Migrations,
     ModelHasPermissions: ModelHasPermissions,
