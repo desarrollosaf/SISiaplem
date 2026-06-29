@@ -14,7 +14,7 @@ export class TramiteInventarioComponent implements OnInit {
   error = signal('');
 
   // RFC temporal hasta integrar auth — reemplazar con el usuario real
-  private RFC_TEMP = 'SAGM990220';
+  private RFC_TEMP = 'AAGE740529';
 
   constructor(private guia: GuiaService) {}
 
