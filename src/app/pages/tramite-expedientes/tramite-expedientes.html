@@ -1,0 +1,189 @@
+<!-- ===== ENCABEZADO ===== -->
+<div class="page-header mb-4">
+  <div>
+    <div class="breadcrumb-mini">
+      <a routerLink="/dashboard/tramite/inventario" class="breadcrumb-link">
+        <i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite
+      </a>
+      <i class="bi bi-chevron-right mx-1"></i>
+      <span>{{ titulo() }}</span>
+    </div>
+    <h4 class="page-title mt-1">{{ titulo() }}</h4>
+    <p class="page-subtitle">{{ subtitulo() }}</p>
+  </div>
+
+  @if (tipo === 'serie' || tipo === 'subserie') {
+    <div class="page-header-actions">
+      <button
+        class="btn btn-primary btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#modalNuevoExp"
+      >
+        <i class="bi bi-plus-lg me-1"></i>Nuevo Expediente
+      </button>
+    </div>
+  }
+</div>
+
+<!-- ===== ERROR ===== -->
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+<!-- ===== TABLA ===== -->
+<div class="content-card">
+  <div class="content-card-header">
+    <span class="content-card-title">
+      <i class="bi bi-files me-2" style="color:var(--primary)"></i>
+      @if (cargando()) { Cargando… }
+      @else { {{ expedientes().length }} expediente(s) }
+    </span>
+    @if (!cargando() && (tipo === 'activos' || tipo === 'cerrados')) {
+      <div class="d-flex gap-2">
+        <a routerLink="/dashboard/tramite/expedientes"
+           class="btn btn-sm"
+           [class.btn-primary]="tipo==='activos'"
+           [class.btn-outline-primary]="tipo!=='activos'">
+          <i class="bi bi-folder-open me-1"></i>Abiertos
+        </a>
+        <a routerLink="/dashboard/tramite/expedientes-cerrados"
+           class="btn btn-sm"
+           [class.btn-primary]="tipo==='cerrados'"
+           [class.btn-outline-secondary]="tipo!=='cerrados'">
+          <i class="bi bi-folder-x me-1"></i>Cerrados
+        </a>
+      </div>
+    }
+  </div>
+
+  @if (cargando()) {
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (expedientes().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-folder2"></i>
+      <p>Sin expedientes registrados.</p>
+      @if (tipo === 'serie' || tipo === 'subserie') {
+        <small>Usa el botón <b>Nuevo Expediente</b> para crear el primero.</small>
+      }
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="exp-table">
+        <thead>
+          <tr>
+            <th>Expediente</th>
+            <th style="width:70px">Año</th>
+            @if (tipo === 'activos' || tipo === 'cerrados') {
+              <th>Serie / Subserie</th>
+            }
+            <th style="width:120px; text-align:center">Estado</th>
+            <th style="width:100px; text-align:center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (exp of expedientes(); track exp.id) {
+            <tr>
+              <td class="exp-nombre">{{ exp.nombre_ex }}</td>
+              <td class="text-muted" style="font-size:0.85rem">{{ exp.anio }}</td>
+              @if (tipo === 'activos' || tipo === 'cerrados') {
+                <td style="font-size:0.8rem; color:#64748b">{{ serieLabel(exp) }}</td>
+              }
+              <td style="text-align:center">
+                @if (estaAbierto(exp)) {
+                  <span class="exp-status exp-status-open">
+                    <i class="bi bi-unlock-fill"></i> Abierto
+                  </span>
+                } @else {
+                  <span class="exp-status exp-status-close">
+                    <i class="bi bi-lock-fill"></i> Cerrado
+                  </span>
+                }
+              </td>
+              <td style="text-align:center">
+                <div class="d-flex justify-content-center gap-1">
+                  <a
+                    [routerLink]="['/dashboard/tramite/expediente', exp.id]"
+                    class="btn-icon btn-icon-view"
+                    title="Ver expediente"
+                  >
+                    <i class="bi bi-folder2-open"></i>
+                  </a>
+                  @if (estaAbierto(exp)) {
+                    <button
+                      class="btn-icon btn-icon-close"
+                      title="Cerrar expediente"
+                      (click)="cerrarExpediente(exp.id)"
+                    >
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ===== MODAL: NUEVO EXPEDIENTE ===== -->
+@if (tipo === 'serie' || tipo === 'subserie') {
+  <div class="modal fade" id="modalNuevoExp" tabindex="-1" aria-labelledby="modalNuevoExpLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header" style="background:var(--primary); color:#fff;">
+          <h5 class="modal-title" id="modalNuevoExpLabel">
+            <i class="bi bi-folder-plus me-2"></i>Nuevo Expediente
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre del Expediente <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Ej. Contratos de Servicios 2026"
+              [value]="nuevoNombre"
+              (input)="nuevoNombre = $any($event.target).value"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Año <span class="text-danger">*</span></label>
+            <input
+              type="number"
+              class="form-control"
+              [value]="nuevoAnio"
+              (input)="nuevoAnio = $any($event.target).value"
+              min="2000"
+              max="2100"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="guardarExpediente()"
+            [disabled]="guardando"
+          >
+            @if (guardando) {
+              <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
+            } @else {
+              <i class="bi bi-check-lg me-1"></i>Guardar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

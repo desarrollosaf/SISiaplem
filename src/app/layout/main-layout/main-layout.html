@@ -44,13 +44,18 @@
       </button>
       <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
         <li>
-          <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
-            <i class="bi bi-dot"></i>Lista de Expedientes
+          <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Guía de Archivos
           </a>
         </li>
         <li>
-          <a routerLink="/dashboard/tramite/nuevo-expediente" routerLinkActive="active" class="submenu-link">
-            <i class="bi bi-dot"></i>Nuevo Expediente
+          <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Expedientes Abiertos
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Expedientes Cerrados
           </a>
         </li>
       </ul>
@@ -63,11 +68,6 @@
       <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-arrow-right-circle nav-icon"></i>
         <span class="nav-label">Transferencia Primaria</span>
-      </a>
-
-      <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="nav-link-item">
-        <i class="bi bi-list-check nav-icon"></i>
-        <span class="nav-label">Inventario</span>
       </a>
 
       <!-- ── ARCHIVO DE CONCENTRACIÓN ── -->

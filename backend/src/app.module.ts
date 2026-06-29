@@ -3,13 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { GuiaModule } from './guia/guia.module';
 
 @Module({
   imports: [
-    // Carga el .env globalmente
     ConfigModule.forRoot({ isGlobal: true }),
-
-    // Conexión a MySQL con Sequelize
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,11 +18,12 @@ import { AppService } from './app.service';
         username: config.get<string>('DB_USER'),
         password: config.get<string>('DB_PASS'),
         database: config.get<string>('DB_NAME'),
-        autoLoadModels: true,  // carga modelos registrados en cada módulo
-        synchronize: false,    // NO sincronizar — la BD ya existe
+        autoLoadModels: true,
+        synchronize: false,
         logging: false,
       }),
     }),
+    GuiaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
