@@ -8,11 +8,17 @@ export interface TipoSeccion {
   valor: string;
 }
 
+export interface DireccionItem {
+  id: number;
+  label: string;
+}
+
 export interface SubserieItem {
   id: number;
   codigo: string;
   subserie: string;
   idSerie: number;
+  id_Departamento?: number | null;
   status: number;
 }
 
@@ -21,6 +27,7 @@ export interface SerieItem {
   codigo: string;
   serie: string;
   idSeccion: number;
+  departamento_id?: number | null;
   status: number;
   subSeries?: SubserieItem[];
 }
@@ -32,6 +39,7 @@ export interface SeccionItem {
   id_subfondo: number;
   id_tipo_seccion: number;
   status: number;
+  direccion_ids?: number[];
   series?: SerieItem[];
 }
 
@@ -52,6 +60,7 @@ export interface SeccionDto {
   codigo: string;
   seccion: string;
   id_tipo_seccion: number;
+  direccion_ids?: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -62,6 +71,10 @@ export class SeccionService {
 
   getTipoSecciones() {
     return this.http.get<TipoSeccion[]>(`${API}/tipo-secciones`);
+  }
+
+  getDirecciones(subfondoId: number) {
+    return this.http.get<DireccionItem[]>(`${API}/direcciones/${subfondoId}`);
   }
 
   // ── Secciones ─────────────────────────────────────────────────────────────
@@ -78,7 +91,7 @@ export class SeccionService {
     return this.http.post<SeccionItem>(API, dto);
   }
 
-  update(id: number, dto: Omit<SeccionDto, 'id_subfondo'>) {
+  update(id: number, dto: Omit<SeccionDto, 'id_subfondo'> & { direccion_ids?: number[] }) {
     return this.http.put<SeccionItem>(`${API}/${id}`, dto);
   }
 
@@ -92,11 +105,11 @@ export class SeccionService {
 
   // ── Series ────────────────────────────────────────────────────────────────
 
-  createSerie(dto: { idSeccion: number; codigo: string; serie: string }) {
+  createSerie(dto: { idSeccion: number; codigo: string; serie: string; departamento_id?: number | null }) {
     return this.http.post<SerieItem>(`${API}/serie`, dto);
   }
 
-  updateSerie(id: number, dto: { codigo: string; serie: string }) {
+  updateSerie(id: number, dto: { codigo: string; serie: string; departamento_id?: number | null }) {
     return this.http.put<SerieItem>(`${API}/serie/${id}`, dto);
   }
 
@@ -110,11 +123,11 @@ export class SeccionService {
 
   // ── Subseries ─────────────────────────────────────────────────────────────
 
-  createSubserie(dto: { idSerie: number; codigo: string; subserie: string }) {
+  createSubserie(dto: { idSerie: number; codigo: string; subserie: string; id_Departamento?: number | null }) {
     return this.http.post<SubserieItem>(`${API}/subserie`, dto);
   }
 
-  updateSubserie(id: number, dto: { codigo: string; subserie: string }) {
+  updateSubserie(id: number, dto: { codigo: string; subserie: string; id_Departamento?: number | null }) {
     return this.http.put<SubserieItem>(`${API}/subserie/${id}`, dto);
   }
 

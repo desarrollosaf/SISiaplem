@@ -23,6 +23,12 @@ export class SeccionController {
     return this.seccionService.getTipoSecciones();
   }
 
+  // GET /api/seccion/direcciones/:subfondoId
+  @Get('direcciones/:subfondoId')
+  getDirecciones(@Param('subfondoId', ParseIntPipe) subfondoId: number) {
+    return this.seccionService.getDirecciones(subfondoId);
+  }
+
   // ── Secciones ─────────────────────────────────────────────────────────────
 
   // GET /api/seccion/subfondo/:subfondoId
@@ -46,6 +52,7 @@ export class SeccionController {
       codigo: string;
       seccion: string;
       id_tipo_seccion: number;
+      direccion_ids?: number[];
     },
   ) {
     return this.seccionService.create(dto);
@@ -55,7 +62,13 @@ export class SeccionController {
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { codigo: string; seccion: string; id_tipo_seccion: number },
+    @Body()
+    dto: {
+      codigo: string;
+      seccion: string;
+      id_tipo_seccion: number;
+      direccion_ids?: number[];
+    },
   ) {
     return this.seccionService.update(id, dto);
   }
@@ -77,7 +90,13 @@ export class SeccionController {
   // POST /api/seccion/serie
   @Post('serie')
   createSerie(
-    @Body() dto: { idSeccion: number; codigo: string; serie: string },
+    @Body()
+    dto: {
+      idSeccion: number;
+      codigo: string;
+      serie: string;
+      departamento_id?: number | null;
+    },
   ) {
     return this.seccionService.createSerie(dto);
   }
@@ -86,7 +105,7 @@ export class SeccionController {
   @Put('serie/:id')
   updateSerie(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { codigo: string; serie: string },
+    @Body() dto: { codigo: string; serie: string; departamento_id?: number | null },
   ) {
     return this.seccionService.updateSerie(id, dto);
   }
@@ -108,7 +127,13 @@ export class SeccionController {
   // POST /api/seccion/subserie
   @Post('subserie')
   createSubserie(
-    @Body() dto: { idSerie: number; codigo: string; subserie: string },
+    @Body()
+    dto: {
+      idSerie: number;
+      codigo: string;
+      subserie: string;
+      id_Departamento?: number | null;
+    },
   ) {
     return this.seccionService.createSubserie(dto);
   }
@@ -117,7 +142,8 @@ export class SeccionController {
   @Put('subserie/:id')
   updateSubserie(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { codigo: string; subserie: string },
+    @Body()
+    dto: { codigo: string; subserie: string; id_Departamento?: number | null },
   ) {
     return this.seccionService.updateSubserie(id, dto);
   }
