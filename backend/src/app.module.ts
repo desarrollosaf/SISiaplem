@@ -34,11 +34,11 @@ import { TDireccion } from './models/t-direccion.model';
     SequelizeModule.forRoot({
       name: 'saf',
       dialect: 'mysql',
-      host: '127.0.0.1',
+      host: 'host.docker.internal',
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'saf',
+      database: 'adminplem_saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,
