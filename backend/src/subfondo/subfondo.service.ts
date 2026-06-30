@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { TDependencia } from '../models/t-dependencia.model';
-import { SeccionEntity } from './entities/seccion.entity';
-import { SerieEntity } from './entities/serie.entity';
-import { SubSerieEntity } from './entities/sub-serie.entity';
-import { SubfondoEntity } from './entities/subfondo.entity';
+import { SeccionModel } from '../models/seccion.model';
+import { SerieModel } from '../models/serie.model';
+import { SubSerieModel } from '../models/sub-serie.model';
+import { SubfondoModel } from '../models/subfondo.model';
 
 @Injectable()
 export class SubfondoService {
   constructor(
-    @InjectModel(SubfondoEntity)
-    private readonly subfondoModel: typeof SubfondoEntity,
+    @InjectModel(SubfondoModel)
+    private readonly subfondoModel: typeof SubfondoModel,
     @InjectModel(TDependencia, 'saf')
     private readonly dependenciaModel: typeof TDependencia,
   ) {}
@@ -19,17 +19,17 @@ export class SubfondoService {
     const subfondos = await this.subfondoModel.findAll({
       include: [
         {
-          model: SeccionEntity,
+          model: SeccionModel,
           where: { status: 1 },
           required: false,
           include: [
             {
-              model: SerieEntity,
+              model: SerieModel,
               where: { status: 1 },
               required: false,
               include: [
                 {
-                  model: SubSerieEntity,
+                  model: SubSerieModel,
                   where: { status: 1 },
                   required: false,
                 },
@@ -99,17 +99,17 @@ export class SubfondoService {
     const sf = await this.subfondoModel.findByPk(id, {
       include: [
         {
-          model: SeccionEntity,
+          model: SeccionModel,
           where: { status: 1 },
           required: false,
           include: [
             {
-              model: SerieEntity,
+              model: SerieModel,
               where: { status: 1 },
               required: false,
               include: [
                 {
-                  model: SubSerieEntity,
+                  model: SubSerieModel,
                   where: { status: 1 },
                   required: false,
                 },

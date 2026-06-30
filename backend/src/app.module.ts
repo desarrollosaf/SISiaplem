@@ -38,7 +38,7 @@ import { TDireccion } from './models/t-direccion.model';
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'adminplem_saf',
+      database: 'saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,

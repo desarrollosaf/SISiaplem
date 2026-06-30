@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { TipoDocEntity } from './entities/tipo-doc.entity';
+import { TipoDocModel } from '../models/tipo-doc.model';
 
 @Injectable()
 export class FichaValoracionService {
   constructor(
-    @InjectModel(TipoDocEntity)
-    private readonly tipoDocModel: typeof TipoDocEntity,
+    @InjectModel(TipoDocModel)
+    private readonly tipoDocModel: typeof TipoDocModel,
   ) {}
 
   async getAll() {

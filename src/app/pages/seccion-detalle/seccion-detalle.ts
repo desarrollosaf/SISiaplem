@@ -7,7 +7,9 @@ import {
   SerieItem,
   SubserieItem,
   TipoSeccion,
+  DireccionItem,
 } from '../../services/seccion.service';
+import { SubfondoService, SubfondoItem } from '../../services/subfondo.service';
 
 type DrawerMode = 'serie-new' | 'serie-edit' | 'subserie-new' | 'subserie-edit' | 'seccion-edit';
 
@@ -28,27 +30,29 @@ export class SeccionDetalleComponent implements OnInit {
   seccionId = 0;
 
   seccion = signal<SeccionItem | null>(null);
+  subfondo = signal<SubfondoItem | null>(null);
   cargando = signal(true);
   error = signal('');
 
   tiposSecciones = signal<TipoSeccion[]>([]);
-
-  // Tab seleccionada: 'info' o id de la serie (string)
-  tabActiva = signal<string>('info');
+  direccionesOpciones = signal<DireccionItem[]>([]);
+  cargandoDirecciones = signal(false);
 
   series = computed(() => this.seccion()?.series ?? []);
-  seriesActivas = computed(() => this.series().filter(s => s.status === 1).length);
+
+  // Accordion: id de la serie expandida (null = todas cerradas)
+  expandedSerieId = signal<number | null>(null);
 
   drawerOpen = signal(false);
   drawerMode = signal<DrawerMode>('serie-new');
   guardando = signal(false);
 
-  // Contexto del drawer
-  serieContextId = signal<number | null>(null); // para subseries: id del padre
+  serieContextId = signal<number | null>(null);
 
-  formSerie = { codigo: '', serie: '' };
-  formSubserie = { codigo: '', subserie: '' };
+  formSerie = { codigo: '', serie: '', departamento_id: null as number | null };
+  formSubserie = { codigo: '', subserie: '', id_Departamento: null as number | null };
   formSeccion = { codigo: '', seccion: '', id_tipo_seccion: 0 };
+  selectedDirIds = signal<number[]>([]);
 
   confirmAction = signal<ConfirmAction | null>(null);
 
@@ -56,15 +60,24 @@ export class SeccionDetalleComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private svc: SeccionService,
+    private subfondoSvc: SubfondoService,
   ) {}
 
   ngOnInit() {
     this.subfondoId = Number(this.route.snapshot.paramMap.get('subfondoId'));
     this.seccionId = Number(this.route.snapshot.paramMap.get('id'));
     this.cargar();
-    this.svc.getTipoSecciones().subscribe({
-      next: t => this.tiposSecciones.set(t),
-      error: () => {},
+    this.svc.getTipoSecciones().subscribe({ next: t => this.tiposSecciones.set(t) });
+    this.cargandoDirecciones.set(true);
+    this.svc.getDirecciones(this.subfondoId).subscribe({
+      next: dirs => { this.direccionesOpciones.set(dirs); this.cargandoDirecciones.set(false); },
+      error: () => this.cargandoDirecciones.set(false),
+    });
+    this.subfondoSvc.getAll().subscribe({
+      next: sfs => {
+        const sf = sfs.find(s => s.id === this.subfondoId);
+        if (sf) this.subfondo.set(sf);
+      },
     });
   }
 
@@ -72,17 +85,8 @@ export class SeccionDetalleComponent implements OnInit {
     this.cargando.set(true);
     this.error.set('');
     this.svc.getById(this.seccionId).subscribe({
-      next: sec => {
-        this.seccion.set(sec);
-        if (sec.series && sec.series.length > 0 && this.tabActiva() === 'info') {
-          // mantener tab info al cargar
-        }
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.error.set('No se pudo cargar la sección.');
-        this.cargando.set(false);
-      },
+      next: sec => { this.seccion.set(sec); this.cargando.set(false); },
+      error: () => { this.error.set('No se pudo cargar la sección.'); this.cargando.set(false); },
     });
   }
 
@@ -94,17 +98,39 @@ export class SeccionDetalleComponent implements OnInit {
     return this.tiposSecciones().find(t => t.id === id)?.valor ?? `Tipo ${id}`;
   }
 
-  serieDeTab(tabId: string): SerieItem | undefined {
-    if (tabId === 'info') return undefined;
-    return this.series().find(s => String(s.id) === tabId);
+  nombreDir(id: number | null | undefined): string {
+    if (!id) return '—';
+    return this.direccionesOpciones().find(d => d.id === id)?.label ?? `Dir. ${id}`;
   }
 
-  // ── Sección info ──────────────────────────────────────────────────────────
+  // ── Accordion ─────────────────────────────────────────────────────────────
+
+  toggleAccordion(serieId: number) {
+    this.expandedSerieId.set(this.expandedSerieId() === serieId ? null : serieId);
+  }
+
+  isExpanded(serieId: number): boolean {
+    return this.expandedSerieId() === serieId;
+  }
+
+  // ── Direcciones multi-select (para sección) ───────────────────────────────
+
+  isDirSelected(id: number): boolean {
+    return this.selectedDirIds().includes(id);
+  }
+
+  toggleDir(id: number) {
+    const ids = this.selectedDirIds();
+    this.selectedDirIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
+  }
+
+  // ── Editar sección ────────────────────────────────────────────────────────
 
   abrirEditarSeccion() {
     const s = this.seccion();
     if (!s) return;
     this.formSeccion = { codigo: s.codigo, seccion: s.seccion, id_tipo_seccion: s.id_tipo_seccion };
+    this.selectedDirIds.set(s.direccion_ids ?? []);
     this.drawerMode.set('seccion-edit');
     this.drawerOpen.set(true);
   }
@@ -112,13 +138,14 @@ export class SeccionDetalleComponent implements OnInit {
   // ── Series ────────────────────────────────────────────────────────────────
 
   abrirNuevaSerie() {
-    this.formSerie = { codigo: '', serie: '' };
+    this.formSerie = { codigo: '', serie: '', departamento_id: null };
+    this.serieContextId.set(null);
     this.drawerMode.set('serie-new');
     this.drawerOpen.set(true);
   }
 
   abrirEditarSerie(ser: SerieItem) {
-    this.formSerie = { codigo: ser.codigo, serie: ser.serie };
+    this.formSerie = { codigo: ser.codigo, serie: ser.serie, departamento_id: ser.departamento_id ?? null };
     this.serieContextId.set(ser.id);
     this.drawerMode.set('serie-edit');
     this.drawerOpen.set(true);
@@ -135,14 +162,14 @@ export class SeccionDetalleComponent implements OnInit {
   // ── Subseries ─────────────────────────────────────────────────────────────
 
   abrirNuevaSubserie(serieId: number) {
-    this.formSubserie = { codigo: '', subserie: '' };
+    this.formSubserie = { codigo: '', subserie: '', id_Departamento: null };
     this.serieContextId.set(serieId);
     this.drawerMode.set('subserie-new');
     this.drawerOpen.set(true);
   }
 
   abrirEditarSubserie(sub: SubserieItem) {
-    this.formSubserie = { codigo: sub.codigo, subserie: sub.subserie };
+    this.formSubserie = { codigo: sub.codigo, subserie: sub.subserie, id_Departamento: sub.id_Departamento ?? null };
     this.serieContextId.set(sub.id);
     this.drawerMode.set('subserie-edit');
     this.drawerOpen.set(true);
@@ -173,7 +200,9 @@ export class SeccionDetalleComponent implements OnInit {
   get formularioValido(): boolean {
     const m = this.drawerMode();
     if (m === 'seccion-edit') {
-      return this.formSeccion.codigo.trim().length > 0 && this.formSeccion.seccion.trim().length > 0 && this.formSeccion.id_tipo_seccion > 0;
+      return this.formSeccion.codigo.trim().length > 0
+        && this.formSeccion.seccion.trim().length > 0
+        && this.formSeccion.id_tipo_seccion > 0;
     }
     if (m === 'serie-new' || m === 'serie-edit') {
       return this.formSerie.codigo.trim().length > 0 && this.formSerie.serie.trim().length > 0;
@@ -185,13 +214,12 @@ export class SeccionDetalleComponent implements OnInit {
     if (!this.formularioValido) return;
     this.guardando.set(true);
     const m = this.drawerMode();
-
     const onNext = () => { this.guardando.set(false); this.drawerOpen.set(false); this.cargar(); };
     const onError = () => { this.guardando.set(false); alert('Error al guardar. Intenta de nuevo.'); };
 
     if (m === 'seccion-edit') {
-      this.svc.update(this.seccionId, this.formSeccion)
-        .subscribe({ next: () => onNext(), error: () => onError() });
+      const payload = { ...this.formSeccion, direccion_ids: this.selectedDirIds() };
+      this.svc.update(this.seccionId, payload).subscribe({ next: () => onNext(), error: () => onError() });
     } else if (m === 'serie-new') {
       this.svc.createSerie({ ...this.formSerie, idSeccion: this.seccionId })
         .subscribe({ next: () => onNext(), error: () => onError() });
@@ -218,7 +246,7 @@ export class SeccionDetalleComponent implements OnInit {
     op$.subscribe({
       next: () => {
         this.confirmAction.set(null);
-        if (a.tipo === 'serie') this.tabActiva.set('info');
+        if (a.tipo === 'serie') this.expandedSerieId.set(null);
         this.cargar();
       },
       error: () => alert('No se pudo eliminar.'),
