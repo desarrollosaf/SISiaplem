@@ -1,0 +1,87 @@
+<div class="page-header mb-4">
+  <div>
+    <h4 class="page-title">
+      <i class="bi bi-folder2-open me-2"></i>Catálogo de Disposición Documental (CADIDO).
+    </h4>
+    <p class="page-subtitle">El CADIDO es el registro general, sistemático y normalizado de los valores de disposición de todos 
+        los documentos existentes, ya sea producidos o recibidos en la unidades administrativas u órganos administrativos 
+        desconcentrados de la Secretaría. En esta sección se podrá modificar los valores documentales, destino final, así como 
+        sus plazos de conservación y vigencia.
+    </p>
+  </div>
+</div>
+
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+<!-- ===== TABLA DE SERIES ===== -->
+@else {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>CADIDO
+      </span>
+      <span class="badge-count">{{ subfondos().length }} serie(s)</span>
+    </div>
+
+    @if (subfondos().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-folder2"></i>
+        <p>No tienes series documentales asignadas.</p>
+        <small>Contacta al administrador para que te asigne como responsable de archivo.</small>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:18%">Código</th>
+              <th>Subfondo</th>
+              <th>Dependencia</th>
+              <th style="width:10%; text-align:center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of subfondos(); track item.id) {
+              <!-- Fila de SERIE -->
+              <tr class="row-serie">
+                <td>
+                  {{ item.codigo }}
+                </td>
+                <td class="serie-nombre">{{ item.subfondo }}</td>
+                <td class="text-center">
+                  
+                </td>
+                <td class="text-center">
+                  <a
+                    [routerLink]="['/dashboard/tramite/expedientes/serie', item.id]"
+                    class="btn-icon"
+                    title="Ver expedientes de esta serie"
+                  >
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
