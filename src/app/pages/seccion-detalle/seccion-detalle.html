@@ -1,0 +1,351 @@
+<!-- ===== BREADCRUMB ===== -->
+<div class="back-bar mb-3">
+  <button class="btn-back" (click)="volver()">
+    <i class="bi bi-arrow-left me-1"></i>Volver a Secciones
+  </button>
+  <span class="back-sep">/</span>
+  @if (seccion()) {
+    <span class="back-current">{{ seccion()!.codigo }} – {{ seccion()!.seccion }}</span>
+  } @else {
+    <span class="back-current">Cargando…</span>
+  }
+</div>
+
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card p-4">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="content-card">
+    <div class="error-state">
+      <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+      <p class="error-msg">{{ error() }}</p>
+      <button class="btn-retry" (click)="cargar()"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button>
+    </div>
+  </div>
+}
+
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
+@else if (seccion()) {
+
+  <!-- Header de sección -->
+  <div class="det-header mb-4">
+    <div class="det-header-icon"><i class="bi bi-folder2-open"></i></div>
+    <div class="det-header-body">
+      <div class="det-fondo-chip"><i class="bi bi-building-fill me-1"></i>Fondo: Poder Legislativo del Estado de México</div>
+      <h4 class="det-title">{{ seccion()!.seccion }}</h4>
+      <div class="det-meta">
+        <span class="det-codigo">{{ seccion()!.codigo }}</span>
+        <span class="tipo-badge">{{ nombreTipo(seccion()!.id_tipo_seccion) }}</span>
+        @if (seccion()!.status === 1) {
+          <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activa</span>
+        } @else {
+          <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactiva</span>
+        }
+      </div>
+    </div>
+    <div class="det-header-actions">
+      <button class="btn-icon-header" title="Editar sección" (click)="abrirEditarSeccion()">
+        <i class="bi bi-pencil-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner Series -->
+  <div class="info-banner info-banner-series mb-4">
+    <i class="bi bi-bell-fill me-2"></i>
+    <div>
+      <strong>Registro de Series</strong>
+      <p>Las series son la división de una sección que corresponde a un conjunto de documentos producidos en el desarrollo de una misma atribución general y que versan sobre una materia o asunto específico.</p>
+    </div>
+  </div>
+
+  <!-- Tabs: Info + una por serie -->
+  <div class="tabs-nav mb-0">
+    <button class="tab-btn" [class.tab-active]="tabActiva() === 'info'" (click)="tabActiva.set('info')">
+      <i class="bi bi-info-circle me-1"></i>Información
+    </button>
+    @for (ser of series(); track ser.id) {
+      <button class="tab-btn" [class.tab-active]="tabActiva() === ser.id.toString()"
+        [class.tab-inactive-serie]="ser.status === 0"
+        (click)="tabActiva.set(ser.id.toString())">
+        <i class="bi bi-layers me-1"></i>{{ ser.codigo }}
+      </button>
+    }
+    <button class="tab-btn-add" title="Agregar nueva serie" (click)="abrirNuevaSerie()">
+      <i class="bi bi-plus-circle-fill me-1"></i>Serie
+    </button>
+  </div>
+
+  <!-- ── TAB: Info ── -->
+  @if (tabActiva() === 'info') {
+    <div class="content-card tab-content-card">
+      <div class="content-card-header">
+        <span class="content-card-title"><i class="bi bi-card-text me-2" style="color:var(--primary)"></i>Datos de la Sección</span>
+      </div>
+      <div class="info-grid p-4">
+        <div class="info-row">
+          <span class="info-label">Código:</span>
+          <span class="info-value mono">{{ seccion()!.codigo }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Nombre:</span>
+          <span class="info-value">{{ seccion()!.seccion }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tipo de Sección:</span>
+          <span class="info-value"><span class="tipo-badge">{{ nombreTipo(seccion()!.id_tipo_seccion) }}</span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Series registradas:</span>
+          <span class="info-value">{{ series().length }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Series activas:</span>
+          <span class="info-value">{{ seriesActivas() }}</span>
+        </div>
+      </div>
+
+      @if (series().length === 0) {
+        <div class="empty-state" style="padding:2rem">
+          <i class="bi bi-layers" style="font-size:2rem;color:#cbd5e1;display:block;margin-bottom:10px"></i>
+          <p style="color:#64748b;margin:0">No hay series registradas. Usa el botón <strong>+ Serie</strong> para agregar la primera.</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── TAB: Serie ── -->
+  @for (ser of series(); track ser.id) {
+    @if (tabActiva() === ser.id.toString()) {
+      <div class="content-card tab-content-card">
+
+        <!-- Cabecera de la serie -->
+        <div class="serie-header" [class.serie-header-inactive]="ser.status === 0">
+          <div class="serie-header-left">
+            <span class="serie-codigo">{{ ser.codigo }}</span>
+            <span class="serie-nombre">{{ ser.serie }}</span>
+            @if (ser.status === 1) {
+              <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activa</span>
+            } @else {
+              <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactiva</span>
+            }
+          </div>
+          <div class="serie-header-actions">
+            <button class="btn-icon btn-icon-edit" title="Editar serie" (click)="abrirEditarSerie(ser)">
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            @if (ser.status === 1) {
+              <button class="btn-icon btn-icon-toggle-off" title="Desactivar (cascade)" (click)="toggleSerie(ser)">
+                <i class="bi bi-toggle-on"></i>
+              </button>
+            } @else {
+              <button class="btn-icon btn-icon-toggle-on" title="Activar (cascade)" (click)="toggleSerie(ser)">
+                <i class="bi bi-toggle-off"></i>
+              </button>
+            }
+            <button class="btn-icon btn-icon-del" title="Eliminar serie y subseries" (click)="pedirEliminarSerie(ser)">
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+            @if (ser.status === 1) {
+              <button class="btn-nuevo-sm ms-2" (click)="abrirNuevaSubserie(ser.id)">
+                <i class="bi bi-plus-lg me-1"></i>Subserie
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Tabla de subseries -->
+        @if (!ser.subSeries || ser.subSeries.length === 0) {
+          <div class="empty-state" style="padding:2rem">
+            <i class="bi bi-diagram-2" style="font-size:2rem;color:#cbd5e1;display:block;margin-bottom:10px"></i>
+            <p style="color:#64748b;margin:0">Esta serie no tiene subseries. Usa <strong>+ Subserie</strong> para agregar.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="inv-table">
+              <thead>
+                <tr>
+                  <th style="width:18%">Código</th>
+                  <th>Subserie</th>
+                  <th style="width:12%;text-align:center">Estatus</th>
+                  <th style="width:16%;text-align:center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (sub of ser.subSeries; track sub.id) {
+                  <tr [class.row-inactive]="sub.status === 0">
+                    <td><span class="codigo-badge">{{ sub.codigo }}</span></td>
+                    <td class="nombre-cell">{{ sub.subserie }}</td>
+                    <td class="text-center">
+                      @if (sub.status === 1) {
+                        <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activa</span>
+                      } @else {
+                        <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactiva</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      <div class="action-group">
+                        <button class="btn-icon btn-icon-edit" title="Editar subserie" (click)="abrirEditarSubserie(sub)">
+                          <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        @if (sub.status === 1) {
+                          <button class="btn-icon btn-icon-toggle-off" title="Desactivar" (click)="toggleSubserie(sub)">
+                            <i class="bi bi-toggle-on"></i>
+                          </button>
+                        } @else {
+                          <button class="btn-icon btn-icon-toggle-on" title="Activar" (click)="toggleSubserie(sub)">
+                            <i class="bi bi-toggle-off"></i>
+                          </button>
+                        }
+                        <button class="btn-icon btn-icon-del" title="Eliminar subserie" (click)="pedirEliminarSubserie(sub)">
+                          <i class="bi bi-trash3-fill"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  }
+}
+
+<!-- ===== OVERLAY ===== -->
+@if (drawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+}
+
+<!-- ===== DRAWER ===== -->
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header">
+    <div>
+      <h5 class="drawer-title">
+        <i class="bi bi-pencil-fill me-2"></i>{{ drawerTitle }}
+      </h5>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Editar sección -->
+    @if (drawerMode() === 'seccion-edit') {
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-tag-fill me-1"></i>Tipo de Sección <span class="required-star">*</span></label>
+        @if (tiposSecciones().length === 0) {
+          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+        } @else {
+          <div class="tipo-grid">
+            @for (tipo of tiposSecciones(); track tipo.id) {
+              <button type="button" class="tipo-btn" [class.tipo-active]="formSeccion.id_tipo_seccion === tipo.id"
+                (click)="formSeccion.id_tipo_seccion = tipo.id">{{ tipo.valor }}</button>
+            }
+          </div>
+        }
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSeccion.codigo" name="sec-codigo"
+          [class.field-input-filled]="formSeccion.codigo.length > 0" placeholder="Ej. PLEM/SAF/IS.1/SC.1" />
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Nombre <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSeccion.seccion" name="sec-nombre"
+          [class.field-input-filled]="formSeccion.seccion.length > 0" placeholder="Ej. Recursos Humanos" />
+      </div>
+    }
+
+    <!-- Nueva / Editar serie -->
+    @if (drawerMode() === 'serie-new' || drawerMode() === 'serie-edit') {
+      <div class="form-hint-card mb-4">
+        <i class="bi bi-lightbulb-fill me-2"></i>
+        <span>La serie es la división de una sección que versa sobre una materia o asunto específico.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSerie.codigo" name="ser-codigo"
+          [class.field-input-filled]="formSerie.codigo.length > 0" placeholder="Ej. PLEM/SAF/IS.1/SC.1/SE.1" />
+        <span class="field-help">Continúa la secuencia del código de la sección.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-layers me-1"></i>Nombre de la Serie <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSerie.serie" name="ser-nombre"
+          [class.field-input-filled]="formSerie.serie.length > 0" placeholder="Ej. Administración de personal" />
+      </div>
+      @if (formSerie.codigo) {
+        <div class="preview-card">
+          <span class="preview-label">Vista previa</span>
+          <div class="preview-code">{{ formSerie.codigo }}</div>
+          <div class="preview-name">{{ formSerie.serie || 'Nombre de la serie…' }}</div>
+        </div>
+      }
+    }
+
+    <!-- Nueva / Editar subserie -->
+    @if (drawerMode() === 'subserie-new' || drawerMode() === 'subserie-edit') {
+      <div class="form-hint-card mb-4">
+        <i class="bi bi-lightbulb-fill me-2"></i>
+        <span>La subserie es el conjunto de unidades documentales que forman parte de una serie, identificada en forma separada por su contenido y características específicas.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSubserie.codigo" name="sub-codigo"
+          [class.field-input-filled]="formSubserie.codigo.length > 0" placeholder="Ej. PLEM/SAF/IS.1/SC.1/SE.1/SS.1" />
+        <span class="field-help">Continúa la secuencia del código de la serie.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-diagram-2 me-1"></i>Nombre de la Subserie <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formSubserie.subserie" name="sub-nombre"
+          [class.field-input-filled]="formSubserie.subserie.length > 0" placeholder="Ej. Contratos de prestadores de servicios" />
+      </div>
+      @if (formSubserie.codigo) {
+        <div class="preview-card">
+          <span class="preview-label">Vista previa</span>
+          <div class="preview-code">{{ formSubserie.codigo }}</div>
+          <div class="preview-name">{{ formSubserie.subserie || 'Nombre de la subserie…' }}</div>
+        </div>
+      }
+    }
+
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardar()" [disabled]="!formularioValido || guardando()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ===== -->
+@if (confirmAction()) {
+  <div class="modal-backdrop" (click)="cancelarConfirm()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h6 class="confirm-title">
+      ¿Eliminar {{ confirmAction()!.tipo === 'serie' ? 'serie' : 'subserie' }}?
+    </h6>
+    <p class="confirm-msg">
+      Se eliminará <strong>{{ confirmAction()!.nombre }}</strong>
+      @if (confirmAction()!.tipo === 'serie') {
+        junto con todas sus <strong>subseries</strong> en cascada.
+      }
+      Esta acción no se puede deshacer.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarConfirm()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarEliminar()">Sí, eliminar</button>
+    </div>
+  </div>
+}

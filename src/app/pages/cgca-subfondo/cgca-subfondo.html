@@ -1,0 +1,469 @@
+<!-- ===== ENCABEZADO ARCHIVO DE CONCENTRACIÓN ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-archive-fill"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Archivo de Concentración</h4>
+    <p class="archivo-subtitle">Cuadro General de Clasificación Archivística y estructura jerárquica documental.</p>
+  </div>
+  <button class="btn-pdf ms-auto" (click)="verCgcaPdf()" title="Ver CGCA en PDF">
+    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Ver CGCA (PDF)
+  </button>
+</div>
+
+<!-- ===== TABS DE NAVEGACIÓN ===== -->
+<div class="tabs-nav mb-4">
+  <button class="tab-btn" [class.tab-active]="tab() === 'subfondos'" (click)="cambiarTab('subfondos')">
+    <i class="bi bi-building me-1"></i>Subfondos
+  </button>
+  <button class="tab-btn" [class.tab-active]="tab() === 'disposicion'" (click)="cambiarTab('disposicion')">
+    <i class="bi bi-journal-bookmark-fill me-1"></i>Disposición (CADIDO)
+  </button>
+  <button class="tab-btn" [class.tab-active]="tab() === 'fichas'" (click)="cambiarTab('fichas')">
+    <i class="bi bi-file-earmark-text-fill me-1"></i>Fichas de Valoración
+  </button>
+</div>
+
+<!-- ================================================================
+     TAB: SUBFONDOS
+     ================================================================ -->
+@if (tab() === 'subfondos') {
+
+  <!-- Banner registro -->
+  <div class="registro-banner mb-4">
+    <div class="registro-banner-header">
+      <i class="bi bi-bell-fill me-2"></i>
+      <strong>Registro de Subfondo</strong>
+    </div>
+    <div class="registro-banner-body">
+      <p>
+        El CGCA está basado en un sistema de clasificación <strong>"funcional"</strong>, que permite la agrupación de los
+        documentos de archivo bajo conceptos que reflejan las funciones generales y las actividades concretas del Poder
+        Legislativo del Estado de México, dentro de una estructura jerárquica y lógica. Asimismo, la estructura del Cuadro
+        es jerárquica, con categorías y subcategorías a las que corresponde una clave o código de identificación, las
+        cuales están representadas en los niveles de Fondo, Subfondo, Sección, Serie y Subserie, a partir de las que se
+        establece la relación o coordinación entre éstas.
+      </p>
+      <p class="mt-2">
+        En esta sección se podrán registrar la estructura jerárquica documental u organización intelectual representada en el CGCA.
+      </p>
+      <p class="mt-1"><strong>Clasificación:</strong></p>
+      <div class="clasificacion-grid mt-3">
+        <div class="clas-item">
+          <span class="clas-badge clas-fondo">F</span>
+          <div>
+            <strong>Fondo</strong>
+            <span>Conjunto de documentos producidos orgánicamente por un sujeto obligado que se identifica con el nombre de este último.</span>
+          </div>
+        </div>
+        <div class="clas-item">
+          <span class="clas-badge clas-subfondo">SF</span>
+          <div>
+            <strong>Subfondo</strong>
+            <span>Subdivisión del Fondo documental que se corresponde con las subdivisiones administrativas del Poder Legislativo del Estado de México.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boton agregar -->
+  <div class="tab-actions mb-3">
+    <button class="btn-nuevo" (click)="abrirNuevo()">
+      <i class="bi bi-plus-lg me-1"></i>Agregar Subfondo
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="content-card">
+      <div class="skeleton-loader">
+        @for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }
+      </div>
+    </div>
+  } @else if (error()) {
+    <div class="content-card">
+      <div class="error-state">
+        <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+        <h6 class="error-title">Sin conexión con el servidor</h6>
+        <p class="error-msg">{{ error() }}<br><small>Verifica que el backend esté corriendo en el puerto 3050.</small></p>
+        <button class="btn-retry" (click)="cargar()"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button>
+      </div>
+    </div>
+  } @else {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Subfondos registrados
+        </span>
+        <div class="header-right">
+          <span class="badge-count">{{ subfondosFiltrados().length }} registro(s)</span>
+          <div class="search-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar…"
+              [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+          </div>
+        </div>
+      </div>
+
+      @if (subfondosFiltrados().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-folder2"></i>
+          <p>No hay subfondos registrados aún.</p>
+          <small>Usa el botón <strong>Agregar Subfondo</strong> para crear el primero.</small>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th style="width:12%">Código</th>
+                <th>Subfondo</th>
+                <th>Dependencia</th>
+                <th style="width:9%;text-align:center">Secciones</th>
+                <th style="width:9%;text-align:center">Series</th>
+                <th style="width:9%;text-align:center">Subseries</th>
+                <th style="width:8%;text-align:center">Ver</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of subfondosFiltrados(); track item.id) {
+                <tr>
+                  <td><span class="codigo-badge">{{ item.codigo }}</span></td>
+                  <td class="nombre-cell">{{ item.subfondo }}</td>
+                  <td class="dep-cell"><i class="bi bi-building me-1 text-muted"></i>{{ item.nombre_dependencia }}</td>
+                  <td class="text-center"><span class="count-pill pill-sec">{{ item.total_secciones }}</span></td>
+                  <td class="text-center"><span class="count-pill pill-ser">{{ item.total_series }}</span></td>
+                  <td class="text-center"><span class="count-pill pill-sub">{{ item.total_subseries }}</span></td>
+                  <td class="text-center">
+                    <button class="btn-icon btn-icon-view" title="Ver detalle" (click)="abrirDetalle(item)">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- ================================================================
+     TAB: DISPOSICIÓN (CADIDO)
+     ================================================================ -->
+@if (tab() === 'disposicion') {
+  <div class="coming-soon-card">
+    <div class="cs-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+    <h5 class="cs-title">Catálogo de Disposición Documental (CADIDO)</h5>
+    <p class="cs-desc">
+      El CADIDO es el registro general, sistemático y normalizado de los valores de disposición de todos los
+      documentos existentes. En esta sección se podrán modificar los valores documentales, destino final,
+      así como sus plazos de conservación y vigencia.
+    </p>
+    <span class="cs-badge"><i class="bi bi-clock-history me-1"></i>Próximamente</span>
+  </div>
+}
+
+<!-- ================================================================
+     TAB: FICHAS DE VALORACIÓN
+     ================================================================ -->
+@if (tab() === 'fichas') {
+
+  <div class="registro-banner mb-4">
+    <div class="registro-banner-header" style="background:#16a34a">
+      <i class="bi bi-bell-fill me-2"></i>
+      <strong>Fichas de Valoración Documental</strong>
+    </div>
+    <div class="registro-banner-body">
+      <p>
+        Catálogo de tipos documentales registrados en el sistema. Cada tipo documental puede activarse o
+        desactivarse según su vigencia en los procesos archivísticos de la institución.
+      </p>
+    </div>
+  </div>
+
+  <div class="tab-actions mb-3">
+    <button class="btn-nuevo btn-nuevo-green" (click)="abrirNuevaFicha()">
+      <i class="bi bi-plus-lg me-1"></i>Agregar Tipo Documental
+    </button>
+  </div>
+
+  @if (fichaCargando()) {
+    <div class="content-card">
+      <div class="skeleton-loader">
+        @for (i of [1,2,3]; track i) { <div class="skeleton-row"></div> }
+      </div>
+    </div>
+  } @else if (fichaError()) {
+    <div class="content-card">
+      <div class="error-state">
+        <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+        <h6 class="error-title">Sin conexión con el servidor</h6>
+        <p class="error-msg">{{ fichaError() }}</p>
+        <button class="btn-retry" (click)="cargarFichas()"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button>
+      </div>
+    </div>
+  } @else {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-file-earmark-text-fill me-2" style="color:#16a34a"></i>Tipos documentales registrados
+        </span>
+        <div class="header-right">
+          <span class="badge-count" style="background:#f0fdf4;color:#16a34a">{{ fichasFiltradas().length }} registro(s)</span>
+          <div class="search-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar tipo documental…"
+              [ngModel]="fichaFiltro()" (ngModelChange)="fichaFiltro.set($event)" />
+          </div>
+        </div>
+      </div>
+
+      @if (fichasFiltradas().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-file-earmark-text"></i>
+          <p>No hay tipos documentales registrados.</p>
+          <small>Usa el botón <strong>Agregar Tipo Documental</strong> para crear el primero.</small>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Tipo Documental</th>
+                <th style="width:14%;text-align:center">Estatus</th>
+                <th style="width:14%;text-align:center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of fichasFiltradas(); track item.id) {
+                <tr>
+                  <td class="nombre-cell">{{ item.tipo_doc }}</td>
+                  <td class="text-center">
+                    @if (item.status === 1) {
+                      <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activo</span>
+                    } @else {
+                      <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactivo</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    <div class="action-group">
+                      <button class="btn-icon btn-icon-edit" title="Editar" (click)="abrirEditarFicha(item)">
+                        <i class="bi bi-pencil-fill"></i>
+                      </button>
+                      @if (item.status === 1) {
+                        <button class="btn-icon btn-icon-del" title="Desactivar" (click)="toggleFichaStatus(item)">
+                          <i class="bi bi-toggle-on"></i>
+                        </button>
+                      } @else {
+                        <button class="btn-icon btn-icon-activate" title="Activar" (click)="toggleFichaStatus(item)">
+                          <i class="bi bi-toggle-off"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- ===== OVERLAY ===== -->
+@if (drawerOpen() || detalleOpen() || fichaDrawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarTodo()"></div>
+}
+
+<!-- ===== DRAWER SUBFONDO: FORMULARIO ===== -->
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header">
+    <div>
+      <h5 class="drawer-title">
+        <i class="bi" [class.bi-plus-circle-fill]="!modoEdicion()" [class.bi-pencil-fill]="modoEdicion()"></i>
+        {{ modoEdicion() ? 'Editar Subfondo' : 'Nuevo Subfondo' }}
+      </h5>
+      <p class="drawer-subtitle">Complete todos los campos requeridos.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-hint-card mb-4">
+      <i class="bi bi-lightbulb-fill me-2"></i>
+      <span>El código debe seguir el formato del CGCA, por ejemplo: <strong>PLEM/SAF/IS.1</strong></span>
+    </div>
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="form.codigo.length > 0"
+        placeholder="Ej. PLEM/SAF/IS.1" [(ngModel)]="form.codigo" name="codigo" />
+      <span class="field-help">Clave de identificación jerárquica del subfondo.</span>
+    </div>
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Nombre del Subfondo <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="form.subfondo.length > 0"
+        placeholder="Ej. Subdirección de Informática" [(ngModel)]="form.subfondo" name="subfondo" />
+      <span class="field-help">Nombre oficial conforme al organigrama institucional.</span>
+    </div>
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-building me-1"></i>Dependencia <span class="required-star">*</span></label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="form.id_Dependencia > 0"
+          [(ngModel)]="form.id_Dependencia" name="id_Dependencia">
+          <option [ngValue]="0" disabled>— Seleccione una dependencia —</option>
+          @for (dep of dependencias(); track dep.id_Dependencia) {
+            <option [ngValue]="dep.id_Dependencia">{{ dep.nombre_completo }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+    @if (form.codigo) {
+      <div class="preview-card">
+        <span class="preview-label">Vista previa</span>
+        <div class="preview-code">{{ form.codigo }}</div>
+        <div class="preview-name">{{ form.subfondo || 'Nombre del subfondo…' }}</div>
+      </div>
+    }
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardar()" [disabled]="!formularioValido || guardando()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>{{ modoEdicion() ? 'Actualizar' : 'Guardar Subfondo' }} }
+    </button>
+  </div>
+</div>
+
+<!-- ===== DRAWER SUBFONDO: DETALLE ===== -->
+<div class="drawer drawer-wide" [class.drawer-open]="detalleOpen()">
+  @if (subfondoDetalle()) {
+    <div class="drawer-header">
+      <div>
+        <h5 class="drawer-title"><i class="bi bi-eye-fill me-1"></i>Detalle del Subfondo</h5>
+        <p class="drawer-subtitle">Código: <strong>{{ subfondoDetalle()!.codigo }}</strong></p>
+      </div>
+      <button class="drawer-close" (click)="cerrarDetalle()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detalle-card mb-4">
+        <div class="detalle-row">
+          <span class="detalle-lbl"><i class="bi bi-hash me-1"></i>Código</span>
+          <span class="detalle-val"><span class="codigo-badge">{{ subfondoDetalle()!.codigo }}</span></span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-lbl"><i class="bi bi-folder2-open me-1"></i>Subfondo</span>
+          <span class="detalle-val fw-semibold">{{ subfondoDetalle()!.subfondo }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-lbl"><i class="bi bi-building me-1"></i>Dependencia</span>
+          <span class="detalle-val">{{ subfondoDetalle()!.nombre_dependencia }}</span>
+        </div>
+      </div>
+      <div class="stats-row mb-4">
+        <div class="stat-box">
+          <span class="stat-num" style="color:#7c3aed">{{ subfondoDetalle()!.total_secciones }}</span>
+          <span class="stat-lbl">Secciones</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" style="color:#166534">{{ subfondoDetalle()!.total_series }}</span>
+          <span class="stat-lbl">Series</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" style="color:#854d0e">{{ subfondoDetalle()!.total_subseries }}</span>
+          <span class="stat-lbl">Subseries</span>
+        </div>
+      </div>
+      <div class="detalle-actions mb-4">
+        <button class="btn-accion btn-accion-edit" (click)="abrirEditar(subfondoDetalle()!)">
+          <i class="bi bi-pencil-fill me-1"></i>Editar
+        </button>
+        <button class="btn-accion btn-accion-del" (click)="pedirConfirmarEliminar(subfondoDetalle()!.id)">
+          <i class="bi bi-trash3-fill me-1"></i>Eliminar
+        </button>
+      </div>
+      <div class="jerarquia-section">
+        <div class="jerarquia-header"><i class="bi bi-diagram-3-fill me-2"></i>Estructura jerárquica</div>
+        @if (cargandoDetalle()) {
+          <div class="sk-line" style="height:40px; margin:10px"></div>
+          <div class="sk-line" style="height:40px; margin:10px; margin-top:8px"></div>
+        } @else if (jerarquia().length === 0) {
+          <div class="jerarquia-empty">
+            <i class="bi bi-folder2"></i>
+            <span>Sin secciones registradas para este subfondo.</span>
+          </div>
+        } @else {
+          @for (sec of jerarquia(); track sec.id) {
+            <div class="jq-seccion">
+              <div class="jq-seccion-header">
+                <span class="jq-badge jq-sec">SEC</span>
+                <span class="jq-codigo">{{ sec.codigo }}</span>
+                <span class="jq-nombre">{{ sec.seccion }}</span>
+              </div>
+              @for (ser of sec.series; track ser.id) {
+                <div class="jq-serie">
+                  <span class="jq-badge jq-ser">SER</span>
+                  <span class="jq-codigo">{{ ser.codigo }}</span>
+                  <span class="jq-nombre">{{ ser.serie }}</span>
+                </div>
+                @for (sub of ser.subseries; track sub.id) {
+                  <div class="jq-subserie">
+                    <span class="jq-badge jq-sub">SUB</span>
+                    <span class="jq-codigo">{{ sub.codigo }}</span>
+                    <span class="jq-nombre">{{ sub.subserie }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ===== DRAWER FICHA DE VALORACIÓN: FORMULARIO ===== -->
+<div class="drawer" [class.drawer-open]="fichaDrawerOpen()">
+  <div class="drawer-header">
+    <div>
+      <h5 class="drawer-title" style="color:#16a34a">
+        <i class="bi" [class.bi-plus-circle-fill]="!fichaModoEdicion()" [class.bi-pencil-fill]="fichaModoEdicion()"></i>
+        {{ fichaModoEdicion() ? 'Editar Tipo Documental' : 'Nuevo Tipo Documental' }}
+      </h5>
+      <p class="drawer-subtitle">Registra la clasificación del tipo de documento.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarFichaDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo de Documento <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="fichaForm.tipo_doc.length > 0"
+        placeholder="Ej. Facturas, Oficios, Contratos…" [(ngModel)]="fichaForm.tipo_doc" name="tipo_doc" />
+      <span class="field-help">Denominación oficial del tipo documental conforme al CGCA.</span>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarFichaDrawer()" [disabled]="fichaGuardando()">Cancelar</button>
+    <button class="btn-save btn-save-green" (click)="guardarFicha()" [disabled]="!fichaFormularioValido || fichaGuardando()">
+      @if (fichaGuardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>{{ fichaModoEdicion() ? 'Actualizar' : 'Guardar' }} }
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINAR SUBFONDO ===== -->
+@if (confirmDeleteId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarEliminar()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h6 class="confirm-title">¿Eliminar subfondo?</h6>
+    <p class="confirm-msg">Esta acción no se puede deshacer. ¿Deseas continuar?</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarEliminar()">Sí, eliminar</button>
+    </div>
+  </div>
+}
