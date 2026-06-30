@@ -67,7 +67,11 @@ export const routes: Routes = [
       { path: 'admin/catalogos',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Catálogos', 'Administración') },
       { path: 'admin/series',       loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Series Documentales', 'Administración') },
       { path: 'admin/configuracion',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Configuración', 'Administración') },
-
+{
+        path: 'control/cadido',
+        loadComponent: () => import('./pages/cadido/cadido').then(m => m.Cadido),
+        data: PH('Cadido', 'Administración')
+      },
       /* ── Herramientas ── */
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },
