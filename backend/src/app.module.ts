@@ -4,6 +4,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GuiaModule } from './guia/guia.module';
+import { SubfondoModule } from './subfondo/subfondo.module';
+import { FichaValoracionModule } from './ficha-valoracion/ficha-valoracion.module';
+import { SeccionModule } from './seccion/seccion.module';
+import { SUsuario } from './models/s-usuario.model';
+import { UsersSafs } from './models/users-safs.model';
+import { TDepartamento } from './models/t-departamento.model';
+import { TDependencia } from './models/t-dependencia.model';
+import { TDireccion } from './models/t-direccion.model';
 
 @Module({
   imports: [
@@ -23,7 +31,23 @@ import { GuiaModule } from './guia/guia.module';
         logging: false,
       }),
     }),
+    SequelizeModule.forRoot({
+      name: 'saf',
+      dialect: 'mysql',
+      host: '127.0.0.1',
+      port: 3306,
+      username: 'root',
+      password: 'root',
+      database: 'saf',
+      models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
+      synchronize: false,
+      logging: false,
+      dialectOptions: { charset: 'utf8mb4' },
+    }),
     GuiaModule,
+    SubfondoModule,
+    FichaValoracionModule,
+    SeccionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,259 @@
+<!-- ===== BREADCRUMB / VOLVER ===== -->
+<div class="back-bar mb-3">
+  <button class="btn-back" (click)="volver()">
+    <i class="bi bi-arrow-left me-1"></i>Volver al CGCA
+  </button>
+  <span class="back-sep">/</span>
+  <span class="back-current">Secciones del Subfondo</span>
+</div>
+
+<!-- ===== ENCABEZADO ===== -->
+<div class="sec-header mb-4">
+  <div class="sec-header-icon">
+    <i class="bi bi-diagram-3-fill"></i>
+  </div>
+  <div class="sec-header-body">
+    @if (subfondo()) {
+      <div class="sec-fondo-chip"><i class="bi bi-building-fill me-1"></i>Fondo: Poder Legislativo del Estado de México</div>
+      <h4 class="sec-title">{{ subfondo()!.subfondo }}</h4>
+      <span class="sec-codigo-badge">{{ subfondo()!.codigo }}</span>
+    } @else {
+      <div class="skeleton-line" style="width:220px; height:14px; margin-bottom:8px"></div>
+      <div class="skeleton-line" style="width:340px; height:22px"></div>
+    }
+  </div>
+  <button class="btn-nuevo ms-auto" (click)="abrirNuevo()">
+    <i class="bi bi-plus-lg me-1"></i>Agregar Sección
+  </button>
+</div>
+
+<!-- ===== BANNER INFORMATIVO ===== -->
+<div class="info-sec-banner mb-4">
+  <i class="bi bi-bell-fill me-2"></i>
+  <div>
+    <strong>Registro de Secciones</strong>
+    <p>
+      En esta sección se podrán registrar secciones documentales del CGCA.<br>
+      <strong>Sección:</strong> A cada una de las divisiones del fondo documental basada en las atribuciones
+      de cada sujeto obligado de conformidad con las disposiciones legales aplicables.
+    </p>
+  </div>
+</div>
+
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) { <div class="skeleton-row"></div> }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="content-card">
+    <div class="error-state">
+      <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+      <h6 class="error-title">Sin conexión</h6>
+      <p class="error-msg">{{ error() }}</p>
+      <button class="btn-retry" (click)="cargar()"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button>
+    </div>
+  </div>
+}
+
+<!-- ===== CONTENIDO ===== -->
+@else {
+
+  <!-- Tabs -->
+  <div class="tabs-nav mb-4">
+    <button class="tab-btn" [class.tab-active]="tab() === 'sustantivas'" (click)="tab.set('sustantivas')">
+      <i class="bi bi-layers-fill me-1"></i>
+      Secciones Sustantivas
+      <span class="tab-counter">{{ sustantivas().length }}</span>
+    </button>
+    <button class="tab-btn" [class.tab-active]="tab() === 'comunes'" (click)="tab.set('comunes')">
+      <i class="bi bi-collection-fill me-1"></i>
+      Secciones Comunes
+      <span class="tab-counter">{{ comunes().length }}</span>
+    </button>
+  </div>
+
+  @if (tab() === 'sustantivas') {
+    <ng-container *ngTemplateOutlet="tablaTemplate; context: { $implicit: sustantivas() }"></ng-container>
+  }
+  @if (tab() === 'comunes') {
+    <ng-container *ngTemplateOutlet="tablaTemplate; context: { $implicit: comunes() }"></ng-container>
+  }
+}
+
+<!-- Template de tabla -->
+<ng-template #tablaTemplate let-items>
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Secciones registradas
+      </span>
+      <span class="badge-count">{{ items.length }} registro(s)</span>
+    </div>
+
+    @if (items.length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-folder2"></i>
+        <p>No hay secciones registradas en esta categoría.</p>
+        <small>Usa el botón <strong>Agregar Sección</strong> para crear la primera.</small>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:15%">Código</th>
+              <th>Sección</th>
+              <th style="width:16%">Tipo</th>
+              <th style="width:11%;text-align:center">Estatus</th>
+              <th style="width:16%;text-align:center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.id) {
+              <tr [class.row-inactive]="item.status === 0">
+                <td><span class="codigo-badge">{{ item.codigo }}</span></td>
+                <td class="nombre-cell">{{ item.seccion }}</td>
+                <td>
+                  <span class="tipo-chip-sm">{{ nombreTipo(item.id_tipo_seccion) }}</span>
+                </td>
+                <td class="text-center">
+                  @if (item.status === 1) {
+                    <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activa</span>
+                  } @else {
+                    <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactiva</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="action-group">
+                    <button class="btn-icon btn-icon-edit" title="Gestionar series y subseries" (click)="irDetalle(item)">
+                      <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    @if (item.status === 1) {
+                      <button class="btn-icon btn-icon-toggle-off" title="Desactivar (cascade)" (click)="toggleStatus(item)">
+                        <i class="bi bi-toggle-on"></i>
+                      </button>
+                    } @else {
+                      <button class="btn-icon btn-icon-toggle-on" title="Activar (cascade)" (click)="toggleStatus(item)">
+                        <i class="bi bi-toggle-off"></i>
+                      </button>
+                    }
+                    <button class="btn-icon btn-icon-del" title="Eliminar en cascada" (click)="pedirEliminar(item)">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- ===== OVERLAY ===== -->
+@if (drawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+}
+
+<!-- ===== DRAWER FORMULARIO ===== -->
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header">
+    <div>
+      <h5 class="drawer-title">
+        <i class="bi" [class.bi-plus-circle-fill]="!modoEdicion()" [class.bi-pencil-fill]="modoEdicion()"></i>
+        {{ modoEdicion() ? 'Editar Sección' : 'Nueva Sección' }}
+      </h5>
+      <p class="drawer-subtitle">
+        Subfondo: <strong>{{ subfondo()?.codigo }}</strong>
+      </p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="form-hint-card mb-4">
+      <i class="bi bi-lightbulb-fill me-2"></i>
+      <span>El código debe continuar la secuencia del Subfondo. Ej: <strong>PLEM/SAF/IS.1/SC.1</strong></span>
+    </div>
+
+    <!-- Tipo de Sección (catálogo real) -->
+    <div class="field-group">
+      <label class="field-label">
+        <i class="bi bi-tag-fill me-1"></i>Tipo de Sección <span class="required-star">*</span>
+      </label>
+      @if (tiposSecciones().length === 0) {
+        <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+      } @else {
+        <div class="tipo-grid">
+          @for (tipo of tiposSecciones(); track tipo.id) {
+            <button
+              type="button"
+              class="tipo-btn"
+              [class.tipo-active]="form.id_tipo_seccion === tipo.id"
+              (click)="form.id_tipo_seccion = tipo.id">
+              {{ tipo.valor }}
+            </button>
+          }
+        </div>
+      }
+      <span class="field-help">Clasificación de la sección conforme al Catálogo del CGCA.</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="form.codigo.length > 0"
+        placeholder="Ej. PLEM/SAF/IS.1/SC.1" [(ngModel)]="form.codigo" name="codigo" />
+      <span class="field-help">Clave de identificación jerárquica de la sección.</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Nombre de la Sección <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="form.seccion.length > 0"
+        placeholder="Ej. Recursos Humanos" [(ngModel)]="form.seccion" name="seccion" />
+      <span class="field-help">Nombre oficial de la sección conforme a las atribuciones del sujeto obligado.</span>
+    </div>
+
+    @if (form.codigo && form.id_tipo_seccion > 0) {
+      <div class="preview-card">
+        <span class="preview-label">Vista previa</span>
+        <div class="preview-code">{{ form.codigo }}</div>
+        <div class="preview-name">{{ form.seccion || 'Nombre de la sección…' }}</div>
+        <div class="preview-tipo" style="margin-top:8px">
+          <span class="tipo-chip-sm">{{ nombreTipo(form.id_tipo_seccion) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardar()" [disabled]="!formularioValido || guardando()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>{{ modoEdicion() ? 'Actualizar' : 'Guardar Sección' }} }
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINAR ===== -->
+@if (confirmDelete()) {
+  <div class="modal-backdrop" (click)="cancelarEliminar()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h6 class="confirm-title">¿Eliminar sección?</h6>
+    <p class="confirm-msg">
+      Se eliminará <strong>{{ confirmDelete()!.nombre }}</strong> junto con todas sus
+      <strong>series y subseries</strong> en cascada. Esta acción no se puede deshacer.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarEliminar()">Sí, eliminar</button>
+    </div>
+  </div>
+}

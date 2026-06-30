@@ -63,6 +63,9 @@ export const routes: Routes = [
       { path: 'historico/conservacion',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Conservación y Restauración', 'Archivo Histórico') },
 
       /* ── Administración ── */
+      { path: 'admin/instrumentos/cgca', loadComponent: () => import('./pages/cgca-subfondo/cgca-subfondo').then(m => m.CgcaSubfondoComponent) },
+      { path: 'admin/instrumentos/cgca/subfondo/:id', loadComponent: () => import('./pages/seccion-subfondo/seccion-subfondo').then(m => m.SeccionSubfondoComponent) },
+      { path: 'admin/instrumentos/cgca/subfondo/:subfondoId/seccion/:id', loadComponent: () => import('./pages/seccion-detalle/seccion-detalle').then(m => m.SeccionDetalleComponent) },
       { path: 'admin/usuarios',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Usuarios y Roles', 'Administración') },
       { path: 'admin/catalogos',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Catálogos', 'Administración') },
       { path: 'admin/series',       loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Series Documentales', 'Administración') },
