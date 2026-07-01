@@ -1,5 +1,6 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { SerieModel } from './serie.model';
+import { SubsubSerieModel } from './subsub-serie.model';
 
 @Table({ tableName: 'sub_series', timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' })
 export class SubSerieModel extends Model {
@@ -24,4 +25,7 @@ export class SubSerieModel extends Model {
 
   @BelongsTo(() => SerieModel)
   declare serie: SerieModel;
+
+  @HasMany(() => SubsubSerieModel, { foreignKey: 'idSubserie' })
+  declare subsubSeries: SubsubSerieModel[];
 }
