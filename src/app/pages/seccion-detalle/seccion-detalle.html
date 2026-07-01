@@ -87,21 +87,36 @@
           <!-- Cabecera clickable -->
           <div class="serie-header" (click)="toggleAccordion(ser.id)">
             <div class="serie-chevron">
-              <i class="bi" [class.bi-chevron-right]="!isExpanded(ser.id)" [class.bi-chevron-down]="isExpanded(ser.id)"></i>
+              <i class="bi bi-chevron-right" [class.rotated]="isExpanded(ser.id)"></i>
             </div>
             <div class="serie-info">
               <span class="serie-codigo">{{ ser.codigo }}</span>
-              <span class="serie-nombre">{{ ser.serie }}</span>
-              @if (ser.departamento_id) {
-                <span class="serie-dir-chip"><i class="bi bi-geo-alt me-1"></i>{{ nombreDir(ser.departamento_id) }}</span>
+              <div class="serie-meta">
+                <span class="serie-nombre">{{ ser.serie }}</span>
+                @if (ser.departamento_id) {
+                  <span class="serie-dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ nombreDir(ser.departamento_id) }}</span>
+                }
+              </div>
+              @if (ser.tipo_documental_ids && ser.tipo_documental_ids.length > 0) {
+                <div class="serie-tipo-chips" (click)="$event.stopPropagation()">
+                  @for (tdId of ser.tipo_documental_ids.slice(0, 2); track tdId) {
+                    <span class="tipo-chip-mini">{{ nombreTipoDoc(tdId) }}</span>
+                  }
+                  @if (ser.tipo_documental_ids.length > 2) {
+                    <span class="tipo-chip-more">+{{ ser.tipo_documental_ids.length - 2 }}</span>
+                  }
+                </div>
               }
             </div>
             <div class="serie-badges">
-              <span class="subseries-count">{{ (ser.subSeries?.length ?? 0) }} sub</span>
+              <span class="subseries-count-badge">
+                <i class="bi bi-diagram-2"></i>
+                {{ ser.subSeries?.length ?? 0 }}
+              </span>
               @if (ser.status === 1) {
-                <span class="status-dot status-dot-active" title="Activa"></span>
+                <span class="status-pill status-pill-active">Activa</span>
               } @else {
-                <span class="status-dot status-dot-inactive" title="Inactiva"></span>
+                <span class="status-pill status-pill-inactive">Inactiva</span>
               }
             </div>
             <div class="serie-actions" (click)="$event.stopPropagation()">
@@ -127,7 +142,12 @@
           @if (isExpanded(ser.id)) {
             <div class="serie-body">
               <div class="subseries-toolbar">
-                <span class="subseries-label"><i class="bi bi-diagram-2 me-1"></i>Subseries</span>
+                <div class="subseries-toolbar-left">
+                  <span class="subseries-label"><i class="bi bi-diagram-2 me-1"></i>Subseries</span>
+                  @if (ser.subSeries && ser.subSeries.length > 0) {
+                    <span class="subseries-total">{{ ser.subSeries.length }}</span>
+                  }
+                </div>
                 <button class="btn-add-sub" (click)="abrirNuevaSubserie(ser.id)">
                   <i class="bi bi-plus me-1"></i>Agregar Subserie
                 </button>
@@ -138,7 +158,8 @@
                   <i class="bi bi-inbox me-2"></i>Sin subseries aún.
                 </div>
               } @else {
-                <div class="sub-table-wrap">
+                <div class="sub-table-scroll-wrap">
+                  <div class="sub-table-scroll">
                   <table class="sub-table">
                     <thead>
                       <tr>
@@ -232,6 +253,7 @@
                       }
                     </tbody>
                   </table>
+                  </div>
                 </div>
               }
             </div>
