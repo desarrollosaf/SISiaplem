@@ -144,9 +144,9 @@
                       <tr>
                         <th style="width:18%">Código</th>
                         <th>Subserie</th>
-                        <th style="width:26%">Dirección</th>
-                        <th style="width:10%;text-align:center">Est.</th>
-                        <th style="width:14%;text-align:center">Acciones</th>
+                        <th style="width:22%">Dirección</th>
+                        <th style="width:8%;text-align:center">Est.</th>
+                        <th style="width:18%;text-align:center">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -164,6 +164,11 @@
                           </td>
                           <td class="text-center">
                             <div class="action-group">
+                              @if (isOsfem()) {
+                                <button class="btn-icon btn-icon-subsub" title="Agregar subsubserie" (click)="abrirNuevaSubsubserie(sub)">
+                                  <i class="bi bi-diagram-3"></i>
+                                </button>
+                              }
                               <button class="btn-icon btn-icon-edit" title="Editar" (click)="abrirEditarSubserie(sub)">
                                 <i class="bi bi-pencil-fill"></i>
                               </button>
@@ -182,6 +187,48 @@
                             </div>
                           </td>
                         </tr>
+
+                        <!-- Subsubseries anidadas (solo OSFEM) -->
+                        @if (isOsfem() && sub.subsubSeries && sub.subsubSeries.length > 0) {
+                          @for (sss of sub.subsubSeries!; track sss.id) {
+                            <tr class="subsubserie-row" [class.row-inactive]="sss.status === 0">
+                              <td>
+                                <span class="subsub-indent">↳</span>
+                                <span class="codigo-badge codigo-subsub">{{ sss.codigo }}</span>
+                              </td>
+                              <td class="sub-nombre">
+                                <span class="subsub-label">{{ sss.subsubserie }}</span>
+                              </td>
+                              <td class="sub-dir">{{ nombreDir(sss.id_departamento) }}</td>
+                              <td class="text-center">
+                                @if (sss.status === 1) {
+                                  <span class="status-dot status-dot-active"></span>
+                                } @else {
+                                  <span class="status-dot status-dot-inactive"></span>
+                                }
+                              </td>
+                              <td class="text-center">
+                                <div class="action-group">
+                                  <button class="btn-icon btn-icon-edit" title="Editar" (click)="abrirEditarSubsubserie(sss)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                  </button>
+                                  @if (sss.status === 1) {
+                                    <button class="btn-icon btn-icon-toggle-off" title="Desactivar" (click)="toggleSubsubserie(sss)">
+                                      <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                  } @else {
+                                    <button class="btn-icon btn-icon-toggle-on" title="Activar" (click)="toggleSubsubserie(sss)">
+                                      <i class="bi bi-toggle-off"></i>
+                                    </button>
+                                  }
+                                  <button class="btn-icon btn-icon-del" title="Eliminar" (click)="pedirEliminarSubsubserie(sss)">
+                                    <i class="bi bi-trash3-fill"></i>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          }
+                        }
                       }
                     </tbody>
                   </table>
@@ -290,18 +337,128 @@
       </div>
 
       <div class="field-group">
-        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Dirección</label>
+        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
         @if (cargandoDirecciones()) {
           <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
         } @else {
-          <select class="field-input" [(ngModel)]="formSerie.departamento_id" name="ser-dir">
-            <option [ngValue]="null">Sin dirección asignada</option>
+          <select class="field-input" name="ser-dir-cascade"
+            [ngModel]="idDireccionSerie()"
+            (ngModelChange)="onDireccionSerieChange($event)">
+            <option [ngValue]="null">— Selecciona dirección —</option>
             @for (dir of direccionesOpciones(); track dir.id) {
               <option [ngValue]="dir.id">{{ dir.label }}</option>
             }
           </select>
         }
-        <span class="field-help">Dirección responsable de esta serie.</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+        @if (cargandoAreas()) {
+          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+        } @else if (idDireccionSerie() === null) {
+          <div class="field-empty-note">Selecciona primero una dirección.</div>
+        } @else if (areasAdministrativas().length === 0) {
+          <div class="field-empty-note">Sin áreas para esta dirección.</div>
+        } @else {
+          <select class="field-input" [(ngModel)]="formSerie.departamento_id" name="ser-depto">
+            <option [ngValue]="null">— Sin área asignada —</option>
+            @for (area of areasAdministrativas(); track area.id) {
+              <option [ngValue]="area.id">{{ area.label }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
+        @if (tipoDocumentales().length === 0) {
+          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
+        } @else {
+          <div class="tipo-doc-list">
+            @for (td of tipoDocumentales(); track td.id) {
+              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSerieSelected(td.id)">
+                <input type="checkbox" class="tipo-doc-cb"
+                  [checked]="isTipoDocSerieSelected(td.id)"
+                  (change)="toggleTipoDocSerie(td.id)" />
+                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
+              </label>
+            }
+          </div>
+          @if (selectedTipoDocSerieIds().length > 0) {
+            <span class="field-help">{{ selectedTipoDocSerieIds().length }} tipo(s) seleccionado(s).</span>
+          }
+        }
+      </div>
+    }
+
+    <!-- ─── SUBSUBSERIE (solo OSFEM) ─── -->
+    @if (drawerMode() === 'subsubserie-new' || drawerMode() === 'subsubserie-edit') {
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+        <input type="text" class="field-input" placeholder="Ej. IS.1/SC.1/S.1/SS.1/SSS.1"
+          [(ngModel)]="formSubsubserie.codigo" name="sss-codigo" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-diagram-3 me-1"></i>Subsubserie <span class="required-star">*</span></label>
+        <input type="text" class="field-input" placeholder="Nombre de la subsubserie"
+          [(ngModel)]="formSubsubserie.subsubserie" name="sss-nombre" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
+        @if (cargandoDirecciones()) {
+          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+        } @else {
+          <select class="field-input" name="sss-dir-cascade"
+            [ngModel]="idDireccionSubsubserie()"
+            (ngModelChange)="onDireccionSubsubserieChange($event)">
+            <option [ngValue]="null">— Selecciona dirección —</option>
+            @for (dir of direccionesOpciones(); track dir.id) {
+              <option [ngValue]="dir.id">{{ dir.label }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+        @if (cargandoAreasSubsub()) {
+          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+        } @else if (idDireccionSubsubserie() === null) {
+          <div class="field-empty-note">Selecciona primero una dirección.</div>
+        } @else if (areasAdministrativasSubsub().length === 0) {
+          <div class="field-empty-note">Sin áreas para esta dirección.</div>
+        } @else {
+          <select class="field-input" [(ngModel)]="formSubsubserie.id_departamento" name="sss-depto">
+            <option [ngValue]="null">— Sin área asignada —</option>
+            @for (area of areasAdministrativasSubsub(); track area.id) {
+              <option [ngValue]="area.id">{{ area.label }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
+        @if (tipoDocumentales().length === 0) {
+          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
+        } @else {
+          <div class="tipo-doc-list">
+            @for (td of tipoDocumentales(); track td.id) {
+              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSubsubserieSelected(td.id)">
+                <input type="checkbox" class="tipo-doc-cb"
+                  [checked]="isTipoDocSubsubserieSelected(td.id)"
+                  (change)="toggleTipoDocSubsubserie(td.id)" />
+                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
+              </label>
+            }
+          </div>
+          @if (selectedTipoDocSubsubserieIds().length > 0) {
+            <span class="field-help">{{ selectedTipoDocSubsubserieIds().length }} tipo(s) seleccionado(s).</span>
+          }
+        }
       </div>
     }
 
@@ -320,18 +477,58 @@
       </div>
 
       <div class="field-group">
-        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Dirección</label>
+        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
         @if (cargandoDirecciones()) {
           <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
         } @else {
-          <select class="field-input" [(ngModel)]="formSubserie.id_Departamento" name="sub-dir">
-            <option [ngValue]="null">Sin dirección asignada</option>
+          <select class="field-input" name="sub-dir-cascade"
+            [ngModel]="idDireccionSubserie()"
+            (ngModelChange)="onDireccionSubserieChange($event)">
+            <option [ngValue]="null">— Selecciona dirección —</option>
             @for (dir of direccionesOpciones(); track dir.id) {
               <option [ngValue]="dir.id">{{ dir.label }}</option>
             }
           </select>
         }
-        <span class="field-help">Dirección responsable de esta subserie.</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+        @if (cargandoAreasSub()) {
+          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+        } @else if (idDireccionSubserie() === null) {
+          <div class="field-empty-note">Selecciona primero una dirección.</div>
+        } @else if (areasAdministrativasSub().length === 0) {
+          <div class="field-empty-note">Sin áreas para esta dirección.</div>
+        } @else {
+          <select class="field-input" [(ngModel)]="formSubserie.id_Departamento" name="sub-depto">
+            <option [ngValue]="null">— Sin área asignada —</option>
+            @for (area of areasAdministrativasSub(); track area.id) {
+              <option [ngValue]="area.id">{{ area.label }}</option>
+            }
+          </select>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
+        @if (tipoDocumentales().length === 0) {
+          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
+        } @else {
+          <div class="tipo-doc-list">
+            @for (td of tipoDocumentales(); track td.id) {
+              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSubserieSelected(td.id)">
+                <input type="checkbox" class="tipo-doc-cb"
+                  [checked]="isTipoDocSubserieSelected(td.id)"
+                  (change)="toggleTipoDocSubserie(td.id)" />
+                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
+              </label>
+            }
+          </div>
+          @if (selectedTipoDocSubserieIds().length > 0) {
+            <span class="field-help">{{ selectedTipoDocSubserieIds().length }} tipo(s) seleccionado(s).</span>
+          }
+        }
       </div>
     }
 
@@ -352,11 +549,15 @@
   <div class="confirm-modal">
     <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
     <h6 class="confirm-title">
-      ¿Eliminar {{ confirmAction()!.tipo === 'serie' ? 'serie' : 'subserie' }}?
+      ¿Eliminar
+      @if (confirmAction()!.tipo === 'serie') { serie }
+      @else if (confirmAction()!.tipo === 'subserie') { subserie }
+      @else { subsubserie }?
     </h6>
     <p class="confirm-msg">
       Se eliminará <strong>{{ confirmAction()!.nombre }}</strong>
-      @if (confirmAction()!.tipo === 'serie') { junto con todas sus subseries }
+      @if (confirmAction()!.tipo === 'serie') { junto con todas sus subseries y subsubseries }
+      @else if (confirmAction()!.tipo === 'subserie') { junto con todas sus subsubseries }
       en cascada. Esta acción no se puede deshacer.
     </p>
     <div class="confirm-actions">
