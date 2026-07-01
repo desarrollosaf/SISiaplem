@@ -316,3 +316,17 @@
 .confirm-actions { display: flex; gap: 10px; justify-content: center; }
 .btn-delete { background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 9px 22px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 .btn-delete:hover { background: #b91c1c; }
+
+/* ── Campos estáticos ── */
+.field-static { background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 9px 12px; font-size: 0.87rem; color: #475569; font-weight: 600; }
+.field-static-code { display: flex; align-items: center; gap: 8px; }
+.mono-tag { font-family: monospace; font-size: 0.77rem; font-weight: 700; background: var(--primary-soft); color: var(--primary); border-radius: 6px; padding: 2px 8px; flex-shrink: 0; }
+.field-empty-note { font-size: 0.8rem; color: #94a3b8; font-style: italic; padding: 8px 0; }
+
+/* ── Multi-select checkboxes de Dirección ── */
+.dir-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px; background: #f8f9fc; }
+.dir-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; cursor: pointer; transition: background .12s; border: 1px solid transparent; }
+.dir-item:hover { background: #f0f4ff; }
+.dir-item-selected { background: var(--primary-soft) !important; border-color: var(--primary) !important; }
+.dir-checkbox { width: 16px; height: 16px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
+.dir-label { font-size: 0.83rem; color: #334155; font-weight: 500; line-height: 1.3; }

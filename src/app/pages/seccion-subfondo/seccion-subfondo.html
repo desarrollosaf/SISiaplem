@@ -178,12 +178,31 @@
   </div>
 
   <div class="drawer-body">
-    <div class="form-hint-card mb-4">
-      <i class="bi bi-lightbulb-fill me-2"></i>
-      <span>El código debe continuar la secuencia del Subfondo. Ej: <strong>PLEM/SAF/IS.1/SC.1</strong></span>
+    <!-- Fondo (estático) -->
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-building-fill me-1"></i>Fondo</label>
+      <div class="field-static">Poder Legislativo del Estado de México</div>
     </div>
 
-    <!-- Tipo de Sección (catálogo real) -->
+    <!-- Subfondo (catálogo seleccionable) -->
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-layers me-1"></i>Subfondo <span class="required-star">*</span></label>
+      @if (subfondosOpciones().length === 0) {
+        <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+      } @else {
+        <select class="field-input" name="id_subfondo"
+          [ngModel]="form.id_subfondo"
+          (ngModelChange)="onSubfondoChange($event)">
+          <option [value]="0" disabled>Seleccione un subfondo…</option>
+          @for (sf of subfondosOpciones(); track sf.id) {
+            <option [value]="sf.id">{{ sf.codigo }} — {{ sf.subfondo }}</option>
+          }
+        </select>
+      }
+      <span class="field-help">Subfondo al que pertenece esta sección.</span>
+    </div>
+
+    <!-- Tipo de Sección (catálogo) -->
     <div class="field-group">
       <label class="field-label">
         <i class="bi bi-tag-fill me-1"></i>Tipo de Sección <span class="required-star">*</span>
@@ -206,6 +225,7 @@
       <span class="field-help">Clasificación de la sección conforme al Catálogo del CGCA.</span>
     </div>
 
+    <!-- Código -->
     <div class="field-group">
       <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
       <input type="text" class="field-input" [class.field-input-filled]="form.codigo.length > 0"
@@ -213,11 +233,36 @@
       <span class="field-help">Clave de identificación jerárquica de la sección.</span>
     </div>
 
+    <!-- Sección -->
     <div class="field-group">
-      <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Nombre de la Sección <span class="required-star">*</span></label>
+      <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Sección <span class="required-star">*</span></label>
       <input type="text" class="field-input" [class.field-input-filled]="form.seccion.length > 0"
         placeholder="Ej. Recursos Humanos" [(ngModel)]="form.seccion" name="seccion" />
       <span class="field-help">Nombre oficial de la sección conforme a las atribuciones del sujeto obligado.</span>
+    </div>
+
+    <!-- Dirección (multi-select con checkboxes) -->
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Dirección</label>
+      @if (cargandoDirecciones()) {
+        <div class="skeleton-row" style="height:38px;border-radius:8px"></div>
+      } @else if (direccionesOpciones().length === 0) {
+        <div class="field-empty-note">No hay direcciones disponibles para este subfondo.</div>
+      } @else {
+        <div class="dir-list">
+          @for (dir of direccionesOpciones(); track dir.id) {
+            <label class="dir-item" [class.dir-item-selected]="isDirSelected(dir.id)">
+              <input type="checkbox" class="dir-checkbox"
+                [checked]="isDirSelected(dir.id)"
+                (change)="toggleDir(dir.id)" />
+              <span class="dir-label">{{ dir.label }}</span>
+            </label>
+          }
+        </div>
+        @if (selectedDirIds().length > 0) {
+          <span class="field-help">{{ selectedDirIds().length }} dirección(es) seleccionada(s).</span>
+        }
+      }
     </div>
 
     @if (form.codigo && form.id_tipo_seccion > 0) {

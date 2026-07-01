@@ -1,9 +1,9 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
-import { SubfondoEntity } from './subfondo.entity';
-import { SerieEntity } from './serie.entity';
+import { SubfondoModel } from './subfondo.model';
+import { SerieModel } from './serie.model';
 
 @Table({ tableName: 'secciones', timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' })
-export class SeccionEntity extends Model {
+export class SeccionModel extends Model {
   @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
   declare id: number;
 
@@ -19,13 +19,13 @@ export class SeccionEntity extends Model {
   @Column({ type: DataType.INTEGER, allowNull: true })
   declare id_tipo_seccion: number;
 
-  @ForeignKey(() => SubfondoEntity)
+  @ForeignKey(() => SubfondoModel)
   @Column({ type: DataType.INTEGER, allowNull: true })
   declare id_subfondo: number;
 
-  @BelongsTo(() => SubfondoEntity)
-  declare subfondoParent: SubfondoEntity;
+  @BelongsTo(() => SubfondoModel)
+  declare subfondoParent: SubfondoModel;
 
-  @HasMany(() => SerieEntity, { foreignKey: 'idSeccion' })
-  declare series: SerieEntity[];
+  @HasMany(() => SerieModel, { foreignKey: 'idSeccion' })
+  declare series: SerieModel[];
 }
