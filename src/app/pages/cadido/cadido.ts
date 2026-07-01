@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { CadidoSevice, CadidoInt } from '../../services/cadido.service';
-
+import { RouterLink, Router } from '@angular/router';
+import { CadidoSevice, CadidoInt, SubfondoItem } from '../../services/cadido.service';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-cadido',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './cadido.html',
   styleUrl: './cadido.css',
 })
@@ -12,7 +12,10 @@ export class Cadido implements OnInit {
   cargando = signal(true);
   error = signal('');
   subfondos = signal<CadidoInt[]>([]);
-  constructor(private cadidoserv: CadidoSevice) {}
+  constructor(
+    private cadidoserv: CadidoSevice,     
+    private router: Router,
+  ) {}
 
    ngOnInit() {
     this.cadidoserv.getsubfondos().subscribe({
@@ -27,4 +30,8 @@ export class Cadido implements OnInit {
       },
     });
   }
+
+  abrirDetalle(item: CadidoInt) {
+      this.router.navigate(['/dashboard/control/cadido/detalle', item.id]);
+    }
 }

@@ -10,5 +10,11 @@ getsubfondos(){
     return this.cadidoService.getsubfondos();
 }
 
+@Get(':id')
+getcadido(@Param('id', ParseIntPipe) id: number){
+    return this.cadidoService.getcadido(id);
+}
+
+
 
 }

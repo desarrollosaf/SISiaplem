@@ -12,6 +12,7 @@ import { UsersSafs } from './models/users-safs.model';
 import { TDepartamento } from './models/t-departamento.model';
 import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
+import { CadidoModule } from './cadido/cadido.module';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { TDireccion } from './models/t-direccion.model';
       host: 'host.docker.internal',
       port: 3306,
       username: 'root',
-      password: 'root',
+      password: '',
       database: 'adminplem_saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
@@ -48,6 +49,7 @@ import { TDireccion } from './models/t-direccion.model';
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
+    CadidoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
