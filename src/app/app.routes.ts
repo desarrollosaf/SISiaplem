@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 const PH = (title: string, section: string) => ({ title, section });
 
@@ -12,6 +13,7 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () => import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { GuiaModule } from './guia/guia.module';
 import { SubfondoModule } from './subfondo/subfondo.module';
 import { FichaValoracionModule } from './ficha-valoracion/ficha-valoracion.module';
@@ -44,6 +45,7 @@ import { TDireccion } from './models/t-direccion.model';
       logging: false,
       dialectOptions: { charset: 'utf8mb4' },
     }),
+    AuthModule,
     GuiaModule,
     SubfondoModule,
     FichaValoracionModule,

@@ -16,12 +16,10 @@
 
     <!-- User info -->
     <div class="sidebar-user">
-      <div class="s-user-avatar">
-        <i class="bi bi-person-fill"></i>
-      </div>
+      <div class="s-user-avatar">{{ initials }}</div>
       <div>
-        <div class="s-user-name">Admin Usuario</div>
-        <div class="s-user-role">Administrador del Sistema</div>
+        <div class="s-user-name">{{ auth.userName() }}</div>
+        <div class="s-user-role">{{ auth.roles().join(', ') || 'Sin rol' }}</div>
       </div>
     </div>
 
@@ -35,42 +33,45 @@
       </a>
 
       <!-- ── ARCHIVO DE TRÁMITE ── -->
-      <div class="nav-section-label">Archivo de Trámite</div>
+      @if (auth.hasRole('RAT')) {
+        <div class="nav-section-label">Archivo de Trámite</div>
 
-      <button class="nav-link-item" (click)="toggleMenu('tramite')">
-        <i class="bi bi-folder2-open nav-icon"></i>
-        <span class="nav-label">Expedientes</span>
-        <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('tramite')"></i>
-      </button>
-      <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
-        <li>
-          <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="submenu-link">
-            <i class="bi bi-dot"></i>Guía de Archivos
-          </a>
-        </li>
-        <li>
-          <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
-            <i class="bi bi-dot"></i>Expedientes Abiertos
-          </a>
-        </li>
-        <li>
-          <a routerLink="/dashboard/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
-            <i class="bi bi-dot"></i>Expedientes Cerrados
-          </a>
-        </li>
-      </ul>
+        <button class="nav-link-item" (click)="toggleMenu('tramite')">
+          <i class="bi bi-folder2-open nav-icon"></i>
+          <span class="nav-label">Expedientes</span>
+          <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('tramite')"></i>
+        </button>
+        <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
+          <li>
+            <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Guía de Archivos
+            </a>
+          </li>
+          <li>
+            <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Expedientes Abiertos
+            </a>
+          </li>
+          <li>
+            <a routerLink="/dashboard/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Expedientes Cerrados
+            </a>
+          </li>
+        </ul>
 
-      <a routerLink="/dashboard/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
-        <i class="bi bi-search nav-icon"></i>
-        <span class="nav-label">Consultas y Préstamos</span>
-      </a>
+        <a routerLink="/dashboard/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-search nav-icon"></i>
+          <span class="nav-label">Consultas y Préstamos</span>
+        </a>
 
-      <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
-        <i class="bi bi-arrow-right-circle nav-icon"></i>
-        <span class="nav-label">Transferencia Primaria</span>
-      </a>
+        <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-arrow-right-circle nav-icon"></i>
+          <span class="nav-label">Transferencia Primaria</span>
+        </a>
+      }
 
       <!-- ── ARCHIVO DE CONCENTRACIÓN ── -->
+      @if (auth.hasRole('RAC')) {
       <div class="nav-section-label">Archivo de Concentración</div>
 
       <a routerLink="/dashboard/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
@@ -92,8 +93,10 @@
         <i class="bi bi-send nav-icon"></i>
         <span class="nav-label">Transfer. al Histórico</span>
       </a>
+      }
 
       <!-- ── ARCHIVO HISTÓRICO ── -->
+      @if (auth.hasRole('RAH')) {
       <div class="nav-section-label">Archivo Histórico</div>
 
       <a routerLink="/dashboard/historico/fondos" routerLinkActive="active" class="nav-link-item">
@@ -115,8 +118,10 @@
         <i class="bi bi-shield-check nav-icon"></i>
         <span class="nav-label">Conservación</span>
       </a>
+      }
 
       <!-- ── ADMINISTRACIÓN ── -->
+      @if (auth.hasRole('ADMIM')) {
       <div class="nav-section-label">Administración</div>
 
 
@@ -256,6 +261,7 @@
         <i class="bi bi-sliders nav-icon"></i>
         <span class="nav-label">Configuración</span>
       </a>
+      }
 
       <!-- ── HERRAMIENTAS ── -->
       <div class="nav-section-label">Herramientas</div>
@@ -274,10 +280,10 @@
 
     <!-- Logout -->
     <div class="sidebar-footer">
-      <a routerLink="/login">
+      <button class="nav-link-item w-100" (click)="logout()">
         <i class="bi bi-box-arrow-right nav-icon"></i>
         <span>Cerrar Sesión</span>
-      </a>
+      </button>
     </div>
 
   </aside>
@@ -330,17 +336,17 @@
             class="topbar-user-btn"
             data-bs-toggle="dropdown"
             aria-expanded="false">
-            <div class="topbar-avatar">AU</div>
+            <div class="topbar-avatar">{{ initials }}</div>
             <div class="d-none d-md-block">
-              <div class="topbar-uname">Admin Usuario</div>
-              <div class="topbar-urole">Administrador</div>
+              <div class="topbar-uname">{{ auth.userName() }}</div>
+              <div class="topbar-urole">{{ auth.roles()[0] ?? 'Usuario' }}</div>
             </div>
             <i class="bi bi-chevron-down d-none d-md-inline" style="font-size:0.65rem; opacity:0.7; margin-left:2px"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-1" style="min-width:220px; border-radius:10px">
             <li class="px-3 py-2">
-              <div class="fw-semibold" style="font-size:0.85rem">Admin Usuario</div>
-              <div class="text-muted" style="font-size:0.75rem">admin&#64;plem.gob.mx</div>
+              <div class="fw-semibold" style="font-size:0.85rem">{{ auth.userName() }}</div>
+              <div class="text-muted" style="font-size:0.75rem">{{ auth.userRfc() }}</div>
             </li>
             <li><hr class="dropdown-divider my-1"></li>
             <li>
@@ -360,9 +366,9 @@
             </li>
             <li><hr class="dropdown-divider my-1"></li>
             <li>
-              <a class="dropdown-item d-flex align-items-center gap-2 text-danger" routerLink="/login" style="font-size:0.85rem">
+              <button class="dropdown-item d-flex align-items-center gap-2 text-danger" (click)="logout()" style="font-size:0.85rem">
                 <i class="bi bi-box-arrow-right"></i>Cerrar Sesión
-              </a>
+              </button>
             </li>
           </ul>
         </div>
