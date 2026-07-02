@@ -40,7 +40,7 @@ import { CadidoModule } from './cadido/cadido.module';
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'saf',
+      database: 'adminplem_saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,
