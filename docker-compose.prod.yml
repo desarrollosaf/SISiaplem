@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BASE_HREF: /siaplem/
     container_name: sisiaplem-frontend
     ports:
       - "8086:80"

@@ -9,7 +9,10 @@ COPY . .
 
 ARG BASE_HREF=/
 
-RUN npx ng build --configuration production --base-href /siaplem/ --deploy-url /siaplem/
+RUN npx ng build \
+    --configuration production \
+    --base-href ${BASE_HREF} \
+    --deploy-url ${BASE_HREF}
 
 FROM nginx:alpine
 
