@@ -38,7 +38,7 @@ async function run() {
     port: Number(process.env.SAF_PORT ?? 3306),
     username: process.env.SAF_USER ?? 'root',
     password: process.env.SAF_PASS ?? 'root',
-    database: process.env.SAF_DB ?? 'saf',
+    database: process.env.SAF_DB ?? 'adminplem_saf',
     logging: false,
   });
 

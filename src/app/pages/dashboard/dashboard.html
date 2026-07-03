@@ -212,6 +212,42 @@
   <!-- Panel lateral -->
   <div class="col-lg-4">
 
+    <!-- Avisos Recientes -->
+    <div class="content-card mb-3">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-megaphone-fill me-2" style="color:var(--primary)"></i>Avisos Recientes
+        </span>
+        <a routerLink="/dashboard/admin/avisos" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem">Ver todos</a>
+      </div>
+      <div class="p-3">
+        @if (avisosRecientes().length === 0) {
+          <p class="text-muted text-center small mb-0 py-2">No hay avisos activos.</p>
+        }
+        @for (a of avisosRecientes(); track a.id) {
+          <div class="aviso-item mb-2">
+            <div class="d-flex align-items-start gap-2">
+              <span class="aviso-tipo-dot"
+                [style.background]="a.tipo === 'urgente' ? '#dc3545' : a.tipo === 'curso' ? '#198754' : a.tipo === 'evento' ? '#0d6efd' : '#6c757d'">
+              </span>
+              <div class="flex-fill">
+                <p class="mb-0 fw-semibold" style="font-size:.82rem; color:var(--primary); line-height:1.2">{{ a.titulo }}</p>
+                <p class="mb-0 text-muted" style="font-size:.75rem">{{ a.descripcion | slice:0:80 }}{{ a.descripcion.length > 80 ? '…' : '' }}</p>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-muted" style="font-size:.7rem">{{ a.created_at | date:'dd/MM/yyyy' }}</span>
+                  @if (a.pdf_path) {
+                    <a [href]="avisosSvc.pdfUrl(a.pdf_path)" target="_blank" class="text-danger" style="font-size:.7rem">
+                      <i class="bi bi-file-earmark-pdf"></i> PDF
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
     <!-- Préstamos por vencer -->
     <div class="content-card mb-3">
       <div class="content-card-header">

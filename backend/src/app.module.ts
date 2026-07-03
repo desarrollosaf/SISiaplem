@@ -15,6 +15,7 @@ import { TDepartamento } from './models/t-departamento.model';
 import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
+import { AvisosModule } from './avisos/avisos.module';
 
 
 @Module({
@@ -55,6 +56,7 @@ import { CadidoModule } from './cadido/cadido.module';
     SeccionModule,
     ResponsablesModule,
     CadidoModule,
+    AvisosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
