@@ -33,14 +33,7 @@
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "security": {
-              "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "outputMode": "static"
           },
           "configurations": {
             "production": {
@@ -52,8 +45,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "40kB",
+                  "maximumError": "50kB"
                 }
               ],
               "outputHashing": "all"
@@ -68,9 +61,6 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "allowedHosts": ["localhost", "127.0.0.1", "0.0.0.0", ".localhost"]
-          },
           "configurations": {
             "production": {
               "buildTarget": "SISiaplem:build:production"

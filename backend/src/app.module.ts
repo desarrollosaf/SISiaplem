@@ -14,6 +14,7 @@ import { UsersSafs } from './models/users-safs.model';
 import { TDepartamento } from './models/t-departamento.model';
 import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
+import { CadidoModule } from './cadido/cadido.module';
 
 @Module({
   imports: [
@@ -40,7 +41,7 @@ import { TDireccion } from './models/t-direccion.model';
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'saf',
+      database: 'adminplem_saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,
@@ -51,7 +52,11 @@ import { TDireccion } from './models/t-direccion.model';
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
+<<<<<<< HEAD
     ResponsablesModule,
+=======
+    CadidoModule,
+>>>>>>> 737e770bac52b64672ad7c99e63d093daedcb03c
   ],
   controllers: [AppController],
   providers: [AppService],

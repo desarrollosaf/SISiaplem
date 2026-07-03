@@ -1,0 +1,26 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_HREF: /siaplem/
+    container_name: sisiaplem-frontend
+    ports:
+      - "8086:80"
+    restart: always
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sisiaplem-backend
+    ports:
+      - "3031:3050"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/storage:/app/storage
+    restart: always
