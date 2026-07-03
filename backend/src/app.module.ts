@@ -16,6 +16,7 @@ import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -52,16 +53,8 @@ import { CadidoModule } from './cadido/cadido.module';
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
-<<<<<<< HEAD
-<<<<<<< HEAD
-    ResponsablesModule,
-=======
-    CadidoModule,
->>>>>>> 737e770bac52b64672ad7c99e63d093daedcb03c
-=======
     ResponsablesModule,
     CadidoModule,
->>>>>>> a1c2159e896a1362a30d811d2dc77502a57b4a97
   ],
   controllers: [AppController],
   providers: [AppService],
