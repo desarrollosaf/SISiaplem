@@ -3,8 +3,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-const API = 'http://localhost:3050/api/auth';
+const API = `${environment.endpoint}api/auth`;
 const TOKEN_KEY = 'siaplem_token';
 
 export interface AuthUser {
@@ -89,14 +90,16 @@ export class AuthService {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1])) as {
+      // JWT usa Base64URL; atob solo acepta Base64 estándar → convertir antes de decodificar
+      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(b64)) as {
         sub: number; rfc: string; name: string; email: string; roles: string[]; exp: number;
       };
       if (payload.exp * 1000 < Date.now()) {
         localStorage.removeItem(TOKEN_KEY);
         return null;
       }
-      return { id: payload.sub, rfc: payload.rfc, name: payload.name, email: payload.email, roles: payload.roles };
+      return { id: payload.sub, rfc: payload.rfc, name: payload.name, email: payload.email, roles: payload.roles ?? [] };
     } catch {
       localStorage.removeItem(TOKEN_KEY);
       return null;

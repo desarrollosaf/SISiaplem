@@ -1,0 +1,331 @@
+<!-- ===== ENCABEZADO ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-diagram-3-fill"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Directorio S.I.A.</h4>
+    <p class="archivo-subtitle">Responsables de archivo por área administrativa.</p>
+  </div>
+</div>
+
+<!-- ===== ERROR ===== -->
+@if (error()) {
+  <div class="content-card mb-3">
+    <div class="error-state">
+      <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+      <h6 class="error-title">Sin conexión con el servidor</h6>
+      <p class="error-msg">{{ error() }}<br><small>Verifica que el backend esté corriendo.</small></p>
+      <button class="btn-retry" (click)="cargar()"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button>
+    </div>
+  </div>
+}
+
+<!-- ===== CARD TABLA ===== -->
+<div class="content-card">
+
+  <!-- Header de la card -->
+  <div class="content-card-header">
+    <span class="content-card-title">
+      <i class="bi bi-people-fill me-2" style="color:var(--primary)"></i>
+      Responsables registrados
+    </span>
+    <div class="header-right">
+      @if (!cargando()) {
+        <span class="badge-count">{{ totalFiltrados() }} registro(s)</span>
+      }
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Buscar…"
+          [ngModel]="filtro()" (ngModelChange)="onFiltroChange($event)" />
+      </div>
+      <button class="btn-nuevo" (click)="abrirNuevo()">
+        <i class="bi bi-plus-lg me-1"></i>Agregar Responsable
+      </button>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  @if (cargando()) {
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) { <div class="skeleton-row"></div> }
+    </div>
+
+  <!-- Vacío -->
+  } @else if (totalFiltrados() === 0) {
+    <div class="empty-state">
+      <i class="bi bi-people"></i>
+      <p>No hay responsables registrados.</p>
+      <small>Usa el botón <strong>Agregar Responsable</strong> para crear el primero.</small>
+    </div>
+
+  } @else {
+    <div class="table-responsive">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th class="th-sortable" (click)="ordenar('tipo_nombre')" style="width:140px">
+              Perfil <i class="bi {{ sortIcon('tipo_nombre') }} ms-1"></i>
+            </th>
+            <th class="th-sortable" (click)="ordenar('nombre_responsable')">
+              Responsable <i class="bi {{ sortIcon('nombre_responsable') }} ms-1"></i>
+            </th>
+            <th class="th-sortable" (click)="ordenar('nombre_departamento')">
+              Área Administrativa <i class="bi {{ sortIcon('nombre_departamento') }} ms-1"></i>
+            </th>
+            <th class="th-sortable" (click)="ordenar('nombre_dependencia')">
+              Dependencia <i class="bi {{ sortIcon('nombre_dependencia') }} ms-1"></i>
+            </th>
+            <th class="th-sortable" (click)="ordenar('email')">
+              Contacto <i class="bi {{ sortIcon('email') }} ms-1"></i>
+            </th>
+            <th class="th-sortable" style="width:90px;text-align:center" (click)="ordenar('status')">
+              Estatus <i class="bi {{ sortIcon('status') }} ms-1"></i>
+            </th>
+            <th style="width:90px;text-align:center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginados(); track item.id) {
+            <tr>
+              <td>
+                <span class="tipo-pill {{ tipoPillClass(item.tipo_nombre) }}">
+                  <span class="tipo-dot"></span>{{ item.tipo_nombre }}
+                </span>
+              </td>
+              <td class="nombre-cell">
+                <div>{{ item.nombre_responsable }}</div>
+                <span class="rfc-sub">{{ item.rfc_responsable }}</span>
+              </td>
+              <td class="dep-cell">{{ item.nombre_departamento }}</td>
+              <td class="dep-cell">
+                <i class="bi bi-building me-1 text-muted"></i>{{ item.nombre_dependencia }}
+              </td>
+              <td>
+                @if (item.email) {
+                  <div class="contact-row"><i class="bi bi-envelope me-1"></i>{{ item.email }}</div>
+                }
+                @if (item.tel) {
+                  <div class="contact-row">
+                    <i class="bi bi-telephone me-1"></i>{{ item.tel }}
+                    @if (item.ext) { <span class="text-muted ms-1">ext. {{ item.ext }}</span> }
+                  </div>
+                }
+                @if (item.nombre_edificio && item.nombre_edificio !== '—') {
+                  <div class="contact-row"><i class="bi bi-geo-alt me-1"></i>{{ item.nombre_edificio }}</div>
+                }
+              </td>
+              <td class="text-center">
+                @if (item.status) {
+                  <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-1"></i>Activo</span>
+                } @else {
+                  <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactivo</span>
+                }
+              </td>
+              <td class="text-center">
+                <div class="action-group">
+                  <button class="btn-icon btn-icon-edit" title="Editar" (click)="abrirEditar(item)">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  @if (item.status) {
+                    <button class="btn-icon btn-icon-del" title="Desactivar" (click)="toggleStatus(item)">
+                      <i class="bi bi-toggle-on"></i>
+                    </button>
+                  } @else {
+                    <button class="btn-icon btn-icon-activate" title="Activar" (click)="toggleStatus(item)">
+                      <i class="bi bi-toggle-off"></i>
+                    </button>
+                  }
+                  <button class="btn-icon btn-icon-del" title="Eliminar" (click)="pedirConfirmarEliminar(item.id)">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas() > 1) {
+      <div class="dt-footer">
+        <span class="dt-info">
+          Mostrando {{ paginaDesde }}–{{ paginaHasta }} de {{ totalFiltrados() }} registros
+        </span>
+        <div class="dt-pager">
+          <button class="pager-btn" (click)="anterior()" [disabled]="pagina() === 1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginasVisibles(); track $index) {
+            @if (p === null) {
+              <span class="pager-dots">…</span>
+            } @else {
+              <button class="pager-btn" [class.pager-active]="p === pagina()" (click)="irA(+p)">{{ p }}</button>
+            }
+          }
+          <button class="pager-btn" (click)="siguiente()" [disabled]="pagina() === totalPaginas()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- ===== OVERLAY ===== -->
+@if (drawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+}
+
+<!-- ===== DRAWER: FORMULARIO ===== -->
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header">
+    <div>
+      <h5 class="drawer-title">
+        <i class="bi" [class.bi-plus-circle-fill]="!modoEdicion()" [class.bi-pencil-fill]="modoEdicion()"></i>
+        {{ modoEdicion() ? 'Editar Responsable' : 'Nuevo Responsable' }}
+      </h5>
+      <p class="drawer-subtitle">Complete todos los campos requeridos.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Tipo de usuario -->
+    <div class="field-group">
+      <label class="field-label">
+        <i class="bi bi-person-badge me-1"></i>Tipo de usuario <span class="required-star">*</span>
+      </label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="form.tipo_id > 0"
+          [(ngModel)]="form.tipo_id" name="tipo_id">
+          <option [ngValue]="0" disabled>— Seleccione un perfil —</option>
+          @for (t of tipos(); track t.id) {
+            <option [ngValue]="t.id">{{ t.tipo }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+
+    <!-- Dependencia -->
+    <div class="field-group">
+      <label class="field-label">
+        <i class="bi bi-building me-1"></i>Dependencia <span class="required-star">*</span>
+      </label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="idDependenciaSeleccionada > 0"
+          [(ngModel)]="idDependenciaSeleccionada" name="id_Dependencia"
+          (ngModelChange)="onDependenciaChange()">
+          <option [ngValue]="0" disabled>— Seleccione una dependencia —</option>
+          @for (dep of dependencias(); track dep.id_Dependencia) {
+            <option [ngValue]="dep.id_Dependencia">{{ dep.nombre_completo }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+
+    <!-- Área Administrativa -->
+    <div class="field-group">
+      <label class="field-label">
+        <i class="bi bi-diagram-2 me-1"></i>Área Administrativa <span class="required-star">*</span>
+      </label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="form.id_Departamento > 0"
+          [(ngModel)]="form.id_Departamento" name="id_Departamento"
+          (ngModelChange)="onDepartamentoChange()"
+          [disabled]="!idDependenciaSeleccionada || cargandoDep()">
+          <option [ngValue]="0" disabled>
+            {{ cargandoDep() ? 'Cargando áreas…' : '— Seleccione un área —' }}
+          </option>
+          @for (dep of departamentos(); track dep.id_Departamento) {
+            <option [ngValue]="dep.id_Departamento">{{ dep.nombre_completo }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+
+    <!-- Responsable -->
+    <div class="field-group">
+      <label class="field-label">
+        <i class="bi bi-person-fill me-1"></i>Responsable <span class="required-star">*</span>
+      </label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="!!form.rfc_responsable"
+          [(ngModel)]="form.rfc_responsable" name="rfc_responsable"
+          [disabled]="!form.id_Departamento || cargandoUsu()">
+          <option value="" disabled>
+            {{ cargandoUsu() ? 'Cargando usuarios…' : '— Seleccione un responsable —' }}
+          </option>
+          @for (u of usuarios(); track u.rfc) {
+            <option [value]="u.rfc">{{ u.nombre }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+
+    <!-- Correo -->
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-envelope me-1"></i>Correo electrónico</label>
+      <input type="email" class="field-input" [class.field-input-filled]="!!form.email"
+        placeholder="usuario@ejemplo.com" [(ngModel)]="form.email" name="email" />
+    </div>
+
+    <!-- Teléfono y Extensión -->
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-telephone me-1"></i>Teléfono</label>
+        <input type="text" class="field-input" [class.field-input-filled]="!!form.tel"
+          placeholder="10 dígitos" [(ngModel)]="form.tel" name="tel" maxlength="10" />
+      </div>
+      <div class="field-group" style="max-width:110px">
+        <label class="field-label"><i class="bi bi-hash me-1"></i>Extensión</label>
+        <input type="text" class="field-input" [class.field-input-filled]="!!form.ext"
+          placeholder="Ext." [(ngModel)]="form.ext" name="ext" maxlength="4" />
+      </div>
+    </div>
+
+    <!-- Edificio -->
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-geo-alt me-1"></i>Edificio / Dirección</label>
+      <div class="select-wrap">
+        <select class="field-select" [class.field-input-filled]="(form.id_edificio ?? 0) > 0"
+          [(ngModel)]="form.id_edificio" name="id_edificio">
+          <option [ngValue]="0">— Sin asignar —</option>
+          @for (e of edificios(); track e.id_Direccion) {
+            <option [ngValue]="e.id_Direccion">{{ e.nombre_completo }}</option>
+          }
+        </select>
+        <i class="bi bi-chevron-down select-arrow"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardar()" [disabled]="!formularioValido || guardando()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>{{ modoEdicion() ? 'Actualizar' : 'Guardar' }} }
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ELIMINAR ===== -->
+@if (confirmDeleteId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarEliminar()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h6 class="confirm-title">¿Eliminar responsable?</h6>
+    <p class="confirm-msg">Esta acción no se puede deshacer. ¿Deseas continuar?</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarEliminar()">Sí, eliminar</button>
+    </div>
+  </div>
+}
