@@ -66,6 +66,7 @@ export const routes: Routes = [
 
       /* ── Administración ── */
       { path: 'admin/instrumentos/cgca', loadComponent: () => import('./pages/cgca-subfondo/cgca-subfondo').then(m => m.CgcaSubfondoComponent) },
+      { path: 'admin/responsables/directorio', loadComponent: () => import('./pages/responsables/responsables').then(m => m.ResponsablesComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:id', loadComponent: () => import('./pages/seccion-subfondo/seccion-subfondo').then(m => m.SeccionSubfondoComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:subfondoId/seccion/:id', loadComponent: () => import('./pages/seccion-detalle/seccion-detalle').then(m => m.SeccionDetalleComponent) },
       { path: 'admin/usuarios',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Usuarios y Roles', 'Administración') },

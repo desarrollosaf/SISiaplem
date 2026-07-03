@@ -6,6 +6,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ModelHasRole } from '../models/model-has-role.model';
 import { RoleModel } from '../models/role.model';
 import { UsersSafs } from '../models/users-safs.model';
+import { ResponsableArchivoModel } from '../models/responsable-archivo.model';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
@@ -22,7 +23,7 @@ import { JwtStrategy } from './jwt.strategy';
       }),
     }),
     SequelizeModule.forFeature([UsersSafs], 'saf'),
-    SequelizeModule.forFeature([ModelHasRole, RoleModel]),
+    SequelizeModule.forFeature([ModelHasRole, RoleModel, ResponsableArchivoModel]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

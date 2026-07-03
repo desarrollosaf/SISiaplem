@@ -8,6 +8,7 @@ import { GuiaModule } from './guia/guia.module';
 import { SubfondoModule } from './subfondo/subfondo.module';
 import { FichaValoracionModule } from './ficha-valoracion/ficha-valoracion.module';
 import { SeccionModule } from './seccion/seccion.module';
+import { ResponsablesModule } from './responsables/responsables.module';
 import { SUsuario } from './models/s-usuario.model';
 import { UsersSafs } from './models/users-safs.model';
 import { TDepartamento } from './models/t-departamento.model';
@@ -50,6 +51,7 @@ import { TDireccion } from './models/t-direccion.model';
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
+    ResponsablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
