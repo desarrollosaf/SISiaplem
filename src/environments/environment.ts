@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  endpoint: 'http://localhost:3050/',
+  endpoint: '/siaplem/backend/',
 };
