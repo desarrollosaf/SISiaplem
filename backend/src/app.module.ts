@@ -8,12 +8,14 @@ import { GuiaModule } from './guia/guia.module';
 import { SubfondoModule } from './subfondo/subfondo.module';
 import { FichaValoracionModule } from './ficha-valoracion/ficha-valoracion.module';
 import { SeccionModule } from './seccion/seccion.module';
+import { ResponsablesModule } from './responsables/responsables.module';
 import { SUsuario } from './models/s-usuario.model';
 import { UsersSafs } from './models/users-safs.model';
 import { TDepartamento } from './models/t-departamento.model';
 import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
+
 
 @Module({
   imports: [
@@ -52,6 +54,7 @@ import { CadidoModule } from './cadido/cadido.module';
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
+    ResponsablesModule,
     CadidoModule,
   ],
   controllers: [AppController],

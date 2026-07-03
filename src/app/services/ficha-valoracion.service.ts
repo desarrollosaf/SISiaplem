@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
-const API = 'http://localhost:3050/api/ficha-valoracion';
+const API = `${environment.endpoint}api/ficha-valoracion`;
 
 export interface TipoDoc {
   id: number;
