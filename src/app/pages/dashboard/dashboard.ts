@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvisosService, Aviso } from '../../services/avisos.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,6 +11,7 @@ import { AvisosService, Aviso } from '../../services/avisos.service';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   protected avisosSvc = inject(AvisosService);
+  protected auth = inject(AuthService);
 
   currentTime = signal('');
   currentDate = signal('');
