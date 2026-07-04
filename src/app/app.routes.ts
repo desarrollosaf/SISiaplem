@@ -65,6 +65,7 @@ export const routes: Routes = [
       { path: 'historico/conservacion',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Conservación y Restauración', 'Archivo Histórico') },
 
       /* ── Administración ── */
+      { path: 'admin/avisos', loadComponent: () => import('./pages/admin-avisos/admin-avisos').then(m => m.AdminAvisosComponent) },
       { path: 'admin/instrumentos/cgca', loadComponent: () => import('./pages/cgca-subfondo/cgca-subfondo').then(m => m.CgcaSubfondoComponent) },
       { path: 'admin/responsables/directorio', loadComponent: () => import('./pages/responsables/responsables').then(m => m.ResponsablesComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:id', loadComponent: () => import('./pages/seccion-subfondo/seccion-subfondo').then(m => m.SeccionSubfondoComponent) },
