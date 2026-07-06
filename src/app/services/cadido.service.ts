@@ -13,16 +13,62 @@ export interface CadidoInt {
 
 export interface detalle {
   id: number;
-  codigoS: string;
+  codigo: string;
   seccion: string;
-  codigoSe: string;
+  series: serieI[];
+}
+
+export interface serieI {
+  id: number,
+  codigo: string,
+  serie: string,
+  subserie: string | null,
+  subSeries: subseriesI[]
+  anio_tramite: number,
+  anios_consentracion: number
+  total_anios: number, 
+  valores: valoresI[],
+  destino: DestinoI,
+  id_destino: number,
+}
+
+export interface FormSerie {
+  codigo: string;
   serie: string;
-  codigoSub: string;
-  subserie: string;
-  valores: string;
-  at: number;
-  ac: number;
-  destino: string;
+  subserie: string | null;
+  anio_tramite: number;
+  anios_consentracion: number;
+  total_anios: number;
+  valoresSeleccionados: number[];
+  destino: DestinoI | null;
+  id_destino: number,
+}
+
+export interface resultado {
+  series: serieI, 
+  valoresS: [],
+  destinosS: []
+}
+
+export interface subseriesI{
+  id: number,
+  codigo: string,
+  subserie: string,
+  anio_tramite: number,
+  anios_consentracion: number
+  total_anios: number,
+  valores: valoresI[],
+  destino: DestinoI,
+  id_destino: number
+}
+
+export interface DestinoI {
+  id: number;
+  valor: string;
+}
+
+export interface valoresI{
+  id_valor: number,
 }
 
 export interface SubfondoItem {
@@ -47,4 +93,12 @@ export class CadidoSevice {
   getcadido(id: number){
     return this.http.get<detalle[]>(`${API}/${id}`);
   }
+
+  getserie(id:number, tipo: number){
+    return this.http.get<resultado>(`${API}/getserie/${id}/${tipo}`);
+  }
+
+  update(id: number, dto: Omit<FormSerie, 'id_subfondo'> & { direccion_ids?: number[] }) {
+    return this.http.put<serieI>(`${API}/${id}`, dto);
+  }  
 }
