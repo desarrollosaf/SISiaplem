@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:models": "sequelize-auto -h $DB_HOST -d $DB_NAME -u $DB_USER -x $DB_PASS -p $DB_PORT -e mysql -l ts -o src/models --cm p --noAlias",
-    "db:seed": "ts-node -r tsconfig-paths/register src/database/seeds/roles.seed.ts"
+    "db:seed": "ts-node -r tsconfig-paths/register src/database/seeds/roles.seed.ts",
+    "db:migrate-guia": "ts-node -r tsconfig-paths/register src/database/migrations/add-expediente-tratamiento-columns.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -29,10 +30,12 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/sequelize": "^11.0.1",
+    "@types/pdfmake": "^0.3.3",
     "bcryptjs": "^3.0.3",
     "mysql2": "^3.22.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "pdfmake": "^0.3.11",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "sequelize": "^6.37.8",

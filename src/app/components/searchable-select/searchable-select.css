@@ -1,0 +1,102 @@
+.ss-wrap { position: relative; width: 100%; }
+
+.ss-control {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.87rem;
+  color: #1e293b;
+  background: #f8f9fc;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  text-align: left;
+}
+.ss-control:hover { border-color: #cbd5e1; }
+.ss-control.ss-open {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 130,30,70), .12);
+}
+
+.ss-placeholder { color: #94a3b8; flex: 1; }
+
+.ss-value { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ss-value-label { font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ss-value-sub { font-size: 0.72rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.ss-clear {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  transition: color .15s;
+  flex-shrink: 0;
+}
+.ss-clear:hover { color: #ef4444; }
+
+.ss-arrow { color: #94a3b8; font-size: 0.75rem; flex-shrink: 0; }
+
+.ss-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15,23,42,.14);
+  z-index: 1100;
+  overflow: hidden;
+  animation: ssFade .12s ease-out;
+}
+@keyframes ssFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.ss-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #94a3b8;
+}
+.ss-search input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: transparent;
+}
+
+.ss-list { max-height: 240px; overflow-y: auto; }
+
+.ss-option {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  border: none;
+  background: none;
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  transition: background .1s;
+}
+.ss-option:hover { background: #f8f9fc; }
+.ss-option-active { background: var(--primary-soft); }
+.ss-option-active .ss-option-label { color: var(--primary); font-weight: 600; }
+.ss-option-sub { font-size: 0.72rem; color: #94a3b8; }
+
+.ss-empty {
+  padding: 18px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}

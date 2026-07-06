@@ -1,16 +1,17 @@
-<!-- ===== ENCABEZADO ===== -->
-<div class="page-header mb-4">
-  <div>
-    <h4 class="page-title">
-      <i class="bi bi-folder2-open me-2"></i>Mi Archivo de Trámite
-    </h4>
-    <p class="page-subtitle">Inventario de series documentales — consulta y gestiona tus expedientes activos.</p>
+<!-- ===== ENCABEZADO ARCHIVO DE TRÁMITE ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-folder2-open"></i>
   </div>
-  <div class="page-header-actions">
-    <a routerLink="/dashboard/tramite/expedientes" class="btn btn-sm btn-outline-primary">
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Guía de Archivos</h4>
+    <p class="archivo-subtitle">Inventario de series documentales — consulta y gestiona tus expedientes activos.</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/dashboard/tramite/expedientes" class="btn-nuevo">
       <i class="bi bi-folder me-1"></i>Expedientes abiertos
     </a>
-    <a routerLink="/dashboard/tramite/expedientes-cerrados" class="btn btn-sm btn-outline-secondary">
+    <a routerLink="/dashboard/tramite/expedientes-cerrados" class="btn-nuevo">
       <i class="bi bi-folder-x me-1"></i>Expedientes cerrados
     </a>
   </div>
@@ -42,7 +43,16 @@
       <span class="content-card-title">
         <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Inventario de Expedientes
       </span>
-      <span class="badge-count">{{ series().length }} serie(s)</span>
+      <div class="header-right">
+        <span class="badge-count">{{ seriesFiltradas().length }} serie(s) · {{ totalExpedientesVisibles() }} expediente(s)</span>
+        @if (series().length > 0) {
+          <div class="search-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar serie o subserie…"
+              [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+          </div>
+        }
+      </div>
     </div>
 
     @if (series().length === 0) {
@@ -50,6 +60,11 @@
         <i class="bi bi-folder2"></i>
         <p>No tienes series documentales asignadas.</p>
         <small>Contacta al administrador para que te asigne como responsable de archivo.</small>
+      </div>
+    } @else if (seriesFiltradas().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-search"></i>
+        <p>Sin resultados para "{{ busqueda() }}".</p>
       </div>
     } @else {
       <div class="table-responsive">
@@ -63,7 +78,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (serie of series(); track serie.id) {
+            @for (serie of seriesFiltradas(); track serie.id) {
               <!-- Fila de SERIE -->
               <tr class="row-serie">
                 <td>

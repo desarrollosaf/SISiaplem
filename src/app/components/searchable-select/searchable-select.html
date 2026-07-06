@@ -1,0 +1,41 @@
+<div class="ss-wrap">
+  <button type="button" class="ss-control" [class.ss-open]="open()" (click)="open() ? open.set(false) : abrir()">
+    @if (seleccionada) {
+      <span class="ss-value">
+        <span class="ss-value-label">{{ seleccionada!.label }}</span>
+        @if (seleccionada!.sublabel) { <span class="ss-value-sub">{{ seleccionada!.sublabel }}</span> }
+      </span>
+      <span class="ss-clear" (click)="limpiar($event)" title="Quitar selección"><i class="bi bi-x-circle-fill"></i></span>
+    } @else {
+      <span class="ss-placeholder">{{ emptyLabel }}</span>
+    }
+    <i class="bi bi-chevron-down ss-arrow"></i>
+  </button>
+
+  @if (open()) {
+    <div class="ss-panel">
+      <div class="ss-search">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          [placeholder]="placeholder"
+          [ngModel]="filtro()"
+          (ngModelChange)="filtro.set($event)"
+          autofocus
+        />
+      </div>
+      <div class="ss-list">
+        @if (filtradas().length === 0) {
+          <div class="ss-empty">Sin resultados.</div>
+        } @else {
+          @for (opt of filtradas(); track opt.value) {
+            <button type="button" class="ss-option" [class.ss-option-active]="opt.value === value" (click)="seleccionar(opt)">
+              <span class="ss-option-label">{{ opt.label }}</span>
+              @if (opt.sublabel) { <span class="ss-option-sub">{{ opt.sublabel }}</span> }
+            </button>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
