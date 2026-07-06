@@ -25,6 +25,7 @@ export class Detalle implements OnInit{
   drawerOpen = signal(false);
   drawerMode = signal<DrawerMode>('serie-new');
   guardando = signal(false);
+  cargandoSerie = signal(false);
   serieContextId = signal<number | null>(null);
   formSerie: FormSerie = { 
     codigo: '', 
@@ -76,16 +77,21 @@ export class Detalle implements OnInit{
     this.tipo = tipo;
     this.idSerie = id;
 
+    this.serieContextId.set(null);
+    this.drawerMode.set('serie-new');
+    this.cargandoSerie.set(true);
+    this.drawerOpen.set(true);
+
     this.cadidoserv.getserie(id, tipo).subscribe({
       next: (data: resultado) => {
-        this.formSerie = { 
-          codigo: data.series.codigo, 
-          serie: data.series.serie, 
-          subserie: data.series.subserie, 
-          anio_tramite: data.series.anio_tramite, 
-          anios_consentracion: data.series.anios_consentracion, 
-          total_anios: data.series.total_anios, 
-          valoresSeleccionados : data.series.valores.map(v => v.id_valor), 
+        this.formSerie = {
+          codigo: data.series.codigo,
+          serie: data.series.serie,
+          subserie: data.series.subserie,
+          anio_tramite: data.series.anio_tramite,
+          anios_consentracion: data.series.anios_consentracion,
+          total_anios: data.series.total_anios,
+          valoresSeleccionados : data.series.valores.map(v => v.id_valor),
           destino: data.series.destino,
           id_destino: data.series.id_destino,
         };
@@ -95,26 +101,23 @@ export class Detalle implements OnInit{
             id: item.id,
             name: item.valor
           }))
-        ];    
+        ];
           this.destinosArray = [
           { id: '', name: '--Seleccione una opción--' },
           ...data.destinosS.map((item: { id: number; valor: string}) => ({
             id: item.id,
             name: item.valor
           }))
-        ];       
+        ];
+        this.cargandoSerie.set(false);
       },
         error: (err) => {
           this.error.set('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
-          this.cargando.set(false);
+          this.cargandoSerie.set(false);
+          this.drawerOpen.set(false);
           console.error(err);
         },
     })
-    
-
-    this.serieContextId.set(null);
-    this.drawerMode.set('serie-new');
-    this.drawerOpen.set(true);
   }
 
   guardar(){
