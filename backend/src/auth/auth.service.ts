@@ -5,7 +5,6 @@ import * as bcrypt from 'bcryptjs';
 import { UsersSafs } from '../models/users-safs.model';
 import { ModelHasRole } from '../models/model-has-role.model';
 import { RoleModel } from '../models/role.model';
-import { ResponsableArchivoModel } from '../models/responsable-archivo.model';
 
 export const MODEL_TYPE = 'App\\Models\\UsersSaf';
 
@@ -15,7 +14,6 @@ export class AuthService {
     @InjectModel(UsersSafs, 'saf') private userModel: typeof UsersSafs,
     @InjectModel(ModelHasRole) private mhrModel: typeof ModelHasRole,
     @InjectModel(RoleModel) private roleModel: typeof RoleModel,
-    @InjectModel(ResponsableArchivoModel) private responsableModel: typeof ResponsableArchivoModel,
     private jwt: JwtService,
   ) {}
 
@@ -25,12 +23,6 @@ export class AuthService {
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciales incorrectas');
-
-    // Bloquear acceso si el responsable está desactivado
-    const responsable = await this.responsableModel.findOne({ where: { rfc_responsable: rfc } });
-    if (responsable && !responsable.status) {
-      throw new UnauthorizedException('Tu cuenta ha sido desactivada. Contacta al administrador.');
-    }
 
     const roles = await this.getUserRoles(user.id);
 
