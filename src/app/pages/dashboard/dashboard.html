@@ -2,8 +2,10 @@
 <div class="welcome-banner">
   <div>
     <div class="welcome-greeting">{{ greeting() }},</div>
-    <div class="welcome-name">Admin Usuario</div>
-    <div class="welcome-role"><i class="bi bi-shield-fill me-1"></i>Administrador del Sistema</div>
+    <div class="welcome-name">{{ auth.userName() }}</div>
+    <div class="welcome-role">
+      <i class="bi bi-shield-fill me-1"></i>{{ auth.roles().join(' · ') || 'Usuario' }}
+    </div>
   </div>
   <div class="welcome-clock">
     <div class="clock-time">{{ currentTime() }}</div>
@@ -14,71 +16,69 @@
 <!-- ===== STATS CARDS ===== -->
 <div class="row g-3 mb-4">
 
-  <div class="col-xl-3 col-sm-6">
-    <div class="stat-card" style="border-left-color: #7B1D4C">
-      <div class="stat-card-header">
-        <div>
-          <div class="stat-value">1,284</div>
-          <div class="stat-label">Expedientes en Trámite</div>
+  @if (auth.hasRole('RAT', 'ADMIM')) {
+    <div [class]="auth.hasRole('ADMIM') ? 'col-xl-3 col-sm-6' : 'col-sm-6'">
+      <div class="stat-card" style="border-left-color:#7B1D4C">
+        <div class="stat-card-header">
+          <div>
+            <div class="stat-value">1,284</div>
+            <div class="stat-label">Expedientes en Trámite</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(123,29,76,0.1);color:#7B1D4C">
+            <i class="bi bi-file-earmark-text-fill"></i>
+          </div>
         </div>
-        <div class="stat-icon" style="background:rgba(123,29,76,0.1); color:#7B1D4C">
-          <i class="bi bi-file-earmark-text-fill"></i>
-        </div>
-      </div>
-      <div class="stat-trend text-success">
-        <i class="bi bi-arrow-up-short"></i>12% este mes
-      </div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-sm-6">
-    <div class="stat-card" style="border-left-color: #0d6efd">
-      <div class="stat-card-header">
-        <div>
-          <div class="stat-value">856</div>
-          <div class="stat-label">En Concentración</div>
-        </div>
-        <div class="stat-icon" style="background:rgba(13,110,253,0.1); color:#0d6efd">
-          <i class="bi bi-archive-fill"></i>
-        </div>
-      </div>
-      <div class="stat-trend text-muted">
-        <i class="bi bi-dash"></i>Sin cambios
+        <div class="stat-trend text-success"><i class="bi bi-arrow-up-short"></i>12% este mes</div>
       </div>
     </div>
-  </div>
+  }
 
-  <div class="col-xl-3 col-sm-6">
-    <div class="stat-card" style="border-left-color: #198754">
-      <div class="stat-card-header">
-        <div>
-          <div class="stat-value">2,431</div>
-          <div class="stat-label">En Archivo Histórico</div>
+  @if (auth.hasRole('RAC', 'ADMIM')) {
+    <div [class]="auth.hasRole('ADMIM') ? 'col-xl-3 col-sm-6' : 'col-sm-6'">
+      <div class="stat-card" style="border-left-color:#0d6efd">
+        <div class="stat-card-header">
+          <div>
+            <div class="stat-value">856</div>
+            <div class="stat-label">En Concentración</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
+            <i class="bi bi-archive-fill"></i>
+          </div>
         </div>
-        <div class="stat-icon" style="background:rgba(25,135,84,0.1); color:#198754">
-          <i class="bi bi-collection-fill"></i>
-        </div>
-      </div>
-      <div class="stat-trend text-success">
-        <i class="bi bi-arrow-up-short"></i>34 nuevos este año
+        <div class="stat-trend text-muted"><i class="bi bi-dash"></i>Sin cambios</div>
       </div>
     </div>
-  </div>
+  }
 
-  <div class="col-xl-3 col-sm-6">
-    <div class="stat-card" style="border-left-color: #fd7e14">
+  @if (auth.hasRole('RAH', 'ADMIM')) {
+    <div [class]="auth.hasRole('ADMIM') ? 'col-xl-3 col-sm-6' : 'col-sm-6'">
+      <div class="stat-card" style="border-left-color:#198754">
+        <div class="stat-card-header">
+          <div>
+            <div class="stat-value">2,431</div>
+            <div class="stat-label">En Archivo Histórico</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(25,135,84,0.1);color:#198754">
+            <i class="bi bi-collection-fill"></i>
+          </div>
+        </div>
+        <div class="stat-trend text-success"><i class="bi bi-arrow-up-short"></i>34 nuevos este año</div>
+      </div>
+    </div>
+  }
+
+  <div [class]="auth.hasRole('ADMIM') ? 'col-xl-3 col-sm-6' : 'col-sm-6'">
+    <div class="stat-card" style="border-left-color:#fd7e14">
       <div class="stat-card-header">
         <div>
           <div class="stat-value">23</div>
           <div class="stat-label">Préstamos Activos</div>
         </div>
-        <div class="stat-icon" style="background:rgba(253,126,20,0.1); color:#fd7e14">
+        <div class="stat-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
           <i class="bi bi-hand-index-thumb-fill"></i>
         </div>
       </div>
-      <div class="stat-trend text-warning">
-        <i class="bi bi-exclamation-circle me-1"></i>5 por vencer
-      </div>
+      <div class="stat-trend text-warning"><i class="bi bi-exclamation-circle me-1"></i>5 por vencer</div>
     </div>
   </div>
 
@@ -88,63 +88,145 @@
 <p class="section-title"><i class="bi bi-lightning-fill me-1"></i>Accesos Rápidos</p>
 <div class="row g-3 mb-4">
 
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/tramite/expedientes">
-      <div class="quick-card-icon" style="background:rgba(123,29,76,0.1); color:#7B1D4C">
-        <i class="bi bi-file-earmark-plus"></i>
-      </div>
-      <div class="quick-card-label">Nuevo<br>Expediente</div>
-    </a>
-  </div>
+  <!-- RAT: Trámite -->
+  @if (auth.hasRole('RAT') && !auth.hasRole('ADMIM')) {
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/inventario">
+        <div class="quick-card-icon" style="background:rgba(123,29,76,0.1);color:#7B1D4C">
+          <i class="bi bi-file-earmark-plus"></i>
+        </div>
+        <div class="quick-card-label">Expedientes<br>en Trámite</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/prestamos">
+        <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
+          <i class="bi bi-search"></i>
+        </div>
+        <div class="quick-card-label">Consultas y<br>Préstamos</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/transferencias">
+        <div class="quick-card-icon" style="background:rgba(25,135,84,0.1);color:#198754">
+          <i class="bi bi-arrow-right-circle"></i>
+        </div>
+        <div class="quick-card-label">Transferencia<br>Primaria</div>
+      </a>
+    </div>
+  }
 
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/tramite/prestamos">
-      <div class="quick-card-icon" style="background:rgba(13,110,253,0.1); color:#0d6efd">
-        <i class="bi bi-search"></i>
-      </div>
-      <div class="quick-card-label">Búsqueda<br>General</div>
-    </a>
-  </div>
+  <!-- RAC: Concentración -->
+  @if (auth.hasRole('RAC') && !auth.hasRole('ADMIM')) {
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/expedientes">
+        <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
+          <i class="bi bi-inbox-fill"></i>
+        </div>
+        <div class="quick-card-label">Expedientes<br>Recibidos</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/prestamos">
+        <div class="quick-card-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
+          <i class="bi bi-hand-index-thumb"></i>
+        </div>
+        <div class="quick-card-label">Préstamos<br>Activos</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/baja">
+        <div class="quick-card-icon" style="background:rgba(220,53,69,0.1);color:#dc3545">
+          <i class="bi bi-trash3"></i>
+        </div>
+        <div class="quick-card-label">Baja<br>Documental</div>
+      </a>
+    </div>
+  }
 
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/tramite/transferencias">
-      <div class="quick-card-icon" style="background:rgba(25,135,84,0.1); color:#198754">
-        <i class="bi bi-arrow-right-circle"></i>
-      </div>
-      <div class="quick-card-label">Transferencia<br>Primaria</div>
-    </a>
-  </div>
+  <!-- RAH: Histórico -->
+  @if (auth.hasRole('RAH') && !auth.hasRole('ADMIM')) {
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/historico/fondos">
+        <div class="quick-card-icon" style="background:rgba(25,135,84,0.1);color:#198754">
+          <i class="bi bi-collection"></i>
+        </div>
+        <div class="quick-card-label">Fondo<br>Documental</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/historico/consulta">
+        <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
+          <i class="bi bi-eye"></i>
+        </div>
+        <div class="quick-card-label">Consulta<br>Pública</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/prestamos">
+        <div class="quick-card-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
+          <i class="bi bi-hand-index-thumb"></i>
+        </div>
+        <div class="quick-card-label">Préstamos<br>Activos</div>
+      </a>
+    </div>
+  }
 
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/concentracion/prestamos">
-      <div class="quick-card-icon" style="background:rgba(253,126,20,0.1); color:#fd7e14">
-        <i class="bi bi-hand-index-thumb"></i>
-      </div>
-      <div class="quick-card-label">Préstamos<br>Pendientes</div>
-    </a>
-  </div>
-
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/concentracion/baja">
-      <div class="quick-card-icon" style="background:rgba(220,53,69,0.1); color:#dc3545">
-        <i class="bi bi-trash3"></i>
-      </div>
-      <div class="quick-card-label">Baja<br>Documental</div>
-    </a>
-  </div>
-
-  <div class="col-xl-2 col-md-3 col-sm-4 col-6">
-    <a class="quick-card" routerLink="/dashboard/reportes">
-      <div class="quick-card-icon" style="background:rgba(108,117,125,0.1); color:#6c757d">
-        <i class="bi bi-bar-chart-fill"></i>
-      </div>
-      <div class="quick-card-label">Reportes y<br>Estadísticas</div>
-    </a>
-  </div>
+  <!-- ADMIM: todo -->
+  @if (auth.hasRole('ADMIM')) {
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/expedientes">
+        <div class="quick-card-icon" style="background:rgba(123,29,76,0.1);color:#7B1D4C">
+          <i class="bi bi-file-earmark-plus"></i>
+        </div>
+        <div class="quick-card-label">Nuevo<br>Expediente</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/prestamos">
+        <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
+          <i class="bi bi-search"></i>
+        </div>
+        <div class="quick-card-label">Búsqueda<br>General</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/tramite/transferencias">
+        <div class="quick-card-icon" style="background:rgba(25,135,84,0.1);color:#198754">
+          <i class="bi bi-arrow-right-circle"></i>
+        </div>
+        <div class="quick-card-label">Transferencia<br>Primaria</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/prestamos">
+        <div class="quick-card-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
+          <i class="bi bi-hand-index-thumb"></i>
+        </div>
+        <div class="quick-card-label">Préstamos<br>Pendientes</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/concentracion/baja">
+        <div class="quick-card-icon" style="background:rgba(220,53,69,0.1);color:#dc3545">
+          <i class="bi bi-trash3"></i>
+        </div>
+        <div class="quick-card-label">Baja<br>Documental</div>
+      </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+      <a class="quick-card" routerLink="/dashboard/reportes">
+        <div class="quick-card-icon" style="background:rgba(108,117,125,0.1);color:#6c757d">
+          <i class="bi bi-bar-chart-fill"></i>
+        </div>
+        <div class="quick-card-label">Reportes y<br>Estadísticas</div>
+      </a>
+    </div>
+  }
 
 </div>
 
-<!-- ===== ACTIVIDAD RECIENTE + ALERTAS ===== -->
+<!-- ===== ACTIVIDAD RECIENTE + PANEL LATERAL ===== -->
 <div class="row g-3">
 
   <!-- Actividad reciente -->
@@ -211,6 +293,57 @@
 
   <!-- Panel lateral -->
   <div class="col-lg-4">
+
+    <!-- Avisos Recientes -->
+    <div class="avisos-widget mb-3">
+      <div class="avisos-widget-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="avisos-widget-icon"><i class="bi bi-megaphone-fill"></i></div>
+          <div>
+            <div class="avisos-widget-title">Avisos Recientes</div>
+            <div class="avisos-widget-sub">Comunicados y noticias</div>
+          </div>
+        </div>
+        @if (auth.hasRole('ADMIM')) {
+          <a routerLink="/dashboard/admin/avisos" class="btn btn-sm avisos-admin-btn">
+            <i class="bi bi-pencil-square me-1"></i>Gestionar
+          </a>
+        }
+      </div>
+      <div class="avisos-widget-body">
+        @if (avisosRecientes().length === 0) {
+          <div class="avisos-empty">
+            <i class="bi bi-megaphone fs-2 opacity-25 d-block mb-1"></i>
+            Sin avisos activos
+          </div>
+        }
+        @for (a of avisosRecientes(); track a.id) {
+          <div class="aviso-card">
+            <div class="aviso-card-stripe"
+              [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
+            </div>
+            <div class="aviso-card-content">
+              <div class="d-flex align-items-start justify-content-between gap-1">
+                <p class="aviso-card-titulo">{{ a.titulo }}</p>
+                <span class="aviso-badge"
+                  [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
+                  {{ a.tipo }}
+                </span>
+              </div>
+              <p class="aviso-card-desc">{{ a.descripcion | slice:0:90 }}{{ a.descripcion.length > 90 ? '…' : '' }}</p>
+              <div class="aviso-card-footer">
+                <span><i class="bi bi-calendar3 me-1"></i>{{ a.created_at | date:'dd MMM yyyy' }}</span>
+                @if (a.pdf_path) {
+                  <a [href]="avisosSvc.pdfUrl(a.pdf_path)" target="_blank" class="aviso-pdf-link">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Ver PDF
+                  </a>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
 
     <!-- Préstamos por vencer -->
     <div class="content-card mb-3">

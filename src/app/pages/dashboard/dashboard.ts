@@ -1,21 +1,29 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AvisosService, Aviso } from '../../services/avisos.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule],
   templateUrl: './dashboard.html'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  protected avisosSvc = inject(AvisosService);
+  protected auth = inject(AuthService);
+
   currentTime = signal('');
   currentDate = signal('');
   greeting = signal('Buenos días');
+  avisosRecientes = signal<Aviso[]>([]);
 
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
+    this.avisosSvc.getRecientes(4).subscribe({ next: (data) => this.avisosRecientes.set(data) });
   }
 
   ngOnDestroy() {
