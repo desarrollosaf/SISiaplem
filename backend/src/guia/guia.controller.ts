@@ -117,6 +117,13 @@ export class GuiaController {
     res.sendFile(ruta);
   }
 
+  // GET /api/guia/documento-envio/:id — descarga de documento anidado (documentos_envios)
+  @Get('documento-envio/:id')
+  async getDocumentoEnvio(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const ruta = await this.guiaService.getRutaDocumentoEnvio(id);
+    res.sendFile(ruta);
+  }
+
   // GET /api/guia/expedientes/:id/indice/fisico — GuiaController.getIndexExpF()
   @Get('expedientes/:id/indice/fisico')
   async indiceFisico(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {

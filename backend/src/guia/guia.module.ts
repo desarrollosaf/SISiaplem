@@ -9,6 +9,8 @@ import { ExpedienteSerieSubseModel } from '../models/expediente-serie-subse.mode
 import { RegistroModel } from '../models/registro.model';
 import { RegistroDocsModel } from '../models/registro-docs.model';
 import { RegistroFisicoModel } from '../models/registro-fisico.model';
+import { DocumentosEnvioModel } from '../models/documentos-envio.model';
+import { TipoDocModel } from '../models/tipo-doc.model';
 import { TipoExpedienteTratamientoModel } from '../models/tipo-expediente-tratamiento.model';
 import { SUsuario } from '../models/s-usuario.model';
 
@@ -22,6 +24,8 @@ import { SUsuario } from '../models/s-usuario.model';
       RegistroModel,
       RegistroDocsModel,
       RegistroFisicoModel,
+      DocumentosEnvioModel,
+      TipoDocModel,
       TipoExpedienteTratamientoModel,
     ]),
     SequelizeModule.forFeature([SUsuario], 'saf'),

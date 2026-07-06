@@ -8,10 +8,10 @@
     <p class="archivo-subtitle">Inventario de series documentales — consulta y gestiona tus expedientes activos.</p>
   </div>
   <div class="header-actions">
-    <a routerLink="/dashboard/tramite/expedientes" class="btn-nuevo">
+    <a routerLink="/tramite/expedientes" class="btn-nuevo">
       <i class="bi bi-folder me-1"></i>Expedientes abiertos
     </a>
-    <a routerLink="/dashboard/tramite/expedientes-cerrados" class="btn-nuevo">
+    <a routerLink="/tramite/expedientes-cerrados" class="btn-nuevo">
       <i class="bi bi-folder-x me-1"></i>Expedientes cerrados
     </a>
   </div>
@@ -91,7 +91,7 @@
                 </td>
                 <td class="text-center">
                   <a
-                    [routerLink]="['/dashboard/tramite/expedientes/serie', serie.id]"
+                    [routerLink]="['/tramite/expedientes/serie', serie.id]"
                     class="btn-icon"
                     title="Ver expedientes de esta serie"
                   >
@@ -117,7 +117,7 @@
                   </td>
                   <td class="text-center">
                     <a
-                      [routerLink]="['/dashboard/tramite/expedientes/subserie', sub.id]"
+                      [routerLink]="['/tramite/expedientes/subserie', sub.id]"
                       class="btn-icon"
                       title="Ver expedientes de esta subserie"
                     >

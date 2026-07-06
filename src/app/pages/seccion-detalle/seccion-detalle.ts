@@ -154,7 +154,7 @@ export class SeccionDetalleComponent implements OnInit {
   }
 
   volver() {
-    this.router.navigate(['/dashboard/admin/instrumentos/cgca/subfondo', this.subfondoId]);
+    this.router.navigate(['/admin/instrumentos/cgca/subfondo', this.subfondoId]);
   }
 
   nombreTipo(id: number): string {

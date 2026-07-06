@@ -102,12 +102,12 @@ export class SeccionSubfondoComponent implements OnInit {
   }
 
   volver() {
-    this.router.navigate(['/dashboard/admin/instrumentos/cgca']);
+    this.router.navigate(['/admin/instrumentos/cgca']);
   }
 
   irDetalle(item: SeccionItem) {
     this.router.navigate([
-      '/dashboard/admin/instrumentos/cgca/subfondo',
+      '/admin/instrumentos/cgca/subfondo',
       this.subfondoId,
       'seccion',
       item.id,
