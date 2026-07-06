@@ -19,7 +19,7 @@ constructor(
     
   async getsubfondos() {
     const sub = await this.sequelize.query(
-      `SELECT s.id, s.codigo, s.subfondo, d.nombre_completo FROM subfondo s INNER JOIN adminplem_saf.t_dependencia d
+      `SELECT s.id, s.codigo, s.subfondo, d.nombre_completo FROM subfondo s INNER JOIN saf.t_dependencia d
       ON d.id_Dependencia = s.id_dependencia`,
       { 
         type: QueryTypes.SELECT,
@@ -136,7 +136,7 @@ constructor(
     
     const valores = await ValorDocumentalsModel.findAll();
     const destinos = await DestinoFinalModel.findAll();
-
+    console.log("hola", valores,destinos,serie);
     const response = {
       series:  serie,
       valoresS: valores,
