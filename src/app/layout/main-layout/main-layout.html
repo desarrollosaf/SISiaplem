@@ -4,7 +4,7 @@
   <aside class="app-sidebar">
 
     <!-- Brand -->
-    <a class="sidebar-brand" routerLink="/dashboard">
+    <a class="sidebar-brand" routerLink="/home">
       <div class="sidebar-brand-icon">
         <i class="bi bi-archive-fill"></i>
       </div>
@@ -27,7 +27,7 @@
     <nav class="sidebar-nav">
 
       <!-- Inicio -->
-      <a routerLink="/dashboard/home" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/home" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-house-fill nav-icon"></i>
         <span class="nav-label">Inicio</span>
       </a>
@@ -43,28 +43,28 @@
         </button>
         <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
           <li>
-            <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Guía de Archivos
             </a>
           </li>
           <li>
-            <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/expedientes" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Expedientes Abiertos
             </a>
           </li>
           <li>
-            <a routerLink="/dashboard/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Expedientes Cerrados
             </a>
           </li>
         </ul>
 
-        <a routerLink="/dashboard/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+        <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
           <i class="bi bi-search nav-icon"></i>
           <span class="nav-label">Consultas y Préstamos</span>
         </a>
 
-        <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
+        <a routerLink="/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
           <i class="bi bi-arrow-right-circle nav-icon"></i>
           <span class="nav-label">Transferencia Primaria</span>
         </a>
@@ -74,22 +74,22 @@
       @if (auth.hasRole('RAC')) {
       <div class="nav-section-label">Archivo de Concentración</div>
 
-      <a routerLink="/dashboard/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-inbox-fill nav-icon"></i>
         <span class="nav-label">Expedientes Recibidos</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/prestamos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/prestamos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-hand-index-thumb nav-icon"></i>
         <span class="nav-label">Préstamos</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/baja" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/baja" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-trash3 nav-icon"></i>
         <span class="nav-label">Baja Documental</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-send nav-icon"></i>
         <span class="nav-label">Transfer. al Histórico</span>
       </a>
@@ -99,22 +99,22 @@
       @if (auth.hasRole('RAH')) {
       <div class="nav-section-label">Archivo Histórico</div>
 
-      <a routerLink="/dashboard/historico/fondos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/fondos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-collection nav-icon"></i>
         <span class="nav-label">Fondo Documental</span>
       </a>
 
-      <a routerLink="/dashboard/historico/consulta" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/consulta" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-eye nav-icon"></i>
         <span class="nav-label">Consulta Pública</span>
       </a>
 
-      <a routerLink="/dashboard/historico/digitalizacion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/digitalizacion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-camera nav-icon"></i>
         <span class="nav-label">Digitalización</span>
       </a>
 
-      <a routerLink="/dashboard/historico/conservacion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/conservacion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-shield-check nav-icon"></i>
         <span class="nav-label">Conservación</span>
       </a>
@@ -136,7 +136,7 @@
       </button>
       <ul class="nav-submenu" [class.submenu-open]="isOpen('instrumentos')">
         <li>
-          <a routerLink="/dashboard/admin/instrumentos/cgca" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/admin/instrumentos/cgca" routerLinkActive="active" class="submenu-link">
 
              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open" viewBox="0 0 16 16">
                 <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z"/>
@@ -145,7 +145,7 @@
         </li>
 
          <li>
-          <a routerLink="/dashboard/control/cadido" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/control/cadido" routerLinkActive="active" class="submenu-link">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open" viewBox="0 0 16 16">
                   <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z"/>
               </svg> CADIDO
@@ -197,7 +197,7 @@
       </button>
       <ul class="nav-submenu" [class.submenu-open]="isOpen('responsables')">
         <li>
-          <a routerLink="/dashboard/admin/responsables/directorio" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/admin/responsables/directorio" routerLinkActive="active" class="submenu-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8"/>
                 <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
@@ -258,12 +258,12 @@
         </li>
       </ul>
 
-      <a routerLink="/dashboard/admin/avisos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/admin/avisos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-megaphone nav-icon"></i>
         <span class="nav-label">Avisos</span>
       </a>
 
-      <a routerLink="/dashboard/admin/configuracion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/admin/configuracion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-sliders nav-icon"></i>
         <span class="nav-label">Configuración</span>
       </a>
@@ -272,12 +272,12 @@
       <!-- ── HERRAMIENTAS ── -->
       <div class="nav-section-label">Herramientas</div>
 
-      <a routerLink="/dashboard/reportes" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/reportes" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-bar-chart-fill nav-icon"></i>
         <span class="nav-label">Reportes y Estadísticas</span>
       </a>
 
-      <a routerLink="/dashboard/ayuda" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/ayuda" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-question-circle nav-icon"></i>
         <span class="nav-label">Ayuda y Soporte</span>
       </a>

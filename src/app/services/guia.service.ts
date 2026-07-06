@@ -50,12 +50,25 @@ export interface DocumentoFisico {
   status: boolean;
 }
 
+export interface TipoDoc {
+  id: number;
+  tipo_doc: string;
+}
+
+export interface DocumentoEnvio {
+  id: number;
+  path: string | null;
+  status_doc: boolean;
+  tipo: TipoDoc | null;
+}
+
 export interface DocumentoDigital {
   id: number;
   folio: string;
   titulo_doc: string;
   path: string | null;
   status: boolean;
+  docs: DocumentoEnvio[];
 }
 
 export interface RegistroDoc {
@@ -64,6 +77,7 @@ export interface RegistroDoc {
   titulo_doc: string | null;
   path_doc: string | null;
   status: boolean;
+  tipo: TipoDoc | null;
 }
 
 export interface ExpedienteDetalle {
@@ -167,6 +181,10 @@ export class GuiaService {
 
   getDocumentoRegistroUrl(id: number): string {
     return `${API}/documento-registro/${id}`;
+  }
+
+  getDocumentoEnvioUrl(id: number): string {
+    return `${API}/documento-envio/${id}`;
   }
 
   getIndiceUrl(id: number, tipo: 'fisico' | 'electronico'): string {

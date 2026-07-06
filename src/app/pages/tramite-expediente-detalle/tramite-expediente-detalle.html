@@ -21,7 +21,7 @@
 @else if (detalle(); as d) {
   <!-- ===== BREADCRUMB ===== -->
   <div class="ws-breadcrumb mb-2">
-    <a routerLink="/dashboard/tramite/inventario"><i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite</a>
+    <a routerLink="/tramite/inventario"><i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite</a>
     <i class="bi bi-chevron-right mx-1"></i>
     <span>{{ d.expediente.nombre_ex }}</span>
   </div>
@@ -127,58 +127,69 @@
               <i class="bi bi-inboxes"></i>
               <p>Sin documentos digitales registrados.</p>
             </div>
-          } @else if (digitalesFiltrados().length === 0 && gruposDocs().length === 0) {
+          } @else if (digitalesFiltrados().length === 0 && registrosDocsFiltrados().length === 0) {
             <div class="ws-empty">
               <i class="bi bi-search"></i>
               <p>Sin resultados para "{{ busca() }}".</p>
             </div>
           } @else {
+            <!-- Cada Registro digital es su propia carpeta, con sus documentos_envios anidados -->
             @for (reg of digitalesFiltrados(); track reg.id) {
-              <div class="ws-file-row">
-                <i class="bi ws-file-icon" [ngClass]="iconoArchivo(reg.titulo_doc)"></i>
-                <div class="ws-file-info">
-                  <span class="ws-file-name">{{ reg.titulo_doc }}</span>
-                  <span class="ws-file-meta">
-                    <span class="ws-chip ws-chip-reg">Registro</span>
-                    @if (reg.folio) { <span class="ws-folio">{{ reg.folio }}</span> }
-                  </span>
-                </div>
-                <button class="ws-download" title="Descargar" (click)="descargarRegistro(reg.id)">
-                  <i class="bi bi-download"></i>
-                </button>
-              </div>
-            }
-
-            @for (grupo of gruposDocs(); track grupo.folio) {
               <div class="ws-group">
-                <button class="ws-group-header" (click)="toggleGrupo(grupo.folio)">
-                  <i class="bi" [class.bi-chevron-right]="!estaExpandido(grupo.folio)" [class.bi-chevron-down]="estaExpandido(grupo.folio)"></i>
+                <button class="ws-group-header" (click)="toggleGrupo(reg.id)">
+                  <i class="bi" [class.bi-chevron-right]="!estaExpandido(reg.id)" [class.bi-chevron-down]="estaExpandido(reg.id)"></i>
                   <i class="bi bi-folder-fill ws-group-icon"></i>
-                  <span class="ws-group-folio">{{ grupo.folio }}</span>
-                  <span class="ws-group-count">{{ grupo.items.length }}</span>
+                  <span class="ws-group-folio">Folio: {{ reg.folio }}</span>
+                  <span class="ws-group-count">{{ reg.docs.length }}</span>
                 </button>
-                @if (estaExpandido(grupo.folio)) {
+                @if (estaExpandido(reg.id)) {
                   <div class="ws-group-body">
-                    @for (doc of grupo.items; track doc.id) {
+                    @for (doc of reg.docs; track doc.id) {
                       <div class="ws-file-row ws-file-row-nested">
-                        <i class="bi ws-file-icon" [ngClass]="iconoArchivo(doc.titulo_doc)"></i>
+                        <i class="bi ws-file-icon" [ngClass]="iconoArchivo(doc.path)"></i>
                         <div class="ws-file-info">
-                          <span class="ws-file-name">{{ doc.titulo_doc }}</span>
+                          <span class="ws-file-name">{{ doc.path }}</span>
                           <span class="ws-file-meta">
-                            @if (doc.status) {
+                            @if (doc.tipo) { <span class="ws-chip ws-chip-reg">{{ doc.tipo.tipo_doc }}</span> }
+                            @if (doc.status_doc) {
                               <span class="ws-chip ws-chip-active">Activo</span>
                             } @else {
                               <span class="ws-chip ws-chip-inactive">Cancelado</span>
                             }
                           </span>
                         </div>
-                        <button class="ws-download" title="Descargar" (click)="descargarRegistroDoc(doc.id)">
+                        <button class="ws-download" title="Descargar" (click)="descargarDocumentoEnvio(doc.id)">
                           <i class="bi bi-download"></i>
                         </button>
                       </div>
                     }
                   </div>
                 }
+              </div>
+            }
+
+            <!-- registro_docs se muestra plano, sin agrupar (igual que el sistema anterior) -->
+            @if (digitalesFiltrados().length > 0 && registrosDocsFiltrados().length > 0) {
+              <div class="ws-section-divider"><span>Documentos sueltos</span></div>
+            }
+            @for (rd of registrosDocsFiltrados(); track rd.id) {
+              <div class="ws-file-row">
+                <i class="bi ws-file-icon" [ngClass]="iconoArchivo(rd.path_doc)"></i>
+                <div class="ws-file-info">
+                  <span class="ws-file-name">{{ rd.path_doc }}</span>
+                  <span class="ws-file-meta">
+                    @if (rd.tipo) { <span class="ws-chip ws-chip-reg">{{ rd.tipo.tipo_doc }}</span> }
+                    @if (rd.folio) { <span class="ws-folio">Folio: {{ rd.folio }}</span> }
+                    @if (rd.status) {
+                      <span class="ws-chip ws-chip-active">Activo</span>
+                    } @else {
+                      <span class="ws-chip ws-chip-inactive">Cancelado</span>
+                    }
+                  </span>
+                </div>
+                <button class="ws-download" title="Descargar" (click)="descargarRegistroDoc(rd.id)">
+                  <i class="bi bi-download"></i>
+                </button>
               </div>
             }
           }

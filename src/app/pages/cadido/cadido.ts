@@ -32,6 +32,6 @@ export class Cadido implements OnInit {
   }
 
   abrirDetalle(item: CadidoInt) {
-      this.router.navigate(['/dashboard/control/cadido/detalle', item.id]);
+      this.router.navigate(['/control/cadido/detalle', item.id]);
     }
 }

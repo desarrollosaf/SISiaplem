@@ -133,7 +133,7 @@ export class CgcaSubfondoComponent implements OnInit {
   }
 
   abrirDetalle(item: SubfondoItem) {
-    this.router.navigate(['/dashboard/admin/instrumentos/cgca/subfondo', item.id]);
+    this.router.navigate(['/admin/instrumentos/cgca/subfondo', item.id]);
   }
 
   cerrarDetalle() {
