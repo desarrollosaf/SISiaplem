@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -8,6 +9,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './main-layout.css'
 })
 export class MainLayoutComponent {
+  auth = inject(AuthService);
+
   sidebarCollapsed = signal(false);
   openMenus: Record<string, boolean> = { tramite: true };
 
@@ -21,5 +24,14 @@ export class MainLayoutComponent {
 
   isOpen(key: string): boolean {
     return this.openMenus[key] ?? false;
+  }
+
+  logout() {
+    this.auth.logout();
+  }
+
+  get initials(): string {
+    const name = this.auth.userName();
+    return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase() || 'U';
   }
 }

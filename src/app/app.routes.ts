@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 const PH = (title: string, section: string) => ({ title, section });
 
@@ -12,6 +13,7 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () => import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -48,7 +50,7 @@ export const routes: Routes = [
       { path: 'tramite/nuevo-expediente', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Nuevo Expediente', 'Archivo de Trámite') },
       { path: 'tramite/prestamos',        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Consultas y Préstamos', 'Archivo de Trámite') },
       { path: 'tramite/transferencias',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia Primaria', 'Archivo de Trámite') },
-      { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Detalle de Expediente', 'Archivo de Trámite') },
+      { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/tramite-expediente-detalle/tramite-expediente-detalle').then(m => m.TramiteExpedienteDetalleComponent) },
 
       /* ── Archivo de Concentración ── */
       { path: 'concentracion/expedientes',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Expedientes Recibidos', 'Archivo de Concentración') },
@@ -63,7 +65,9 @@ export const routes: Routes = [
       { path: 'historico/conservacion',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Conservación y Restauración', 'Archivo Histórico') },
 
       /* ── Administración ── */
+      { path: 'admin/avisos', loadComponent: () => import('./pages/admin-avisos/admin-avisos').then(m => m.AdminAvisosComponent) },
       { path: 'admin/instrumentos/cgca', loadComponent: () => import('./pages/cgca-subfondo/cgca-subfondo').then(m => m.CgcaSubfondoComponent) },
+      { path: 'admin/responsables/directorio', loadComponent: () => import('./pages/responsables/responsables').then(m => m.ResponsablesComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:id', loadComponent: () => import('./pages/seccion-subfondo/seccion-subfondo').then(m => m.SeccionSubfondoComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:subfondoId/seccion/:id', loadComponent: () => import('./pages/seccion-detalle/seccion-detalle').then(m => m.SeccionDetalleComponent) },
       { path: 'admin/usuarios',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Usuarios y Roles', 'Administración') },

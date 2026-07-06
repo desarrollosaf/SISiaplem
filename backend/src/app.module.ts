@@ -3,16 +3,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { GuiaModule } from './guia/guia.module';
 import { SubfondoModule } from './subfondo/subfondo.module';
 import { FichaValoracionModule } from './ficha-valoracion/ficha-valoracion.module';
 import { SeccionModule } from './seccion/seccion.module';
+import { ResponsablesModule } from './responsables/responsables.module';
 import { SUsuario } from './models/s-usuario.model';
 import { UsersSafs } from './models/users-safs.model';
 import { TDepartamento } from './models/t-departamento.model';
 import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
+import { AvisosModule } from './avisos/avisos.module';
+
 
 @Module({
   imports: [
@@ -45,11 +49,14 @@ import { CadidoModule } from './cadido/cadido.module';
       logging: false,
       dialectOptions: { charset: 'utf8mb4' },
     }),
+    AuthModule,
     GuiaModule,
     SubfondoModule,
     FichaValoracionModule,
     SeccionModule,
+    ResponsablesModule,
     CadidoModule,
+    AvisosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

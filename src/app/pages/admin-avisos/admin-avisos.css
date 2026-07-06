@@ -1,0 +1,14 @@
+.page-header h4 { color: var(--primary); }
+
+.pdf-upload-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.pdf-upload-area:hover {
+  border-color: var(--primary);
+  background: #fdf5f9;
+}

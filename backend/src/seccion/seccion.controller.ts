@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -23,10 +24,42 @@ export class SeccionController {
     return this.seccionService.getTipoSecciones();
   }
 
+  // GET /api/seccion/tipo-documentales
+  @Get('tipo-documentales')
+  getTipoDocumentales() {
+    return this.seccionService.getTipoDocumentales();
+  }
+
   // GET /api/seccion/direcciones/:subfondoId
   @Get('direcciones/:subfondoId')
   getDirecciones(@Param('subfondoId', ParseIntPipe) subfondoId: number) {
     return this.seccionService.getDirecciones(subfondoId);
+  }
+
+  // GET /api/seccion/area-administrativa/:idDireccion
+  @Get('area-administrativa/:idDireccion')
+  getAreaAdministrativa(
+    @Param('idDireccion', ParseIntPipe) idDireccion: number,
+  ) {
+    return this.seccionService.getAreaAdministrativa(idDireccion);
+  }
+
+  // GET /api/seccion/departamento-info/:id  → { id_Direccion } para pre-cargar cascada
+  @Get('departamento-info/:id')
+  getDepartamentoInfo(@Param('id', ParseIntPipe) id: number) {
+    return this.seccionService.getDepartamentoInfo(id);
+  }
+
+  // GET /api/seccion/area-names?ids=1,2,3
+  @Get('area-names')
+  getAreaNames(@Query('ids') ids: string) {
+    const idList = ids
+      ? ids
+          .split(',')
+          .map(Number)
+          .filter((n) => !isNaN(n) && n > 0)
+      : [];
+    return this.seccionService.getAreaNames(idList);
   }
 
   // ── Secciones ─────────────────────────────────────────────────────────────
@@ -96,6 +129,7 @@ export class SeccionController {
       codigo: string;
       serie: string;
       departamento_id?: number | null;
+      tipo_documental_ids?: number[];
     },
   ) {
     return this.seccionService.createSerie(dto);
@@ -105,7 +139,13 @@ export class SeccionController {
   @Put('serie/:id')
   updateSerie(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { codigo: string; serie: string; departamento_id?: number | null },
+    @Body()
+    dto: {
+      codigo: string;
+      serie: string;
+      departamento_id?: number | null;
+      tipo_documental_ids?: number[];
+    },
   ) {
     return this.seccionService.updateSerie(id, dto);
   }
@@ -133,6 +173,7 @@ export class SeccionController {
       codigo: string;
       subserie: string;
       id_Departamento?: number | null;
+      tipo_documental_ids?: number[];
     },
   ) {
     return this.seccionService.createSubserie(dto);
@@ -143,7 +184,12 @@ export class SeccionController {
   updateSubserie(
     @Param('id', ParseIntPipe) id: number,
     @Body()
-    dto: { codigo: string; subserie: string; id_Departamento?: number | null },
+    dto: {
+      codigo: string;
+      subserie: string;
+      id_Departamento?: number | null;
+      tipo_documental_ids?: number[];
+    },
   ) {
     return this.seccionService.updateSubserie(id, dto);
   }
@@ -158,5 +204,50 @@ export class SeccionController {
   @Delete('subserie/:id')
   removeSubserie(@Param('id', ParseIntPipe) id: number) {
     return this.seccionService.removeSubserie(id);
+  }
+
+  // ── Subsubseries ──────────────────────────────────────────────────────────
+
+  // POST /api/seccion/subsubserie
+  @Post('subsubserie')
+  createSubsubserie(
+    @Body()
+    dto: {
+      idSubserie: number;
+      idSerie: number;
+      codigo: string;
+      subsubserie: string;
+      id_departamento?: number | null;
+      tipo_documental_ids?: number[];
+    },
+  ) {
+    return this.seccionService.createSubsubserie(dto);
+  }
+
+  // PUT /api/seccion/subsubserie/:id
+  @Put('subsubserie/:id')
+  updateSubsubserie(
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    dto: {
+      codigo: string;
+      subsubserie: string;
+      id_departamento?: number | null;
+      tipo_documental_ids?: number[];
+    },
+  ) {
+    return this.seccionService.updateSubsubserie(id, dto);
+  }
+
+  // PATCH /api/seccion/subsubserie/:id/toggle
+  @Patch('subsubserie/:id/toggle')
+  toggleSubsubserie(@Param('id', ParseIntPipe) id: number) {
+    return this.seccionService.toggleSubsubserie(id);
+  }
+
+  // DELETE /api/seccion/subsubserie/:id
+  @Delete('subsubserie/:id')
+  removeSubsubserie(@Param('id', ParseIntPipe) id: number) {
+    return this.seccionService.removeSubsubserie(id);
   }
 }
