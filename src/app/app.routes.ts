@@ -50,7 +50,7 @@ export const routes: Routes = [
       { path: 'tramite/nuevo-expediente', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Nuevo Expediente', 'Archivo de Trámite') },
       { path: 'tramite/prestamos',        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Consultas y Préstamos', 'Archivo de Trámite') },
       { path: 'tramite/transferencias',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia Primaria', 'Archivo de Trámite') },
-      { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Detalle de Expediente', 'Archivo de Trámite') },
+      { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/tramite-expediente-detalle/tramite-expediente-detalle').then(m => m.TramiteExpedienteDetalleComponent) },
 
       /* ── Archivo de Concentración ── */
       { path: 'concentracion/expedientes',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Expedientes Recibidos', 'Archivo de Concentración') },

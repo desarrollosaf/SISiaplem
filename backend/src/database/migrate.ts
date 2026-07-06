@@ -1,95 +1,57 @@
-import * as dotenv from 'dotenv';
-import { resolve } from 'path';
+import { NestFactory } from '@nestjs/core';
+import { getConnectionToken } from '@nestjs/sequelize';
 import { Sequelize, QueryTypes } from 'sequelize';
-import { readdirSync, readFileSync } from 'fs';
+import { readdirSync } from 'fs';
+import { join } from 'path';
+import { AppModule } from '../app.module';
 
-dotenv.config({ path: resolve(__dirname, '../../..', '.env') });
-
-const MIGRATIONS_DIR = resolve(__dirname, 'migrations');
+const MIGRATIONS_DIR = join(__dirname, 'migrations');
 
 async function run() {
-  const db = new Sequelize({
-    dialect: 'mysql',
-    host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT ?? 3306),
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    logging: false,
-  });
+  const app = await NestFactory.createApplicationContext(AppModule);
+  const sequelize = app.get<Sequelize>(getConnectionToken());
 
-  await db.authenticate();
-
-  // ── 1. Crear tabla de control si no existe ────────────────────────────
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS \`_migrations\` (
-      \`id\`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-      \`nombre\`     VARCHAR(255) NOT NULL UNIQUE,
-      \`ejecutada_en\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (\`id\`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  await sequelize.query(`
+    CREATE TABLE IF NOT EXISTS nest_migrations (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL UNIQUE,
+      executed_at DATETIME NOT NULL
+    )
   `);
 
-  // ── 2. Leer migraciones ya ejecutadas ─────────────────────────────────
-  const ejecutadas = await db.query<{ nombre: string }>(
-    `SELECT nombre FROM \`_migrations\``,
+  const ejecutadas = await sequelize.query<{ name: string }>(
+    `SELECT name FROM nest_migrations`,
     { type: QueryTypes.SELECT },
   );
-  const yaEjecutadas = new Set(ejecutadas.map(r => r.nombre));
+  const ejecutadasSet = new Set(ejecutadas.map((m) => m.name));
 
-  // ── 3. Obtener archivos .sql ordenados ────────────────────────────────
   const archivos = readdirSync(MIGRATIONS_DIR)
-    .filter(f => f.endsWith('.sql'))
+    .filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts'))
     .sort();
 
   if (archivos.length === 0) {
-    console.log('\n⚠️  No hay archivos .sql en migrations/\n');
-    await db.close();
-    return;
+    console.log('No hay migraciones en src/database/migrations.');
   }
 
-  let nuevas = 0;
-  console.log(`\n🗄️  Migraciones (${archivos.length} archivo(s) encontrado(s)):\n`);
-
-  // ── 4. Ejecutar las pendientes ────────────────────────────────────────
   for (const archivo of archivos) {
-    if (yaEjecutadas.has(archivo)) {
-      console.log(`  ⏭️  ${archivo} — ya ejecutada`);
+    if (ejecutadasSet.has(archivo)) {
+      console.log(`↷ ${archivo} ya aplicada, se omite.`);
       continue;
     }
-
-    const sql = readFileSync(resolve(MIGRATIONS_DIR, archivo), 'utf8');
-
-    // Separar múltiples sentencias por punto y coma
-    const sentencias = sql
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
-
-    try {
-      for (const sentencia of sentencias) {
-        await db.query(sentencia);
-      }
-      await db.query(
-        `INSERT INTO \`_migrations\` (nombre) VALUES (:nombre)`,
-        { replacements: { nombre: archivo }, type: QueryTypes.INSERT },
-      );
-      console.log(`  ✅ ${archivo} — ejecutada correctamente`);
-      nuevas++;
-    } catch (err: any) {
-      console.error(`  ❌ ${archivo} — ERROR: ${err.message}`);
-      await db.close();
-      process.exit(1);
+    console.log(`🔧 Aplicando ${archivo}...`);
+    const modulo = require(join(MIGRATIONS_DIR, archivo));
+    if (typeof modulo.up !== 'function') {
+      throw new Error(`${archivo} no exporta una función "up(sequelize)".`);
     }
+    await modulo.up(sequelize);
+    await sequelize.query(
+      `INSERT INTO nest_migrations (name, executed_at) VALUES (:name, NOW())`,
+      { replacements: { name: archivo } },
+    );
+    console.log(`✅ ${archivo} aplicada.`);
   }
 
-  if (nuevas === 0) {
-    console.log('\n✅ Todo al día, no hay migraciones pendientes.\n');
-  } else {
-    console.log(`\n✅ ${nuevas} migración(es) ejecutada(s) correctamente.\n`);
-  }
-
-  await db.close();
+  await app.close();
 }
 
-run().catch(e => { console.error(e); process.exit(1); });
+run().catch((e) => { console.error(e); process.exit(1); });

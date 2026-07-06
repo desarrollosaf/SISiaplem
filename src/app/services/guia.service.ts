@@ -32,6 +32,79 @@ export interface Expediente {
   subserie_nombre?: string;
 }
 
+export interface TipoTratamiento {
+  id: number;
+  tipo: string;
+  status: boolean;
+}
+
+export interface ServidorPublico {
+  N_Usuario: string;
+  Nombre: string;
+}
+
+export interface DocumentoFisico {
+  id: number;
+  folio: string;
+  titulo_doc: string;
+  status: boolean;
+}
+
+export interface DocumentoDigital {
+  id: number;
+  folio: string;
+  titulo_doc: string;
+  path: string | null;
+  status: boolean;
+}
+
+export interface RegistroDoc {
+  id: number;
+  folio: string | null;
+  titulo_doc: string | null;
+  path_doc: string | null;
+  status: boolean;
+}
+
+export interface ExpedienteDetalle {
+  expediente: {
+    id: number;
+    nombre_ex: string;
+    anio: string;
+    fecha_cierre_exp: string | null;
+    status: number;
+    id_serie: number | null;
+    id_subserie: number | null;
+    id_tipo_expediente: number | null;
+    rfc_usuario_expediente: string | null;
+    serie_codigo: string | null;
+    serie_nombre: string | null;
+    subserie_codigo: string | null;
+    subserie_nombre: string | null;
+  };
+  tipoExpediente: TipoTratamiento | null;
+  responsable: ServidorPublico | null;
+  fisicos: DocumentoFisico[];
+  digitales: DocumentoDigital[];
+  registrosDocs: RegistroDoc[];
+}
+
+export interface CrearExpedienteDto {
+  id_serie?: number;
+  id_subserie?: number;
+  nombre_ex: string;
+  anio: string;
+  id_tipo_expediente?: number;
+  rfc_usuario_expediente?: string;
+}
+
+export interface TransferirExpedienteDto {
+  nombre_ex?: string;
+  anio?: string;
+  id_tipo_expediente?: number | null;
+  rfc_usuario_expediente?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GuiaService {
   private http = inject(HttpClient);
@@ -64,11 +137,39 @@ export class GuiaService {
     return this.http.get<Expediente[]>(`${API}/cerrados`, { params: { rfc } });
   }
 
-  crearExpediente(data: { id_serie?: number; id_subserie?: number; nombre_ex: string; anio: string }) {
+  crearExpediente(data: CrearExpedienteDto) {
     return this.http.post<Expediente>(`${API}/expedientes`, data);
   }
 
   cerrarExpediente(id: number) {
     return this.http.patch<{ ok: boolean }>(`${API}/expedientes/${id}/cerrar`, {});
+  }
+
+  getTiposTratamiento() {
+    return this.http.get<TipoTratamiento[]>(`${API}/tipos-tratamiento`);
+  }
+
+  getServidoresPublicos() {
+    return this.http.get<ServidorPublico[]>(`${API}/servidores-publicos`);
+  }
+
+  getExpedienteDetalle(id: number) {
+    return this.http.get<ExpedienteDetalle>(`${API}/expedientes/${id}`);
+  }
+
+  transferirExpediente(id: number, data: TransferirExpedienteDto) {
+    return this.http.put<ExpedienteDetalle>(`${API}/expedientes/${id}`, data);
+  }
+
+  getDocumentoUrl(id: number): string {
+    return `${API}/documento/${id}`;
+  }
+
+  getDocumentoRegistroUrl(id: number): string {
+    return `${API}/documento-registro/${id}`;
+  }
+
+  getIndiceUrl(id: number, tipo: 'fisico' | 'electronico'): string {
+    return `${API}/expedientes/${id}/indice/${tipo}`;
   }
 }

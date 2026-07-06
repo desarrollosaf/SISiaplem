@@ -1,0 +1,284 @@
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="content-card">
+    <div class="error-state">
+      <div class="error-icon"><i class="bi bi-wifi-off"></i></div>
+      <h6 class="error-title">Sin conexión con el servidor</h6>
+      <p class="error-msg">{{ error() }}</p>
+    </div>
+  </div>
+}
+
+@else if (detalle(); as d) {
+  <!-- ===== BREADCRUMB ===== -->
+  <div class="ws-breadcrumb mb-2">
+    <a routerLink="/dashboard/tramite/inventario"><i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite</a>
+    <i class="bi bi-chevron-right mx-1"></i>
+    <span>{{ d.expediente.nombre_ex }}</span>
+  </div>
+
+  @if (documentoError()) {
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-2" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ documentoError() }}</span>
+    </div>
+  }
+
+  <!-- ===== WORKSPACE ===== -->
+  <div class="ws-shell">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="ws-side">
+      <div class="ws-side-top">
+        <div class="ws-side-icon"><i class="bi bi-folder2-open"></i></div>
+        @if (!d.expediente.fecha_cierre_exp) {
+          <span class="ws-pill ws-pill-open"><i class="bi bi-unlock-fill"></i>Abierto</span>
+        } @else {
+          <span class="ws-pill ws-pill-closed"><i class="bi bi-lock-fill"></i>Cerrado</span>
+        }
+      </div>
+      <h4 class="ws-title">{{ d.expediente.nombre_ex }}</h4>
+      <div class="ws-code">{{ d.expediente.serie_codigo || d.expediente.subserie_codigo }}</div>
+
+      <div class="ws-meta">
+        <div class="ws-meta-row">
+          <span class="ws-meta-lbl"><i class="bi bi-diagram-3 me-1"></i>Serie / Subserie</span>
+          <span class="ws-meta-val">
+            @if (d.expediente.serie_codigo) { {{ d.expediente.serie_nombre }} }
+            @else if (d.expediente.subserie_codigo) { {{ d.expediente.subserie_nombre }} }
+            @else { — }
+          </span>
+        </div>
+        <div class="ws-meta-row">
+          <span class="ws-meta-lbl"><i class="bi bi-calendar3 me-1"></i>Año</span>
+          <span class="ws-meta-val">{{ d.expediente.anio }}</span>
+        </div>
+        <div class="ws-meta-row">
+          <span class="ws-meta-lbl"><i class="bi bi-tags me-1"></i>Tipo</span>
+          <span class="ws-meta-val">{{ d.tipoExpediente?.tipo || 'Sin especificar' }}</span>
+        </div>
+        <div class="ws-meta-row">
+          <span class="ws-meta-lbl"><i class="bi bi-person-badge me-1"></i>Responsable</span>
+          <span class="ws-meta-val">{{ d.responsable?.Nombre || 'Sin asignación directa' }}</span>
+        </div>
+        @if (d.expediente.fecha_cierre_exp) {
+          <div class="ws-meta-row">
+            <span class="ws-meta-lbl"><i class="bi bi-lock me-1"></i>Cierre</span>
+            <span class="ws-meta-val">{{ d.expediente.fecha_cierre_exp }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="ws-stats">
+        <div class="ws-stat">
+          <strong>{{ d.fisicos.length }}</strong>
+          <span>Físicos</span>
+        </div>
+        <div class="ws-stat">
+          <strong>{{ d.digitales.length + d.registrosDocs.length }}</strong>
+          <span>Digitales</span>
+        </div>
+      </div>
+
+      <div class="ws-actions">
+        <button class="ws-btn ws-btn-primary" (click)="abrirDrawer()">
+          <i class="bi bi-pencil-fill"></i>Transferir / Editar
+        </button>
+        <button class="ws-btn ws-btn-ghost" (click)="verIndice('fisico')">
+          <i class="bi bi-file-earmark-pdf icon-pdf"></i>Índice físico
+        </button>
+        <button class="ws-btn ws-btn-ghost" (click)="verIndice('electronico')">
+          <i class="bi bi-file-earmark-pdf icon-pdf"></i>Índice electrónico
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── EXPLORADOR DE DOCUMENTOS ── -->
+    <section class="ws-main">
+      <div class="ws-tabs">
+        <button class="ws-tab" [class.ws-tab-active]="tab() === 'digital'" (click)="cambiarTab('digital')">
+          <i class="bi bi-file-earmark-text me-1"></i>Digital
+          <span class="ws-tab-count">{{ totalDigital() }}</span>
+        </button>
+        <button class="ws-tab" [class.ws-tab-active]="tab() === 'fisico'" (click)="cambiarTab('fisico')">
+          <i class="bi bi-archive me-1"></i>Físico
+          <span class="ws-tab-count">{{ totalFisico() }}</span>
+        </button>
+        <div class="ws-tab-search">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Buscar por folio o nombre…"
+            [ngModel]="busca()" (ngModelChange)="busca.set($event)" />
+        </div>
+      </div>
+
+      <div class="ws-filelist">
+        @if (tab() === 'digital') {
+          @if (d.digitales.length === 0 && d.registrosDocs.length === 0) {
+            <div class="ws-empty">
+              <i class="bi bi-inboxes"></i>
+              <p>Sin documentos digitales registrados.</p>
+            </div>
+          } @else if (digitalesFiltrados().length === 0 && gruposDocs().length === 0) {
+            <div class="ws-empty">
+              <i class="bi bi-search"></i>
+              <p>Sin resultados para "{{ busca() }}".</p>
+            </div>
+          } @else {
+            @for (reg of digitalesFiltrados(); track reg.id) {
+              <div class="ws-file-row">
+                <i class="bi ws-file-icon" [ngClass]="iconoArchivo(reg.titulo_doc)"></i>
+                <div class="ws-file-info">
+                  <span class="ws-file-name">{{ reg.titulo_doc }}</span>
+                  <span class="ws-file-meta">
+                    <span class="ws-chip ws-chip-reg">Registro</span>
+                    @if (reg.folio) { <span class="ws-folio">{{ reg.folio }}</span> }
+                  </span>
+                </div>
+                <button class="ws-download" title="Descargar" (click)="descargarRegistro(reg.id)">
+                  <i class="bi bi-download"></i>
+                </button>
+              </div>
+            }
+
+            @for (grupo of gruposDocs(); track grupo.folio) {
+              <div class="ws-group">
+                <button class="ws-group-header" (click)="toggleGrupo(grupo.folio)">
+                  <i class="bi" [class.bi-chevron-right]="!estaExpandido(grupo.folio)" [class.bi-chevron-down]="estaExpandido(grupo.folio)"></i>
+                  <i class="bi bi-folder-fill ws-group-icon"></i>
+                  <span class="ws-group-folio">{{ grupo.folio }}</span>
+                  <span class="ws-group-count">{{ grupo.items.length }}</span>
+                </button>
+                @if (estaExpandido(grupo.folio)) {
+                  <div class="ws-group-body">
+                    @for (doc of grupo.items; track doc.id) {
+                      <div class="ws-file-row ws-file-row-nested">
+                        <i class="bi ws-file-icon" [ngClass]="iconoArchivo(doc.titulo_doc)"></i>
+                        <div class="ws-file-info">
+                          <span class="ws-file-name">{{ doc.titulo_doc }}</span>
+                          <span class="ws-file-meta">
+                            @if (doc.status) {
+                              <span class="ws-chip ws-chip-active">Activo</span>
+                            } @else {
+                              <span class="ws-chip ws-chip-inactive">Cancelado</span>
+                            }
+                          </span>
+                        </div>
+                        <button class="ws-download" title="Descargar" (click)="descargarRegistroDoc(doc.id)">
+                          <i class="bi bi-download"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+        } @else {
+          @if (d.fisicos.length === 0) {
+            <div class="ws-empty">
+              <i class="bi bi-archive"></i>
+              <p>Sin documentos físicos registrados.</p>
+            </div>
+          } @else if (fisicosFiltrados().length === 0) {
+            <div class="ws-empty">
+              <i class="bi bi-search"></i>
+              <p>Sin resultados para "{{ busca() }}".</p>
+            </div>
+          } @else {
+            @for (f of fisicosFiltrados(); track f.id) {
+              <div class="ws-file-row">
+                <i class="bi bi-file-earmark-richtext-fill ws-file-icon icon-default"></i>
+                <div class="ws-file-info">
+                  <span class="ws-file-name">{{ f.titulo_doc }}</span>
+                  <span class="ws-file-meta">
+                    <span class="ws-chip ws-chip-reg">Físico</span>
+                    @if (f.folio) { <span class="ws-folio">{{ f.folio }}</span> }
+                  </span>
+                </div>
+              </div>
+            }
+          }
+        }
+      </div>
+    </section>
+  </div>
+}
+
+<!-- ===== OVERLAY + DRAWER: TRANSFERIR / EDITAR ===== -->
+@if (drawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+}
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header-band">
+    <div class="drawer-header-icon"><i class="bi bi-pencil-fill"></i></div>
+    <div class="drawer-header-text">
+      <h5 class="drawer-title">Transferir / Editar Expediente</h5>
+      <p class="drawer-subtitle">Actualiza los datos o reasigna el responsable.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-folder2 me-1"></i>Nombre del Expediente <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="editNombre.length > 0"
+        [(ngModel)]="editNombre" name="edit_nombre_ex" />
+    </div>
+    <div class="field-row">
+      <div class="field-group field-grow">
+        <label class="field-label"><i class="bi bi-tags me-1"></i>Tipo de Expediente <span class="required-star">*</span></label>
+        <div class="select-wrap">
+          <select class="field-select" [class.field-input-filled]="editTipoExpediente > 0"
+            [(ngModel)]="editTipoExpediente" name="edit_id_tipo_expediente">
+            <option [ngValue]="0" disabled>— Seleccione —</option>
+            @for (t of tiposTratamiento(); track t.id) {
+              <option [ngValue]="t.id">{{ t.tipo }}</option>
+            }
+          </select>
+          <i class="bi bi-chevron-down select-arrow"></i>
+        </div>
+      </div>
+      <div class="field-group" style="width:110px">
+        <label class="field-label"><i class="bi bi-calendar3 me-1"></i>Año <span class="required-star">*</span></label>
+        <input type="number" class="field-input" [class.field-input-filled]="editAnio.length > 0"
+          [(ngModel)]="editAnio" name="edit_anio" min="2000" max="2100" />
+      </div>
+    </div>
+    <div class="field-group toggle-card">
+      <label class="toggle-row">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="editAsignaSwitch" [(ngModel)]="asignacionDirecta" name="edit_asigna" />
+        </div>
+        <div>
+          <span class="toggle-title"><i class="bi bi-person-check me-1"></i>Asignación directa</span>
+          <span class="toggle-desc">Asignar este expediente directamente a un responsable</span>
+        </div>
+      </label>
+    </div>
+    @if (asignacionDirecta) {
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-person-badge me-1"></i>Responsable de Expediente <span class="required-star">*</span></label>
+        <app-searchable-select
+          [options]="servidoresOptions()"
+          placeholder="Buscar por nombre o RFC…"
+          [(value)]="editResponsable"
+        ></app-searchable-select>
+      </div>
+    }
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardarTransferencia()" [disabled]="!formularioValido || guardando()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>Guardar Cambios }
+    </button>
+  </div>
+</div>
