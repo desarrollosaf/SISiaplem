@@ -1,27 +1,24 @@
-<!-- ===== ENCABEZADO ===== -->
-<div class="page-header mb-4">
-  <div>
-    <div class="breadcrumb-mini">
-      <a routerLink="/dashboard/tramite/inventario" class="breadcrumb-link">
+<!-- ===== ENCABEZADO ARCHIVO DE TRÁMITE ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-folder2-open"></i>
+  </div>
+  <div class="archivo-header-body">
+    <div class="breadcrumb-mini breadcrumb-mini-light">
+      <a routerLink="/dashboard/tramite/inventario" class="breadcrumb-link-light">
         <i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite
       </a>
       <i class="bi bi-chevron-right mx-1"></i>
       <span>{{ titulo() }}</span>
     </div>
-    <h4 class="page-title mt-1">{{ titulo() }}</h4>
-    <p class="page-subtitle">{{ subtitulo() }}</p>
+    <h4 class="archivo-title">{{ titulo() }}</h4>
+    <p class="archivo-subtitle">{{ subtitulo() }}</p>
   </div>
 
   @if (tipo === 'serie' || tipo === 'subserie') {
-    <div class="page-header-actions">
-      <button
-        class="btn btn-primary btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#modalNuevoExp"
-      >
-        <i class="bi bi-plus-lg me-1"></i>Nuevo Expediente
-      </button>
-    </div>
+    <button class="btn-nuevo ms-auto" (click)="abrirDrawer()">
+      <i class="bi bi-plus-lg me-1"></i>Nuevo Expediente
+    </button>
   }
 </div>
 
@@ -39,24 +36,33 @@
     <span class="content-card-title">
       <i class="bi bi-files me-2" style="color:var(--primary)"></i>
       @if (cargando()) { Cargando… }
-      @else { {{ expedientes().length }} expediente(s) }
+      @else { {{ expedientesFiltrados().length }} expediente(s) }
     </span>
-    @if (!cargando() && (tipo === 'activos' || tipo === 'cerrados')) {
-      <div class="d-flex gap-2">
-        <a routerLink="/dashboard/tramite/expedientes"
-           class="btn btn-sm"
-           [class.btn-primary]="tipo==='activos'"
-           [class.btn-outline-primary]="tipo!=='activos'">
-          <i class="bi bi-folder-open me-1"></i>Abiertos
-        </a>
-        <a routerLink="/dashboard/tramite/expedientes-cerrados"
-           class="btn btn-sm"
-           [class.btn-primary]="tipo==='cerrados'"
-           [class.btn-outline-secondary]="tipo!=='cerrados'">
-          <i class="bi bi-folder-x me-1"></i>Cerrados
-        </a>
-      </div>
-    }
+    <div class="header-right">
+      @if (!cargando() && (tipo === 'activos' || tipo === 'cerrados')) {
+        <div class="d-flex gap-2">
+          <a routerLink="/dashboard/tramite/expedientes"
+             class="btn btn-sm"
+             [class.btn-primary]="tipo==='activos'"
+             [class.btn-outline-primary]="tipo!=='activos'">
+            <i class="bi bi-folder-open me-1"></i>Abiertos
+          </a>
+          <a routerLink="/dashboard/tramite/expedientes-cerrados"
+             class="btn btn-sm"
+             [class.btn-primary]="tipo==='cerrados'"
+             [class.btn-outline-secondary]="tipo!=='cerrados'">
+            <i class="bi bi-folder-x me-1"></i>Cerrados
+          </a>
+        </div>
+      }
+      @if (!cargando() && expedientes().length > 0) {
+        <div class="search-wrap">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" class="search-input" placeholder="Buscar expediente…"
+            [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event); pagina.set(1)" />
+        </div>
+      }
+    </div>
   </div>
 
   @if (cargando()) {
@@ -73,22 +79,39 @@
         <small>Usa el botón <b>Nuevo Expediente</b> para crear el primero.</small>
       }
     </div>
+  } @else if (expedientesFiltrados().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-search"></i>
+      <p>Sin resultados para "{{ busqueda() }}".</p>
+    </div>
   } @else {
     <div class="table-responsive">
       <table class="exp-table">
         <thead>
           <tr>
-            <th>Expediente</th>
-            <th style="width:70px">Año</th>
+            <th class="th-sort" (click)="ordenarPor('nombre_ex')">
+              Expediente
+              <i class="bi" [class.bi-caret-up-fill]="sortKey()==='nombre_ex' && sortDir()===1" [class.bi-caret-down-fill]="sortKey()==='nombre_ex' && sortDir()===-1" [class.bi-caret-down]="sortKey()!=='nombre_ex'"></i>
+            </th>
+            <th class="th-sort" style="width:80px" (click)="ordenarPor('anio')">
+              Año
+              <i class="bi" [class.bi-caret-up-fill]="sortKey()==='anio' && sortDir()===1" [class.bi-caret-down-fill]="sortKey()==='anio' && sortDir()===-1" [class.bi-caret-down]="sortKey()!=='anio'"></i>
+            </th>
             @if (tipo === 'activos' || tipo === 'cerrados') {
-              <th>Serie / Subserie</th>
+              <th class="th-sort" (click)="ordenarPor('serie')">
+                Serie / Subserie
+                <i class="bi" [class.bi-caret-up-fill]="sortKey()==='serie' && sortDir()===1" [class.bi-caret-down-fill]="sortKey()==='serie' && sortDir()===-1" [class.bi-caret-down]="sortKey()!=='serie'"></i>
+              </th>
             }
-            <th style="width:120px; text-align:center">Estado</th>
+            <th class="th-sort" style="width:120px; text-align:center" (click)="ordenarPor('estado')">
+              Estado
+              <i class="bi" [class.bi-caret-up-fill]="sortKey()==='estado' && sortDir()===1" [class.bi-caret-down-fill]="sortKey()==='estado' && sortDir()===-1" [class.bi-caret-down]="sortKey()!=='estado'"></i>
+            </th>
             <th style="width:100px; text-align:center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          @for (exp of expedientes(); track exp.id) {
+          @for (exp of expedientesPagina(); track exp.id) {
             <tr>
               <td class="exp-nombre">{{ exp.nombre_ex }}</td>
               <td class="text-muted" style="font-size:0.85rem">{{ exp.anio }}</td>
@@ -119,7 +142,7 @@
                     <button
                       class="btn-icon btn-icon-close"
                       title="Cerrar expediente"
-                      (click)="cerrarExpediente(exp.id)"
+                      (click)="pedirConfirmarCierre(exp.id)"
                     >
                       <i class="bi bi-x-circle"></i>
                     </button>
@@ -131,59 +154,102 @@
         </tbody>
       </table>
     </div>
+
+    @if (totalPaginas() > 1) {
+      <div class="paginacion">
+        <span class="paginacion-info">Página {{ pagina() }} de {{ totalPaginas() }}</span>
+        <div class="paginacion-botones">
+          <button class="btn-page" (click)="irAPagina(pagina() - 1)" [disabled]="pagina() === 1"><i class="bi bi-chevron-left"></i></button>
+          @for (n of paginasArray(); track n) {
+            <button class="btn-page" [class.btn-page-active]="pagina() === n" (click)="irAPagina(n)">{{ n }}</button>
+          }
+          <button class="btn-page" (click)="irAPagina(pagina() + 1)" [disabled]="pagina() === totalPaginas()"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    }
   }
 </div>
 
-<!-- ===== MODAL: NUEVO EXPEDIENTE ===== -->
-@if (tipo === 'serie' || tipo === 'subserie') {
-  <div class="modal fade" id="modalNuevoExp" tabindex="-1" aria-labelledby="modalNuevoExpLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header" style="background:var(--primary); color:#fff;">
-          <h5 class="modal-title" id="modalNuevoExpLabel">
-            <i class="bi bi-folder-plus me-2"></i>Nuevo Expediente
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nombre del Expediente <span class="text-danger">*</span></label>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Ej. Contratos de Servicios 2026"
-              [value]="nuevoNombre"
-              (input)="nuevoNombre = $any($event.target).value"
-            />
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Año <span class="text-danger">*</span></label>
-            <input
-              type="number"
-              class="form-control"
-              [value]="nuevoAnio"
-              (input)="nuevoAnio = $any($event.target).value"
-              min="2000"
-              max="2100"
-            />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            (click)="guardarExpediente()"
-            [disabled]="guardando"
-          >
-            @if (guardando) {
-              <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
-            } @else {
-              <i class="bi bi-check-lg me-1"></i>Guardar
+<!-- ===== OVERLAY + DRAWER: NUEVO EXPEDIENTE ===== -->
+@if (drawerOpen()) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+}
+<div class="drawer" [class.drawer-open]="drawerOpen()">
+  <div class="drawer-header-band">
+    <div class="drawer-header-icon"><i class="bi bi-folder-plus"></i></div>
+    <div class="drawer-header-text">
+      <h5 class="drawer-title">Nuevo Expediente</h5>
+      <p class="drawer-subtitle">Complete todos los campos requeridos.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-folder2 me-1"></i>Nombre del Expediente <span class="required-star">*</span></label>
+      <input type="text" class="field-input" [class.field-input-filled]="nuevoNombre.length > 0"
+        placeholder="Ej. Contratos de Servicios 2026" [(ngModel)]="nuevoNombre" name="nombre_ex" />
+    </div>
+    <div class="field-row">
+      <div class="field-group field-grow">
+        <label class="field-label"><i class="bi bi-tags me-1"></i>Tipo de Expediente <span class="required-star">*</span></label>
+        <div class="select-wrap">
+          <select class="field-select" [class.field-input-filled]="nuevoTipoExpediente > 0"
+            [(ngModel)]="nuevoTipoExpediente" name="id_tipo_expediente">
+            <option [ngValue]="0" disabled>— Seleccione —</option>
+            @for (t of tiposTratamiento(); track t.id) {
+              <option [ngValue]="t.id">{{ t.tipo }}</option>
             }
-          </button>
+          </select>
+          <i class="bi bi-chevron-down select-arrow"></i>
         </div>
       </div>
+      <div class="field-group" style="width:110px">
+        <label class="field-label"><i class="bi bi-calendar3 me-1"></i>Año <span class="required-star">*</span></label>
+        <input type="number" class="field-input" [class.field-input-filled]="nuevoAnio.length > 0"
+          [(ngModel)]="nuevoAnio" name="anio" min="2000" max="2100" />
+      </div>
+    </div>
+    <div class="field-group toggle-card">
+      <label class="toggle-row">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="asignaSwitch" [(ngModel)]="asignacionDirecta" name="asigna" />
+        </div>
+        <div>
+          <span class="toggle-title"><i class="bi bi-person-check me-1"></i>Asignación directa</span>
+          <span class="toggle-desc">Asignar este expediente directamente a un responsable</span>
+        </div>
+      </label>
+    </div>
+    @if (asignacionDirecta) {
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-person-badge me-1"></i>Responsable de Expediente <span class="required-star">*</span></label>
+        <app-searchable-select
+          [options]="servidoresOptions()"
+          placeholder="Buscar por nombre o RFC…"
+          [(value)]="nuevoResponsable"
+        ></app-searchable-select>
+      </div>
+    }
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando">Cancelar</button>
+    <button class="btn-save" (click)="guardarExpediente()" [disabled]="!formularioValido || guardando">
+      @if (guardando) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>Guardar Expediente }
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR CIERRE ===== -->
+@if (confirmCerrarId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarCierre()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-lock-fill"></i></div>
+    <h6 class="confirm-title">¿Cerrar este expediente?</h6>
+    <p class="confirm-msg">Una vez cerrado, no podrás agregar más documentos. Esta acción se puede revertir solo por un administrador.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarCierre()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarCierre()"><i class="bi bi-lock-fill me-1"></i>Sí, cerrar</button>
     </div>
   </div>
 }
