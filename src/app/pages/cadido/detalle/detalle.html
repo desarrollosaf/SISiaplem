@@ -47,28 +47,190 @@
         <table class="inv-table">
           <thead>
             <tr>
-              <th style="width:18%">Código</th>
-              <th>Sección (SC), Serie (SE), Subserie (SS)</th>
-              <th>Valores primarios</th>
-              <th><table>
-                <tr>
-                    <td colspan="2">Plazo de conservación</td>
-                </tr>
-                <tr>
-                    <td>AT</td>
-                    <td>AC</td>
-                </tr>
-              </table></th>
-              <th>Total de años</th>
-              <th>Destino</th>
-              <th style="width:10%; text-align:center">Acciones</th>
+              <th style="width:10%" >Código</th>
+              <th colspan="6">Sección (SC), Serie (SE), Subserie (SS)</th>
             </tr>
           </thead>
           <tbody>
-            
+             @for (item of cadido(); track item.id) {
+              <!-- Fila de SERIE -->
+              <tr class="seccion" >
+                <td>
+                  <span class="seccion-badge">Sección </span> {{ item.codigo }} 
+                </td>
+                <td class="serie-nombre">{{ item.seccion }}</td>
+                <td class="text-center">Valores primarios</td>
+                <td style="width:10%" >
+                    <table>
+                        <tr>
+                            <td colspan="2">Plazo de conservación</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">AT</td>
+                            <td class="text-center">AC</td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="text-center">Total de años</td>
+                <td class="text-center">Destino</td>
+                <td style="width:10%; text-align:center">Acciones</td>
+              </tr>
+                @for (ser of item.series; track ser.id) {
+                    <tr class="row-serie">
+                        <td> <span class="codigo-badge">Serie </span>{{ ser.codigo }} </td>
+                        <td class="serie-nombre">{{ ser.serie }}</td>
+                        <td class="serie-nombrer center"> 
+                            <table style="width:100%" >
+                                <tr class="text-center">
+                                    @for (item of ser.valores; track $index) {
+                                        @switch (item.id_valor) {
+                                            @case (1) { <td class="text-center">A</td> }
+                                            @case (2) { <td class="text-center">L</td> }
+                                            @case (3) { <td class="text-center">F</td> }
+                                            @case (4) { <td class="text-center">C</td> }
+                                        }
+                                    }
+                                </tr>
+                            </table> 
+                        </td>
+                        <td>
+                            <table style="width:90%">
+                                <tr>
+                                    <td class="text-center">{{ser.anio_tramite}}</td>
+                                    <td class="text-center">{{ser.anios_consentracion}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="text-center"> {{ ser.total_anios }} </td>
+                        <td class="text-center"> {{ser.destino?.valor}} </td>
+                        <td class="text-center">
+                            <a class="btn-icon"title="Editar" (click)="editSerie(ser.id, 1)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    @for (sub of ser.subSeries; track sub.id) {
+                    <tr class="row-serie">
+                        <td>
+                            <span class="subserie-badge">Sub </span>{{ sub.codigo }}
+                        </td>
+                        <td class="serie-nombre">{{ sub.subserie }}</td>
+                        <td class="serie-nombrer"> 
+                            <table  style="width:100%">
+                                <tr class="text-center">
+                                    @for (item of sub.valores; track $index) {
+                                        @switch (item.id_valor) {
+                                            @case (1) { <td class="text-center">A</td> }
+                                            @case (2) { <td class="text-center">L</td> }
+                                            @case (3) { <td class="text-center">F</td> }
+                                            @case (4) { <td class="text-center">C</td> }
+                                        }
+                                    }
+                                </tr>
+                            </table> 
+                        </td>
+                        <td class="text-center"> 
+                            <table style="width:90%">
+                                <tr>
+                                    <td class="text-center">{{sub.anio_tramite}}</td>
+                                    <td class="text-center">{{sub.anios_consentracion}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="text-center"> {{sub.total_anios }} </td>
+                        <td class="text-center"> {{sub.destino?.valor}} </td>
+                        <td class="text-center">
+                            <a class="btn-icon"title="Editar"  (click)="editSerie(sub.id, 2)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    }
+                }   
+            }
           </tbody>
         </table>
       </div>
+
+
+
+
+
+      <div class="drawer" [class.drawer-open]="drawerOpen()">
+        <div class="drawer-header">
+            <div>
+            <h5 class="drawer-title">
+                <i class="bi bi-pencil-fill"></i>
+                Modificar CADIDO
+            </h5>
+            </div>
+            <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="drawer-body">
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+                <input type="text" class="field-input" [(ngModel)]="formSerie.codigo" name="codigo" disabled="true"/>
+            </div>
+            @if(formSerie.serie){
+                <div class="field-group">
+                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Serie <span class="required-star">*</span></label>
+                    <input type="text" class="field-input" [(ngModel)]="formSerie.serie" name="serie" disabled="true"/>
+                </div>
+            }
+            @else{
+                <div class="field-group">
+                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Subserie <span class="required-star">*</span></label>
+                    <input type="text" class="field-input" [(ngModel)]="formSerie.subserie" name="serie" disabled="true"/>
+                </div>
+            }
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Valores primarios <span class="required-star">*</span></label>
+                <select class="form-select" multiple size="4" [(ngModel)]="formSerie.valoresSeleccionados"  name="valoresSeleccionados" >
+                    @for (item of valoresArray; track item.id) {
+                        <option [ngValue]="item.id">
+                        {{ item.name }}
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Plazo archivo trámite <span class="required-star">*</span></label>
+                <input type="text" class="field-input" [(ngModel)]="formSerie.anio_tramite" name="anio_tramite" />
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Plazo archivo concentrasión <span class="required-star">*</span></label>
+                <input type="text" class="field-input" [(ngModel)]="formSerie.anios_consentracion" name="anios_consentracion" />
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Total de años <span class="required-star">*</span></label>
+                <input type="text" class="field-input" [(ngModel)]="formSerie.total_anios" name="total_anios" />
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Destino <span class="required-star">*</span></label>
+                <select class="field-input" [(ngModel)]="formSerie.id_destino"  name="id_destino" >
+                    @for (item of destinosArray; track item.id) {
+                        <option [ngValue]="item.id">
+                        {{ item.name }}
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn-save" (click)="guardar()">
+            @if (guardando()) { <span class="spinner"></span> Guardando… }
+            @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+            </button>
+        </div>
+        </div>
     }
   </div>
 }
