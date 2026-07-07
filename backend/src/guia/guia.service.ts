@@ -11,6 +11,8 @@ import { ExpedienteSerieSubseModel } from '../models/expediente-serie-subse.mode
 import { RegistroModel } from '../models/registro.model';
 import { RegistroDocsModel } from '../models/registro-docs.model';
 import { RegistroFisicoModel } from '../models/registro-fisico.model';
+import { DocumentosEnvioModel } from '../models/documentos-envio.model';
+import { TipoDocModel } from '../models/tipo-doc.model';
 import { TipoExpedienteTratamientoModel } from '../models/tipo-expediente-tratamiento.model';
 import { SUsuario } from '../models/s-usuario.model';
 
@@ -33,6 +35,7 @@ export class GuiaService {
     @InjectModel(RegistroModel) private registroModel: typeof RegistroModel,
     @InjectModel(RegistroDocsModel) private registroDocsModel: typeof RegistroDocsModel,
     @InjectModel(RegistroFisicoModel) private registroFisicoModel: typeof RegistroFisicoModel,
+    @InjectModel(DocumentosEnvioModel) private documentosEnvioModel: typeof DocumentosEnvioModel,
     @InjectModel(TipoExpedienteTratamientoModel) private tipoTratamientoModel: typeof TipoExpedienteTratamientoModel,
     @InjectModel(SUsuario, 'saf') private sUsuarioModel: typeof SUsuario,
   ) {}
@@ -136,6 +139,43 @@ export class GuiaService {
     return this.getExpedientesPorEstado(rfc, false);
   }
 
+  // GuiaController.actividadReciente() — últimos expedientes tocados en los departamentos del usuario
+  async getActividadReciente(rfc: string, limit = 5) {
+    const deptIds = await this.getDeptIds(rfc);
+    if (!deptIds.length) return [];
+
+    const serieIds = (await this.serieModel.findAll({
+      where: { departamento_id: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+    const subserieIds = (await this.subSerieModel.findAll({
+      where: { id_Departamento: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+
+    const expedientes = await this.expedienteModel.findAll({
+      where: {
+        [Op.or]: [
+          { id_serie: { [Op.in]: serieIds } },
+          { id_subserie: { [Op.in]: subserieIds } },
+        ],
+        status: true,
+      },
+      include: [{ model: SerieModel }, { model: SubSerieModel }, { model: TipoExpedienteTratamientoModel }],
+      order: [['updated_at', 'DESC']],
+      limit,
+    });
+
+    return expedientes.map((e) => ({
+      id: e.id,
+      codigo: `EXP-${e.anio}-${String(e.id).padStart(4, '0')}`,
+      nombre_ex: e.nombre_ex,
+      area: e.serie?.serie ?? e.subSerie?.subserie ?? '—',
+      estado: e.tipoExpediente?.tipo ?? (e.fecha_cierre_exp ? 'Cerrado' : 'Activo'),
+      fecha: e.get('updated_at'),
+    }));
+  }
+
   // GuiaController.expCerrados()
   async getCerrados(rfc: string) {
     return this.getExpedientesPorEstado(rfc, true);
@@ -183,11 +223,25 @@ export class GuiaService {
       responsable = await this.sUsuarioModel.findOne({ where: { N_Usuario: expediente.rfc_usuario_expediente } });
     }
 
-    const [fisicos, digitales, registrosDocs] = await Promise.all([
+    const [fisicos, digitalesRows, registrosDocs] = await Promise.all([
       this.registroFisicoModel.findAll({ where: { expediente_id: id, status: true }, order: [['folio', 'ASC']] }),
       this.registroModel.findAll({ where: { expediente_id: id, status: true }, order: [['folio', 'ASC']] }),
-      this.registroDocsModel.findAll({ where: { expediente_id: id, status: true }, order: [['folio', 'ASC']] }),
+      this.registroDocsModel.findAll({
+        where: { expediente_id: id, status: true },
+        include: [{ model: TipoDocModel }],
+        order: [['folio', 'ASC']],
+      }),
     ]);
+
+    // Registro.docs() — cada registro digital tiene sus propios documentos anidados (documentos_envios)
+    const digitales = await Promise.all(digitalesRows.map(async (reg) => {
+      const docs = await this.documentosEnvioModel.findAll({
+        where: { registro_id: reg.id, status_doc: true },
+        include: [{ model: TipoDocModel }],
+        order: [['id', 'DESC']],
+      });
+      return { ...reg.get({ plain: true }), docs };
+    }));
 
     return {
       expediente: {
@@ -246,6 +300,13 @@ export class GuiaService {
     return this.resolverRutaArchivo(registro.get('path') as string);
   }
 
+  // Descarga de un documento anidado bajo un registro digital (documentos_envios)
+  async getRutaDocumentoEnvio(id: number): Promise<string> {
+    const doc = await this.documentosEnvioModel.findByPk(id);
+    if (!doc || !doc.get('path')) throw new NotFoundException('Documento no encontrado');
+    return this.resolverRutaArchivo(doc.get('path') as string);
+  }
+
   private resolverRutaArchivo(relativePath: string): string {
     const base = process.env.DOCS_STORAGE_PATH;
     if (!base) {
@@ -268,8 +329,13 @@ export class GuiaService {
     const items = tipo === 'fisico'
       ? detalle.fisicos.map((f) => `${f.get('folio')} — ${f.get('titulo_doc') ?? ''}`)
       : [
-          ...detalle.digitales.map((d) => `${d.get('folio')} — ${d.get('titulo_doc') ?? ''}`),
-          ...detalle.registrosDocs.map((d) => `${d.get('folio') ?? ''} — ${d.get('titulo_doc') ?? ''} (${d.get('status') ? 'Activo' : 'Cancelado'})`),
+          ...detalle.digitales.map((d) => `${d.folio} — ${d.titulo_doc ?? ''}`),
+          ...detalle.registrosDocs.map((d) => {
+            const folio = d.get('folio') ? `Folio: ${d.get('folio')}, ` : '';
+            const tipoNombre = (d as any).tipo?.tipo_doc ?? '';
+            const activo = d.get('status') ? 'Activo' : 'Cancelado';
+            return `${folio}Documento: ${d.get('path_doc') ?? ''}, Tipo documento: ${tipoNombre}, Estatus: ${activo}`;
+          }),
         ];
 
     const docDefinition = {

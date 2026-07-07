@@ -50,6 +50,12 @@ export class GuiaController {
     return this.guiaService.getCerrados(rfc ?? '');
   }
 
+  // GET /api/guia/actividad-reciente?rfc=XXXX&limit=5
+  @Get('actividad-reciente')
+  actividadReciente(@Query('rfc') rfc: string, @Query('limit') limit?: string) {
+    return this.guiaService.getActividadReciente(rfc ?? '', limit ? parseInt(limit, 10) : 5);
+  }
+
   // POST /api/guia/expedientes
   @Post('expedientes')
   crearExpediente(
@@ -114,6 +120,13 @@ export class GuiaController {
   @Get('documento-registro/:id')
   async getDocumentoRegistro(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const ruta = await this.guiaService.getRutaDocumentoRegistro(id);
+    res.sendFile(ruta);
+  }
+
+  // GET /api/guia/documento-envio/:id — descarga de documento anidado (documentos_envios)
+  @Get('documento-envio/:id')
+  async getDocumentoEnvio(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const ruta = await this.guiaService.getRutaDocumentoEnvio(id);
     res.sendFile(ruta);
   }
 

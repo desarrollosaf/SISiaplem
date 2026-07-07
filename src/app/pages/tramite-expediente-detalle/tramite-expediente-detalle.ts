@@ -3,13 +3,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, RegistroDoc } from '../../services/guia.service';
+import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico } from '../../services/guia.service';
 import { SearchableSelectComponent, SearchableOption } from '../../components/searchable-select/searchable-select';
-
-interface GrupoDocs {
-  folio: string;
-  items: RegistroDoc[];
-}
 
 @Component({
   selector: 'app-tramite-expediente-detalle',
@@ -34,45 +29,54 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
 
   tab = signal<'digital' | 'fisico'>('digital');
   busca = signal('');
-  expandidos = signal<Set<string>>(new Set());
+  expandidos = signal<Set<number>>(new Set());
 
   totalDigital = computed(() => (this.detalle()?.digitales.length ?? 0) + (this.detalle()?.registrosDocs.length ?? 0));
   totalFisico = computed(() => this.detalle()?.fisicos.length ?? 0);
 
+  // Orden natural/numérico por folio (ej. 48001/2/2026 antes que 48001/13/2026)
+  private compararFolio(a: string | null, b: string | null): number {
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    const partesA = a.match(/\d+|\D+/g) ?? [a];
+    const partesB = b.match(/\d+|\D+/g) ?? [b];
+    const len = Math.max(partesA.length, partesB.length);
+    for (let i = 0; i < len; i++) {
+      const va = partesA[i] ?? '';
+      const vb = partesB[i] ?? '';
+      const na = Number(va);
+      const nb = Number(vb);
+      if (va !== '' && vb !== '' && !isNaN(na) && !isNaN(nb)) {
+        if (na !== nb) return na - nb;
+      } else if (va !== vb) {
+        return va < vb ? -1 : 1;
+      }
+    }
+    return 0;
+  }
+
   fisicosFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.fisicos ?? [];
-    if (!q) return lista;
-    return lista.filter((f) => f.folio?.toLowerCase().includes(q) || f.titulo_doc?.toLowerCase().includes(q));
+    const filtrados = q ? lista.filter((f) => f.folio?.toLowerCase().includes(q) || f.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
+  // Cada Registro digital es su propia carpeta expandible (con sus documentos_envios anidados)
   digitalesFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.digitales ?? [];
-    if (!q) return lista;
-    return lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q));
+    const filtrados = q ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
-  gruposDocs = computed<GrupoDocs[]>(() => {
+  // registro_docs se muestra plano, sin agrupar (igual que el sistema anterior)
+  registrosDocsFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.registrosDocs ?? [];
-    const filtrados = q
-      ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q))
-      : lista;
-
-    const mapa = new Map<string, RegistroDoc[]>();
-    for (const doc of filtrados) {
-      const clave = doc.folio || 'Sin folio';
-      if (!mapa.has(clave)) mapa.set(clave, []);
-      mapa.get(clave)!.push(doc);
-    }
-    const grupos = Array.from(mapa.entries()).map(([folio, items]) => ({ folio, items }));
-    grupos.sort((a, b) => {
-      if (a.folio === 'Sin folio') return 1;
-      if (b.folio === 'Sin folio') return -1;
-      return a.folio.localeCompare(b.folio);
-    });
-    return grupos;
+    const filtrados = q ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
   editNombre = '';
@@ -117,17 +121,17 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     this.busca.set('');
   }
 
-  toggleGrupo(folio: string) {
+  toggleGrupo(registroId: number) {
     this.expandidos.update((set) => {
       const nuevo = new Set(set);
-      if (nuevo.has(folio)) nuevo.delete(folio);
-      else nuevo.add(folio);
+      if (nuevo.has(registroId)) nuevo.delete(registroId);
+      else nuevo.add(registroId);
       return nuevo;
     });
   }
 
-  estaExpandido(folio: string): boolean {
-    return this.expandidos().has(folio);
+  estaExpandido(registroId: number): boolean {
+    return this.expandidos().has(registroId);
   }
 
   iconoArchivo(nombre: string | null): string {
@@ -191,12 +195,12 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     });
   }
 
-  descargarRegistro(id: number) {
-    this.descargarDocumento(this.guia.getDocumentoRegistroUrl(id));
-  }
-
   descargarRegistroDoc(id: number) {
     this.descargarDocumento(this.guia.getDocumentoUrl(id));
+  }
+
+  descargarDocumentoEnvio(id: number) {
+    this.descargarDocumento(this.guia.getDocumentoEnvioUrl(id));
   }
 
   verIndice(tipo: 'fisico' | 'electronico') {

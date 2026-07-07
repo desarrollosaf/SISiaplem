@@ -5,7 +5,7 @@
   </div>
   <div class="archivo-header-body">
     <div class="breadcrumb-mini breadcrumb-mini-light">
-      <a routerLink="/dashboard/tramite/inventario" class="breadcrumb-link-light">
+      <a routerLink="/tramite/inventario" class="breadcrumb-link-light">
         <i class="bi bi-folder2-open me-1"></i>Mi Archivo de Trámite
       </a>
       <i class="bi bi-chevron-right mx-1"></i>
@@ -41,13 +41,13 @@
     <div class="header-right">
       @if (!cargando() && (tipo === 'activos' || tipo === 'cerrados')) {
         <div class="d-flex gap-2">
-          <a routerLink="/dashboard/tramite/expedientes"
+          <a routerLink="/tramite/expedientes"
              class="btn btn-sm"
              [class.btn-primary]="tipo==='activos'"
              [class.btn-outline-primary]="tipo!=='activos'">
             <i class="bi bi-folder-open me-1"></i>Abiertos
           </a>
-          <a routerLink="/dashboard/tramite/expedientes-cerrados"
+          <a routerLink="/tramite/expedientes-cerrados"
              class="btn btn-sm"
              [class.btn-primary]="tipo==='cerrados'"
              [class.btn-outline-secondary]="tipo!=='cerrados'">
@@ -132,7 +132,7 @@
               <td style="text-align:center">
                 <div class="d-flex justify-content-center gap-1">
                   <a
-                    [routerLink]="['/dashboard/tramite/expediente', exp.id]"
+                    [routerLink]="['/tramite/expediente', exp.id]"
                     class="btn-icon btn-icon-view"
                     title="Ver expediente"
                   >

@@ -12,7 +12,7 @@ export const routes: Routes = [
   },
 
   {
-    path: 'dashboard',
+    path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
     children: [
@@ -76,7 +76,6 @@ export const routes: Routes = [
       { path: 'admin/configuracion',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Configuración', 'Administración') },
       { path: 'control/cadido', loadComponent: () => import('./pages/cadido/cadido').then(m => m.Cadido), data: PH('Cadido', 'Administración') },
       { path: 'control/cadido/detalle/:id', loadComponent: () => import('./pages/cadido/detalle/detalle').then(m => m.Detalle)},
-
       /* ── Herramientas ── */
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },

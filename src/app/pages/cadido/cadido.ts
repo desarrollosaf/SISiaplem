@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CadidoSevice, CadidoInt, SubfondoItem } from '../../services/cadido.service';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-cadido',
-  imports: [RouterLink, FormsModule],
+  imports: [FormsModule],
   templateUrl: './cadido.html',
   styleUrl: './cadido.css',
 })
@@ -32,6 +32,6 @@ export class Cadido implements OnInit {
   }
 
   abrirDetalle(item: CadidoInt) {
-      this.router.navigate(['/dashboard/control/cadido/detalle', item.id]);
+      this.router.navigate(['/control/cadido/detalle', item.id]);
     }
 }
