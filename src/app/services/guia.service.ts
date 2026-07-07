@@ -33,7 +33,7 @@ export interface Expediente {
 }
 
 export interface ActividadReciente {
-  id: number;
+  id: string;
   codigo: string;
   nombre_ex: string;
   area: string;
