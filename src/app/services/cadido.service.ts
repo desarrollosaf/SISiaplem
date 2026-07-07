@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-const API = 'http://localhost:3050/api/cadido';
+const API = `${environment.endpoint}api/cadido`;
 
 export interface CadidoInt {
   id: number;
