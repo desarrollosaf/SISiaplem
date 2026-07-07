@@ -50,6 +50,12 @@ export class GuiaController {
     return this.guiaService.getCerrados(rfc ?? '');
   }
 
+  // GET /api/guia/actividad-reciente?rfc=XXXX&limit=5
+  @Get('actividad-reciente')
+  actividadReciente(@Query('rfc') rfc: string, @Query('limit') limit?: string) {
+    return this.guiaService.getActividadReciente(rfc ?? '', limit ? parseInt(limit, 10) : 5);
+  }
+
   // POST /api/guia/expedientes
   @Post('expedientes')
   crearExpediente(

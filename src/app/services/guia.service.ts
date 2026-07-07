@@ -32,6 +32,15 @@ export interface Expediente {
   subserie_nombre?: string;
 }
 
+export interface ActividadReciente {
+  id: number;
+  codigo: string;
+  nombre_ex: string;
+  area: string;
+  estado: string;
+  fecha: string;
+}
+
 export interface TipoTratamiento {
   id: number;
   tipo: string;
@@ -149,6 +158,10 @@ export class GuiaService {
 
   getCerrados(rfc: string) {
     return this.http.get<Expediente[]>(`${API}/cerrados`, { params: { rfc } });
+  }
+
+  getActividadReciente(rfc: string, limit = 5) {
+    return this.http.get<ActividadReciente[]>(`${API}/actividad-reciente`, { params: { rfc, limit } });
   }
 
   crearExpediente(data: CrearExpedienteDto) {
