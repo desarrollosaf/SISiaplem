@@ -59,14 +59,73 @@
           </li>
         </ul>
 
-        <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
-          <i class="bi bi-search nav-icon"></i>
-          <span class="nav-label">Consultas y Préstamos</span>
+        <button class="nav-link-item" (click)="toggleMenu('inventarios')">
+          <i class="bi bi-list-check"></i>
+          <span class="nav-label">Elaboración de inventarios</span>
+          <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('inventarios')"></i>
+        </button>
+        <ul class="nav-submenu" [class.submenu-open]="isOpen('inventarios')">
+          <li>
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de archivo de trámite
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de transferencia
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de baja documental
+            </a>
+          </li>
+        </ul>
+
+         <button class="nav-link-item" (click)="toggleMenu('clasificacion')">
+          <i class="bi bi-diagram-3"></i>
+          <span class="nav-label">Clasificación archivistica</span>
+          <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('clasificacion')"></i>
+        </button>
+        <ul class="nav-submenu" [class.submenu-open]="isOpen('clasificacion')">
+          <li>
+            <a routerLink="/clasificacion" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Consultar series/subseries
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Solicitar adición/cancelación
+            </a>
+          </li>
+        </ul>
+
+         <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+         <i class="bi bi-truck"></i>
+          <span class="nav-label">Solicitud transferencia primaria</span>
         </a>
 
+         <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-headset"></i>
+          <span class="nav-label">Solicitud asesoría técnica</span>
+        </a>
+
+         <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-file-text"></i>
+          <span class="nav-label">Generar guía simple</span>
+        </a>
+
+
+        <div class="nav-section-label">Archivo de Concentración</div>
+        <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-search nav-icon"></i>
+          <span class="nav-label">Solicitar consulta de expedientes</span>
+        </a>
+
+        <div class="nav-section-label">Archivo histórico</div>
         <a routerLink="/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
-          <i class="bi bi-arrow-right-circle nav-icon"></i>
-          <span class="nav-label">Transferencia Primaria</span>
+          <i class="bi bi-search nav-icon"></i>
+          <span class="nav-label">Solicitar consulta de expedientes</span>
         </a>
       }
 
