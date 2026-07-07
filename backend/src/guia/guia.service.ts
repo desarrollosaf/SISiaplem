@@ -190,6 +190,7 @@ export class GuiaService {
     const archivos = [
       ...digitales.map((d) => ({
         id: `reg-${d.id}`,
+        folio: d.folio,
         titulo: d.titulo_doc,
         tipo: 'Digital',
         expediente_id: d.expediente_id,
@@ -197,6 +198,7 @@ export class GuiaService {
       })),
       ...docs.map((d) => ({
         id: `docs-${d.id}`,
+        folio: d.folio,
         titulo: d.titulo_doc ?? d.tipo?.tipo_doc ?? 'Documento',
         tipo: d.tipo?.tipo_doc ?? 'Documento',
         expediente_id: d.expediente_id,
@@ -204,6 +206,7 @@ export class GuiaService {
       })),
       ...fisicos.map((f) => ({
         id: `fis-${f.id}`,
+        folio: f.folio,
         titulo: f.titulo_doc,
         tipo: 'Físico',
         expediente_id: f.expediente_id,
@@ -217,7 +220,7 @@ export class GuiaService {
       const exp = expedienteMap.get(a.expediente_id);
       return {
         id: a.id,
-        codigo: exp ? `EXP-${exp.anio}-${String(exp.id).padStart(4, '0')}` : '—',
+        codigo: a.folio ?? exp?.serie?.codigo ?? exp?.subSerie?.codigo ?? '—',
         nombre_ex: a.titulo,
         area: exp?.serie?.serie ?? exp?.subSerie?.subserie ?? '—',
         estado: a.tipo,
