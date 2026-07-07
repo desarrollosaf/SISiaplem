@@ -243,9 +243,9 @@
           <thead>
             <tr>
               <th>Expediente</th>
-              <th>Descripción</th>
+              <th>Archivo</th>
               <th>Área</th>
-              <th>Estado</th>
+              <th>Tipo</th>
               <th>Fecha</th>
             </tr>
           </thead>
@@ -262,10 +262,9 @@
                 <td>{{ item.area }}</td>
                 <td>
                   <span class="status-badge"
-                    [class.status-active]="item.estado === 'Activo'"
-                    [class.status-pending]="item.estado === 'Préstamo'"
-                    [class.status-transfer]="item.estado === 'Transferido'"
-                    [class.status-closed]="item.estado === 'Cerrado'">
+                    [class.status-active]="item.estado === 'Digital'"
+                    [class.status-transfer]="item.estado === 'Físico'"
+                    [class.status-pending]="item.estado !== 'Digital' && item.estado !== 'Físico'">
                     {{ item.estado }}
                   </span>
                 </td>
