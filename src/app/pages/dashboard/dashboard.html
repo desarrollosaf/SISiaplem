@@ -250,41 +250,28 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0842</span></td>
-              <td>Contratos de Servicios 2026</td>
-              <td>Área Jurídica</td>
-              <td><span class="status-badge status-active">Activo</span></td>
-              <td class="text-muted">26/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0841</span></td>
-              <td>Nómina Quincenal – Junio</td>
-              <td>Recursos Humanos</td>
-              <td><span class="status-badge status-pending">Préstamo</span></td>
-              <td class="text-muted">25/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2025-1204</span></td>
-              <td>Dictámenes Legislativos 2025</td>
-              <td>Coordinación Leg.</td>
-              <td><span class="status-badge status-transfer">Transferido</span></td>
-              <td class="text-muted">24/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2024-0530</span></td>
-              <td>Actas de Sesión Plenaria</td>
-              <td>Secretaría General</td>
-              <td><span class="status-badge status-closed">Cerrado</span></td>
-              <td class="text-muted">23/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0839</span></td>
-              <td>Adquisición de Equipo TI</td>
-              <td>Administración</td>
-              <td><span class="status-badge status-active">Activo</span></td>
-              <td class="text-muted">22/06/2026</td>
-            </tr>
+            @if (actividadReciente().length === 0) {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-3">Sin actividad reciente</td>
+              </tr>
+            }
+            @for (item of actividadReciente(); track item.id) {
+              <tr>
+                <td><span class="fw-semibold" style="color:var(--primary)">{{ item.codigo }}</span></td>
+                <td>{{ item.nombre_ex }}</td>
+                <td>{{ item.area }}</td>
+                <td>
+                  <span class="status-badge"
+                    [class.status-active]="item.estado === 'Activo'"
+                    [class.status-pending]="item.estado === 'Préstamo'"
+                    [class.status-transfer]="item.estado === 'Transferido'"
+                    [class.status-closed]="item.estado === 'Cerrado'">
+                    {{ item.estado }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>

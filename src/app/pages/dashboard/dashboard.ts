@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvisosService, Aviso } from '../../services/avisos.service';
 import { AuthService } from '../../services/auth.service';
+import { GuiaService, ActividadReciente } from '../../services/guia.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,11 +13,13 @@ import { AuthService } from '../../services/auth.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   protected avisosSvc = inject(AvisosService);
   protected auth = inject(AuthService);
+  protected guiaSvc = inject(GuiaService);
 
   currentTime = signal('');
   currentDate = signal('');
   greeting = signal('Buenos días');
   avisosRecientes = signal<Aviso[]>([]);
+  actividadReciente = signal<ActividadReciente[]>([]);
 
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -24,6 +27,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
     this.avisosSvc.getRecientes(4).subscribe({ next: (data) => this.avisosRecientes.set(data) });
+
+    const rfc = this.auth.userRfc();
+    if (rfc) {
+      this.guiaSvc.getActividadReciente(rfc, 5).subscribe({ next: (data) => this.actividadReciente.set(data) });
+    }
   }
 
   ngOnDestroy() {

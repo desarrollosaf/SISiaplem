@@ -139,6 +139,43 @@ export class GuiaService {
     return this.getExpedientesPorEstado(rfc, false);
   }
 
+  // GuiaController.actividadReciente() — últimos expedientes tocados en los departamentos del usuario
+  async getActividadReciente(rfc: string, limit = 5) {
+    const deptIds = await this.getDeptIds(rfc);
+    if (!deptIds.length) return [];
+
+    const serieIds = (await this.serieModel.findAll({
+      where: { departamento_id: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+    const subserieIds = (await this.subSerieModel.findAll({
+      where: { id_Departamento: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+
+    const expedientes = await this.expedienteModel.findAll({
+      where: {
+        [Op.or]: [
+          { id_serie: { [Op.in]: serieIds } },
+          { id_subserie: { [Op.in]: subserieIds } },
+        ],
+        status: true,
+      },
+      include: [{ model: SerieModel }, { model: SubSerieModel }, { model: TipoExpedienteTratamientoModel }],
+      order: [['updated_at', 'DESC']],
+      limit,
+    });
+
+    return expedientes.map((e) => ({
+      id: e.id,
+      codigo: `EXP-${e.anio}-${String(e.id).padStart(4, '0')}`,
+      nombre_ex: e.nombre_ex,
+      area: e.serie?.serie ?? e.subSerie?.subserie ?? '—',
+      estado: e.tipoExpediente?.tipo ?? (e.fecha_cierre_exp ? 'Cerrado' : 'Activo'),
+      fecha: e.get('updated_at'),
+    }));
+  }
+
   // GuiaController.expCerrados()
   async getCerrados(rfc: string) {
     return this.getExpedientesPorEstado(rfc, true);
