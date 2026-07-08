@@ -16,6 +16,7 @@ import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
+import { TransferenciasModule } from './transferencias/transferencias.module';
 
 
 @Module({
@@ -57,6 +58,7 @@ import { AvisosModule } from './avisos/avisos.module';
     ResponsablesModule,
     CadidoModule,
     AvisosModule,
+    TransferenciasModule,
   ],
   controllers: [AppController],
   providers: [AppService],

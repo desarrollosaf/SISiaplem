@@ -446,6 +446,11 @@ body {
 }
 .aviso-pdf-link:hover { text-decoration: underline; }
 
+/* ===== AVISOS COMPACTO (a un lado de Accesos Rápidos) ===== */
+.avisos-widget-compact { min-height: 420px; display: flex; flex-direction: column; }
+.avisos-widget-compact.avisos-fill { height: 100%; }
+.avisos-widget-compact .avisos-widget-body { max-height: 420px; overflow-y: auto; }
+
 /* ===== SIDEBAR COLLAPSED ===== */
 .app-wrapper.sidebar-mini .app-sidebar { width: var(--sidebar-mini); }
 .app-wrapper.sidebar-mini .app-main { margin-left: var(--sidebar-mini); }
