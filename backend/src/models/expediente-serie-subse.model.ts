@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize
 import { SerieModel } from './serie.model';
 import { SubSerieModel } from './sub-serie.model';
 import { TipoExpedienteTratamientoModel } from './tipo-expediente-tratamiento.model';
+import { SolicitudTransferenciaModel } from './solicitud-transferencia.model';
 
 @Table({
   tableName: 'expediente_serie_subses',
@@ -40,6 +41,10 @@ export class ExpedienteSerieSubseModel extends Model {
   @Column({ type: DataType.STRING(20), allowNull: true })
   declare rfc_usuario_expediente: string | null;
 
+  @ForeignKey(() => SolicitudTransferenciaModel)
+  @Column({ type: DataType.BIGINT.UNSIGNED, allowNull: true })
+  declare id_solicitud_transferencia: number | null;
+
   @BelongsTo(() => SerieModel)
   declare serie: SerieModel;
 
@@ -48,4 +53,7 @@ export class ExpedienteSerieSubseModel extends Model {
 
   @BelongsTo(() => TipoExpedienteTratamientoModel)
   declare tipoExpediente: TipoExpedienteTratamientoModel;
+
+  @BelongsTo(() => SolicitudTransferenciaModel)
+  declare solicitudTransferencia: SolicitudTransferenciaModel;
 }

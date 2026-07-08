@@ -1,0 +1,71 @@
+/* ── Encabezado ── */
+.archivo-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, #a8264e 100%);
+  border-radius: 14px;
+  padding: 20px 24px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+.archivo-header-icon {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,.18);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+}
+.archivo-header-body { flex: 1; min-width: 0; }
+.archivo-title { font-size: 1.2rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: -.01em; }
+.archivo-subtitle { font-size: 0.8rem; color: rgba(255,255,255,.8); margin: 3px 0 0; line-height: 1.4; }
+
+/* ── Tabs ── */
+.tt-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tt-tab {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.tt-tab:hover { border-color: var(--primary); color: var(--primary); }
+.tt-tab-active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 3.5rem 1rem; color: #94a3b8; }
+.empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; color: #cbd5e1; }
+.empty-state p { font-size: 0.95rem; margin-bottom: 4px; color: #64748b; }
+
+/* ── Modal confirmar ── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 1060; }
+.confirm-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  z-index: 1070; background: #fff; border-radius: 14px;
+  padding: 32px 28px 24px; width: 400px; max-width: 92vw;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.confirm-icon {
+  width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
+  background: #fef3c7; color: #d97706;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+}
+.confirm-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.confirm-msg { font-size: 0.84rem; color: #64748b; margin-bottom: 20px; line-height: 1.55; }
+.confirm-actions { display: flex; gap: 10px; justify-content: center; }
+
+.btn-cancel {
+  background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  padding: 9px 20px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer;
+}
+.btn-cancel:hover { border-color: #94a3b8; background: #f1f5f9; }
+
+.btn-confirm {
+  background: var(--primary); color: #fff; border: none; border-radius: 8px;
+  padding: 9px 22px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+}
+.btn-confirm:hover { background: var(--primary-dark); }

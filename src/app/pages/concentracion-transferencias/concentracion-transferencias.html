@@ -1,0 +1,567 @@
+<!-- ===== ENCABEZADO ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi" [class.bi-inbox-fill]="soloExpedientes" [class.bi-send-fill]="!soloExpedientes"></i>
+  </div>
+  <div class="archivo-header-body">
+    @if (soloExpedientes) {
+      <h4 class="archivo-title">Expedientes Recibidos</h4>
+      <p class="archivo-subtitle">Expedientes de archivo de trámite concluidos ya transferidos a Concentración.</p>
+    } @else {
+      <h4 class="archivo-title">Transferencia Primaria</h4>
+      <p class="archivo-subtitle">Recibe las solicitudes de transferencia autorizadas por Archivo de Trámite.</p>
+    }
+  </div>
+</div>
+
+@if (soloExpedientes) {
+  <!-- ===== EXPEDIENTES RECIBIDOS (lista plana) ===== -->
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-folder2-open me-2" style="color:var(--primary)"></i>
+        @if (cargando()) { Cargando… } @else { {{ expedientesRecibidos().length }} expediente(s) recibido(s) }
+      </span>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (!cargando() && expedientesRecibidos().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Aún no se ha recibido ningún expediente por transferencia primaria.</p>
+        </div>
+      } @else if (!cargando()) {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Expediente</th>
+              <th>Clasificación (Subfondo › Sección › Serie › Subserie)</th>
+              <th>Año</th>
+              <th>Fecha de recepción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of expedientesRecibidos(); track e.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">{{ e.nombre_ex }}</td>
+                <td style="font-size:0.8rem">{{ e.clasificacion }}</td>
+                <td class="text-muted">{{ e.anio }}</td>
+                <td class="text-muted">{{ e.fecha_recepcion | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+} @else {
+  <!-- ===== TABS ===== -->
+  <div class="tt-tabs mb-3">
+    <button class="tt-tab" [class.tt-tab-active]="tab() === 'revisar'" (click)="cambiarTab('revisar')">
+      <i class="bi bi-clipboard-check me-1"></i>Por Revisar
+      @if (pendientes().length > 0) { <span class="status-badge status-pending ms-1">{{ pendientes().length }}</span> }
+    </button>
+    <button class="tt-tab" [class.tt-tab-active]="tab() === 'recibir'" (click)="cambiarTab('recibir')">
+      <i class="bi bi-inbox-fill me-1"></i>Por Recibir
+      @if (autorizadas().length > 0) { <span class="status-badge status-transfer ms-1">{{ autorizadas().length }}</span> }
+    </button>
+    <button class="tt-tab" [class.tt-tab-active]="tab() === 'recibidas'" (click)="cambiarTab('recibidas')">
+      <i class="bi bi-check2-circle me-1"></i>Recibidas
+    </button>
+    <button class="tt-tab" [class.tt-tab-active]="tab() === 'rechazadas'" (click)="cambiarTab('rechazadas')">
+      <i class="bi bi-x-circle me-1"></i>Rechazadas
+    </button>
+  </div>
+
+  @if (tab() === 'revisar') {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-clipboard-check me-2" style="color:var(--primary)"></i>
+          @if (cargando()) { Cargando… } @else { {{ pendientes().length }} solicitud(es) pendiente(s) }
+        </span>
+      </div>
+      <div class="content-card-body" style="overflow-x:auto">
+        @if (!cargando() && pendientes().length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-check2-circle"></i>
+            <p>No hay solicitudes pendientes de revisión.</p>
+          </div>
+        } @else if (!cargando()) {
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Solicitud</th>
+                <th>Solicitó</th>
+                <th>Fecha</th>
+                <th style="text-align:center">Ver</th>
+                <th style="text-align:center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of pendientes(); track s.id) {
+                <tr>
+                  <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                  <td>{{ s.nombre_solicita }}</td>
+                  <td class="text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
+                  <td style="text-align:center">
+                    <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                      <i class="bi bi-eye-fill"></i>Ver
+                    </button>
+                  </td>
+                  <td style="text-align:center">
+                    <div class="d-flex justify-content-center gap-2">
+                      <button class="btn btn-sm btn-outline-success" (click)="pedirConfirmarAutorizar(s.id)">
+                        <i class="bi bi-check-lg me-1"></i>Autorizar
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="abrirRechazo(s.id)">
+                        <i class="bi bi-x-lg me-1"></i>Rechazar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'recibir') {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-inbox-fill me-2" style="color:var(--primary)"></i>
+          @if (cargando()) { Cargando… } @else { {{ autorizadas().length }} solicitud(es) autorizada(s), por recibir }
+        </span>
+      </div>
+      <div class="content-card-body" style="overflow-x:auto">
+        @if (!cargando() && autorizadas().length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-check2-circle"></i>
+            <p>No hay solicitudes autorizadas pendientes de recepción.</p>
+          </div>
+        } @else if (!cargando()) {
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Solicitud</th>
+                <th>Solicitó</th>
+                <th>Autorizó</th>
+                <th>Fecha de autorización</th>
+                <th style="text-align:center">Ver</th>
+                <th style="text-align:center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of autorizadas(); track s.id) {
+                <tr>
+                  <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                  <td>{{ s.nombre_solicita }}</td>
+                  <td>{{ s.nombre_revisa }}</td>
+                  <td class="text-muted">{{ s.fecha_revision | date:'dd/MM/yyyy' }}</td>
+                  <td style="text-align:center">
+                    <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                      <i class="bi bi-eye-fill"></i>Ver
+                    </button>
+                  </td>
+                  <td style="text-align:center">
+                    <button class="btn btn-sm btn-primary" [disabled]="recibiendoId() === s.id" (click)="pedirConfirmarRecibir(s.id)">
+                      @if (recibiendoId() === s.id) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                      <i class="bi bi-box-arrow-in-down me-1"></i>Recibir
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'recibidas') {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-check2-circle me-2" style="color:var(--primary)"></i>{{ recibidas().length }} solicitud(es) recibida(s)
+        </span>
+      </div>
+      <div class="content-card-body" style="overflow-x:auto">
+        @if (recibidas().length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Aún no se ha recibido ninguna transferencia.</p>
+          </div>
+        } @else {
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Solicitud</th>
+                <th>Recibió</th>
+                <th>Fecha de recepción</th>
+                <th style="text-align:center">Ver</th>
+                <th style="text-align:center">Acta</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of recibidas(); track s.id) {
+                <tr>
+                  <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                  <td>{{ s.nombre_recibe }}</td>
+                  <td class="text-muted">{{ s.fecha_recepcion | date:'dd/MM/yyyy' }}</td>
+                  <td style="text-align:center">
+                    <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                      <i class="bi bi-eye-fill"></i>Ver
+                    </button>
+                  </td>
+                  <td style="text-align:center">
+                    <a [href]="actaUrl(s.id)" target="_blank" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-file-earmark-pdf me-1"></i>Ver acta
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'rechazadas') {
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-x-circle me-2" style="color:#dc3545"></i>{{ rechazadas().length }} solicitud(es) rechazada(s)
+        </span>
+      </div>
+      <div class="content-card-body" style="overflow-x:auto">
+        @if (rechazadas().length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-check2-circle"></i>
+            <p>No hay solicitudes rechazadas.</p>
+          </div>
+        } @else {
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Solicitud</th>
+                <th>Solicitó</th>
+                <th>Rechazó</th>
+                <th>Motivo</th>
+                <th>Fecha</th>
+                <th style="text-align:center">Ver</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of rechazadas(); track s.id) {
+                <tr>
+                  <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                  <td>{{ s.nombre_solicita }}</td>
+                  <td>{{ s.nombre_revisa }}</td>
+                  <td class="text-muted">{{ s.motivo_rechazo ?? '—' }}</td>
+                  <td class="text-muted">{{ s.fecha_revision | date:'dd/MM/yyyy' }}</td>
+                  <td style="text-align:center">
+                    <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                      <i class="bi bi-eye-fill"></i>Ver
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+}
+
+<!-- ===== MODAL RECHAZO ===== -->
+@if (rechazoId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarRechazo()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-x-circle"></i></div>
+    <h6 class="confirm-title">Rechazar solicitud #{{ rechazoId() }}</h6>
+    <p class="confirm-msg">Los expedientes de esta solicitud volverán a estar disponibles para una nueva solicitud.</p>
+    <textarea class="field-input" rows="3" placeholder="Motivo de improcedencia (opcional)" [(ngModel)]="motivoRechazo" style="width:100%; margin-bottom:1rem"></textarea>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarRechazo()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarRechazo()"><i class="bi bi-x-lg me-1"></i>Confirmar rechazo</button>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL CONFIRMAR AUTORIZAR ===== -->
+@if (autorizarId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarAutorizar()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon" style="background:#dcfce7; color:#16a34a"><i class="bi bi-check-circle"></i></div>
+    <h6 class="confirm-title">¿Autorizar solicitud #{{ autorizarId() }}?</h6>
+    <p class="confirm-msg">Se marcará como procedente y quedará lista para que Concentración la reciba.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarAutorizar()">Cancelar</button>
+      <button class="btn-confirm" (click)="confirmarAutorizar()"><i class="bi bi-check-lg me-1"></i>Sí, autorizar</button>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL CONFIRMAR RECIBIR ===== -->
+@if (confirmRecibirId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarRecibir()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon" style="background:#dbeafe; color:#0d6efd"><i class="bi bi-box-arrow-in-down"></i></div>
+    <h6 class="confirm-title">¿Recibir solicitud #{{ confirmRecibirId() }}?</h6>
+    <p class="confirm-msg">Se generará el Acta de transferencia primaria y los expedientes quedarán en Archivo de Concentración.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" [disabled]="recibiendoId() !== null" (click)="cancelarRecibir()">Cancelar</button>
+      <button class="btn-confirm" [disabled]="recibiendoId() !== null" (click)="confirmarRecibir()">
+        @if (recibiendoId() !== null) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        <i class="bi bi-check-lg me-1"></i>Sí, recibir
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL DETALLE DE SOLICITUD ===== -->
+@if (detalleId() !== null) {
+  <div class="modal-backdrop" (click)="cerrarDetalle()"></div>
+  <div class="detalle-modal">
+    <div class="detalle-modal-header">
+      <h6 class="detalle-modal-title">Solicitud #{{ detalleId() }}</h6>
+      <button class="detalle-modal-close" (click)="cerrarDetalle()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="detalle-modal-body">
+      @if (cargandoDetalle()) {
+        <div class="empty-state"><i class="bi bi-hourglass-split"></i><p>Cargando…</p></div>
+      } @else if (detalle(); as d) {
+        <div class="detalle-info-grid">
+          <div>
+            <span class="detalle-info-label">Estado</span>
+            <span class="status-badge" [class]="estadoClase(d.estado)">{{ estadoLabel(d.estado) }}</span>
+          </div>
+          <div>
+            <span class="detalle-info-label">Solicitó</span>
+            <span>{{ d.nombre_solicita }}</span>
+          </div>
+          @if (d.nombre_revisa) {
+            <div>
+              <span class="detalle-info-label">{{ d.autorizada ? 'Autorizó' : 'Rechazó' }}</span>
+              <span>{{ d.nombre_revisa }} — {{ d.fecha_revision | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+          @if (d.motivo_rechazo) {
+            <div>
+              <span class="detalle-info-label">Motivo</span>
+              <span>{{ d.motivo_rechazo }}</span>
+            </div>
+          }
+          @if (d.nombre_recibe) {
+            <div>
+              <span class="detalle-info-label">Recibió</span>
+              <span>{{ d.nombre_recibe }} — {{ d.fecha_recepcion | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+        </div>
+
+        <p class="detalle-expedientes-titulo">{{ d.expedientes.length }} expediente(s) en esta solicitud</p>
+
+        @if (documentoError()) {
+          <div class="alert alert-warning d-flex align-items-center gap-2 mb-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>{{ documentoError() }}</span>
+          </div>
+        }
+
+        <!-- Acordeón de expedientes: cada uno se ve idéntico a tramite/expediente/:id, solo lectura -->
+        <div class="exp-acordeon">
+          @for (e of d.expedientes; track e.id) {
+            <div class="exp-acordeon-item">
+              <button class="exp-acordeon-header" (click)="toggleExpediente(e.id)">
+                <i class="bi" [class.bi-chevron-right]="expedienteAbierto() !== e.id" [class.bi-chevron-down]="expedienteAbierto() === e.id"></i>
+                <i class="bi bi-folder2-open exp-acordeon-icon"></i>
+                <div class="exp-acordeon-info">
+                  <span class="exp-acordeon-nombre">{{ e.nombre_ex }}</span>
+                  <span class="exp-acordeon-clasif">{{ e.clasificacion }}</span>
+                </div>
+                <span class="ws-folio">{{ e.anio }}</span>
+              </button>
+
+              @if (expedienteAbierto() === e.id) {
+                <div class="exp-acordeon-body">
+                  @if (cargandoExpediente() === e.id) {
+                    <div class="ws-empty"><i class="bi bi-hourglass-split"></i><p>Cargando documentos…</p></div>
+                  } @else if (expedienteDetalles()[e.id]; as det) {
+                    <div class="ws-shell ws-shell-lite">
+                      <!-- ── Meta / resumen ── -->
+                      <aside class="ws-side">
+                        <div class="ws-side-top">
+                          <div class="ws-side-icon"><i class="bi bi-folder2-open"></i></div>
+                          @if (!det.expediente.fecha_cierre_exp) {
+                            <span class="ws-pill ws-pill-open"><i class="bi bi-unlock-fill"></i>Abierto</span>
+                          } @else {
+                            <span class="ws-pill ws-pill-closed"><i class="bi bi-lock-fill"></i>Cerrado</span>
+                          }
+                        </div>
+                        <h4 class="ws-title">{{ det.expediente.nombre_ex }}</h4>
+                        <div class="ws-code">{{ det.expediente.serie_codigo || det.expediente.subserie_codigo }}</div>
+
+                        <div class="ws-meta">
+                          <div class="ws-meta-row">
+                            <span class="ws-meta-lbl"><i class="bi bi-diagram-3 me-1"></i>Serie / Subserie</span>
+                            <span class="ws-meta-val">
+                              @if (det.expediente.serie_codigo) { {{ det.expediente.serie_nombre }} }
+                              @else if (det.expediente.subserie_codigo) { {{ det.expediente.subserie_nombre }} }
+                              @else { — }
+                            </span>
+                          </div>
+                          <div class="ws-meta-row">
+                            <span class="ws-meta-lbl"><i class="bi bi-calendar3 me-1"></i>Año</span>
+                            <span class="ws-meta-val">{{ det.expediente.anio }}</span>
+                          </div>
+                          <div class="ws-meta-row">
+                            <span class="ws-meta-lbl"><i class="bi bi-tags me-1"></i>Tipo</span>
+                            <span class="ws-meta-val">{{ det.tipoExpediente?.tipo || 'Sin especificar' }}</span>
+                          </div>
+                          <div class="ws-meta-row">
+                            <span class="ws-meta-lbl"><i class="bi bi-person-badge me-1"></i>Responsable</span>
+                            <span class="ws-meta-val">{{ det.responsable?.Nombre || 'Sin asignación directa' }}</span>
+                          </div>
+                          @if (det.expediente.fecha_cierre_exp) {
+                            <div class="ws-meta-row">
+                              <span class="ws-meta-lbl"><i class="bi bi-lock me-1"></i>Cierre</span>
+                              <span class="ws-meta-val">{{ det.expediente.fecha_cierre_exp }}</span>
+                            </div>
+                          }
+                        </div>
+
+                        <div class="ws-stats">
+                          <div class="ws-stat">
+                            <strong>{{ det.fisicos.length }}</strong>
+                            <span>Físicos</span>
+                          </div>
+                          <div class="ws-stat">
+                            <strong>{{ det.digitales.length + det.registrosDocs.length }}</strong>
+                            <span>Digitales</span>
+                          </div>
+                        </div>
+
+                        <div class="ws-actions">
+                          <button class="ws-btn ws-btn-ghost" (click)="verIndice(e.id, 'fisico')">
+                            <i class="bi bi-file-earmark-pdf icon-pdf"></i>Índice físico
+                          </button>
+                          <button class="ws-btn ws-btn-ghost" (click)="verIndice(e.id, 'electronico')">
+                            <i class="bi bi-file-earmark-pdf icon-pdf"></i>Índice electrónico
+                          </button>
+                        </div>
+                      </aside>
+
+                      <!-- ── Explorador de documentos ── -->
+                      <section class="ws-main">
+                        <div class="ws-tabs">
+                          <button class="ws-tab" [class.ws-tab-active]="tabDeExpediente(e.id) === 'digital'" (click)="cambiarTabExpediente(e.id, 'digital')">
+                            <i class="bi bi-file-earmark-text me-1"></i>Digital
+                            <span class="ws-tab-count">{{ det.digitales.length + det.registrosDocs.length }}</span>
+                          </button>
+                          <button class="ws-tab" [class.ws-tab-active]="tabDeExpediente(e.id) === 'fisico'" (click)="cambiarTabExpediente(e.id, 'fisico')">
+                            <i class="bi bi-archive me-1"></i>Físico
+                            <span class="ws-tab-count">{{ det.fisicos.length }}</span>
+                          </button>
+                        </div>
+
+                        <div class="ws-filelist">
+                          @if (tabDeExpediente(e.id) === 'digital') {
+                            @if (det.digitales.length === 0 && det.registrosDocs.length === 0) {
+                              <div class="ws-empty">
+                                <i class="bi bi-inboxes"></i>
+                                <p>Sin documentos digitales registrados.</p>
+                              </div>
+                            } @else {
+                              @for (reg of det.digitales; track reg.id) {
+                                <div class="ws-group">
+                                  <div class="ws-group-header" style="cursor:default">
+                                    <i class="bi bi-folder-fill ws-group-icon"></i>
+                                    <span class="ws-group-folio">Folio: {{ reg.folio }}</span>
+                                    <span class="ws-group-count">{{ reg.docs.length }}</span>
+                                  </div>
+                                  <div class="ws-group-body">
+                                    @for (doc of reg.docs; track doc.id) {
+                                      <div class="ws-file-row ws-file-row-nested">
+                                        <i class="bi ws-file-icon" [ngClass]="iconoArchivo(doc.path)"></i>
+                                        <div class="ws-file-info">
+                                          <span class="ws-file-name">{{ doc.path }}</span>
+                                          <span class="ws-file-meta">
+                                            @if (doc.tipo) { <span class="ws-chip ws-chip-reg">{{ doc.tipo.tipo_doc }}</span> }
+                                            @if (doc.status_doc) {
+                                              <span class="ws-chip ws-chip-active">Activo</span>
+                                            } @else {
+                                              <span class="ws-chip ws-chip-inactive">Cancelado</span>
+                                            }
+                                          </span>
+                                        </div>
+                                        <button class="ws-download" title="Descargar" (click)="descargarDocumentoEnvio(doc.id)">
+                                          <i class="bi bi-download"></i>
+                                        </button>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              @if (det.digitales.length > 0 && det.registrosDocs.length > 0) {
+                                <div class="ws-section-divider"><span>Documentos</span></div>
+                              }
+                              @for (rd of det.registrosDocs; track rd.id) {
+                                <div class="ws-file-row">
+                                  <i class="bi ws-file-icon" [ngClass]="iconoArchivo(rd.path_doc)"></i>
+                                  <div class="ws-file-info">
+                                    <span class="ws-file-name">{{ rd.path_doc }}</span>
+                                    <span class="ws-file-meta">
+                                      @if (rd.tipo) { <span class="ws-chip ws-chip-reg">{{ rd.tipo.tipo_doc }}</span> }
+                                      @if (rd.folio) { <span class="ws-folio">Folio: {{ rd.folio }}</span> }
+                                      @if (rd.status) {
+                                        <span class="ws-chip ws-chip-active">Activo</span>
+                                      } @else {
+                                        <span class="ws-chip ws-chip-inactive">Cancelado</span>
+                                      }
+                                    </span>
+                                  </div>
+                                  <button class="ws-download" title="Descargar" (click)="descargarRegistroDoc(rd.id)">
+                                    <i class="bi bi-download"></i>
+                                  </button>
+                                </div>
+                              }
+                            }
+                          } @else {
+                            @if (det.fisicos.length === 0) {
+                              <div class="ws-empty">
+                                <i class="bi bi-archive"></i>
+                                <p>Sin documentos físicos registrados.</p>
+                              </div>
+                            } @else {
+                              @for (f of det.fisicos; track f.id) {
+                                <div class="ws-file-row">
+                                  <i class="bi bi-file-earmark-richtext-fill ws-file-icon icon-default"></i>
+                                  <div class="ws-file-info">
+                                    <span class="ws-file-name">{{ f.titulo_doc }}</span>
+                                    <span class="ws-file-meta">
+                                      <span class="ws-chip ws-chip-reg">Físico</span>
+                                      @if (f.folio) { <span class="ws-folio">{{ f.folio }}</span> }
+                                    </span>
+                                  </div>
+                                </div>
+                              }
+                            }
+                          }
+                        </div>
+                      </section>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
