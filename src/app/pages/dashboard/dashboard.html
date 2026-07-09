@@ -309,7 +309,10 @@
   <div class="avisos-widget avisos-widget-compact mb-3" [class.avisos-fill]="!mostrarActividad()">
     <div class="avisos-widget-header">
       <div class="d-flex align-items-center gap-2">
-        <div class="avisos-widget-icon"><i class="bi bi-megaphone-fill"></i></div>
+        <div class="avisos-widget-icon" [class.tiene-avisos]="avisosRecientes().length > 0">
+          <i class="bi bi-megaphone-fill"></i>
+          @if (avisosRecientes().length > 0) { <span class="avisos-dot"></span> }
+        </div>
         <div>
           <div class="avisos-widget-title">Avisos Recientes</div>
           <div class="avisos-widget-sub">Comunicados y noticias</div>
@@ -329,7 +332,7 @@
         </div>
       }
       @for (a of avisosRecientes(); track a.id) {
-        <div class="aviso-card">
+        <div class="aviso-card" [class.aviso-card-urgente]="a.tipo === 'urgente'">
           <div class="aviso-card-stripe"
             [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
           </div>
