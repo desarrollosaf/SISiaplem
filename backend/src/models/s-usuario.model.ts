@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { TDepartamento } from './t-departamento.model';
 
 @Table({ tableName: 's_usuario', paranoid: false, timestamps: false })
 export class SUsuario extends Model {
@@ -14,6 +15,7 @@ export class SUsuario extends Model {
   @Column({ type: DataType.INTEGER, allowNull: true, field: 'id_Direccion' })
   declare id_Direccion: number;
 
+  @ForeignKey(() => TDepartamento)
   @Column({ type: DataType.INTEGER, allowNull: true, field: 'id_Departamento' })
   declare id_Departamento: number;
 
@@ -43,4 +45,7 @@ export class SUsuario extends Model {
 
   @Column({ type: DataType.STRING(18), allowNull: true, field: 'curp' })
   declare curp: string;
+
+  @BelongsTo(() => TDepartamento)
+  declare departamentoM: TDepartamento;
 }

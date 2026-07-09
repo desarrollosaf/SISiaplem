@@ -22,11 +22,12 @@ export interface solicitud{
     tipo: number,
     codigo: string, 
     adicion:string,
-    serie: serieI, 
-    subserie: subseriesI, 
+    serieM: serieI, 
+    subserieM: subseriesI, 
     motivo: string, 
     created_at: Date, 
     statusSolicitud: estatusI,
+    motivo_rechazo: string
 }
 
 export interface tipoTramiteI{
@@ -51,6 +52,7 @@ export interface seccionI{
 }
 
 export interface FormSolicitud {
+    id: number,
     tipo: number | null, 
     id_departamento: number | null, 
     tipoMov: number | null,
@@ -60,6 +62,21 @@ export interface FormSolicitud {
     motivo: string | null,
     id_serie: number | null,
     id_subserie: number | null
+}
+
+export interface formSolicitudD{
+    id: number, 
+    unidad: string, 
+    solicitante: string, 
+    tipo: string, 
+    clasificacion: string, 
+    seccion: string | null,
+    cancelar: string | null, 
+    codigo: string | null, 
+    adicion: string | null, 
+    motivo: string,
+    status: number,
+    motivo_rechazo: string | null
 }
 
 export interface solicitudesI {
@@ -78,7 +95,39 @@ export interface solicitudesI {
     subserieM: subseriesI,
     statusSolicitud: estatusI,
     created_at: Date
+}
 
+export interface solicitudesAd {
+    id: number , 
+    solicitante: string, 
+    seccion: seccionI,
+    unidad: string, 
+    movimiento: tipoTramiteI,
+    tipoTramite: tipoTramiteMovI,
+    motivo: string, 
+    codigo: string, 
+    adicion: string, 
+    serieM: serieI, 
+    subserieM: subseriesI,
+    statusSolicitud: estatusI,
+    motivo_rechazo: string,
+    created_at: Date
+}
+
+export interface respuetaI{
+    solicitud: solicitudesAd,
+    solicitante: responsableI
+}
+
+export interface responsableI{
+    rfc: string,
+    Nombre: string, 
+    departamentoM: departamentoI,
+}
+
+export interface departamentoI{
+    id_Departamento: number, 
+    nombre_completo: string
 }
 
 @Injectable({ providedIn: 'root' })
@@ -123,5 +172,17 @@ export class ClasificacionService {
 
     getSolicitudesAdmin(){
         return this.http.get<solicitudesI[]>(`${API}/getSolicitudesAdmin`);
+    }
+
+    getsolicitud(id: number){
+        return this.http.get<respuetaI>(`${API}/getSolicitud/${id}`);
+    }
+
+    getstatus(){
+        return this.http.get<[]>(`${API}/getstatus`);
+    }
+
+    editSolicitud(dto: formSolicitudD){
+        return this.http.post<formSolicitudD>(`${API}/editSolicitud`, dto);
     }
 }
