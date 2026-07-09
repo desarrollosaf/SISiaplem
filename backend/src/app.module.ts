@@ -17,6 +17,7 @@ import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
 import { ClasificacionModule } from './clasificacion/clasificacion.module';
+import { TransferenciasModule } from './transferencias/transferencias.module';
 
 
 @Module({
@@ -60,7 +61,7 @@ import { ClasificacionModule } from './clasificacion/clasificacion.module';
     CadidoModule,
     AvisosModule,
     ClasificacionModule,
-  
+    TransferenciasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
