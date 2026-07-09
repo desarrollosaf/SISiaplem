@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from '
 import { SerieModel } from './serie.model';
 import { ValorDocumentalSerieSubserieModel } from './valor_documental_serie_subserie.model';
 import { DestinoFinalModel } from './destino_final.model';
+import { SubsubSerieModel } from './subsub-serie.model';
 
 @Table({ tableName: 'sub_series', timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' })
 export class SubSerieModel extends Model {
@@ -42,6 +43,9 @@ export class SubSerieModel extends Model {
 
   @HasMany(() => ValorDocumentalSerieSubserieModel, { foreignKey: 'id_subserie' })
   declare valores: ValorDocumentalSerieSubserieModel[];
+
+  @HasMany(() => SubsubSerieModel, { foreignKey: 'idSubserie' })
+  declare subsubSeries: SubsubSerieModel[];
 
   @BelongsTo(() => DestinoFinalModel)
     declare destino: DestinoFinalModel;
