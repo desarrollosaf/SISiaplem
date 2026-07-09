@@ -139,6 +139,96 @@ export class GuiaService {
     return this.getExpedientesPorEstado(rfc, false);
   }
 
+  // GuiaController.actividadReciente() — últimos archivos (documentos) registrados en expedientes del usuario
+  async getActividadReciente(rfc: string, limit = 5) {
+    const deptIds = await this.getDeptIds(rfc);
+    if (!deptIds.length) return [];
+
+    const serieIds = (await this.serieModel.findAll({
+      where: { departamento_id: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+    const subserieIds = (await this.subSerieModel.findAll({
+      where: { id_Departamento: { [Op.in]: deptIds } },
+      attributes: ['id'],
+    })).map((s) => s.id);
+
+    const expedientes = await this.expedienteModel.findAll({
+      where: {
+        [Op.or]: [
+          { id_serie: { [Op.in]: serieIds } },
+          { id_subserie: { [Op.in]: subserieIds } },
+        ],
+        status: true,
+      },
+      include: [{ model: SerieModel }, { model: SubSerieModel }],
+    });
+    if (!expedientes.length) return [];
+
+    const expedienteMap = new Map(expedientes.map((e) => [e.id, e]));
+    const expedienteIds = expedientes.map((e) => e.id);
+
+    const [digitales, docs, fisicos] = await Promise.all([
+      this.registroModel.findAll({
+        where: { expediente_id: { [Op.in]: expedienteIds }, status: true },
+        order: [['created_at', 'DESC']],
+        limit,
+      }),
+      this.registroDocsModel.findAll({
+        where: { expediente_id: { [Op.in]: expedienteIds }, status: true },
+        include: [{ model: TipoDocModel }],
+        order: [['created_at', 'DESC']],
+        limit,
+      }),
+      this.registroFisicoModel.findAll({
+        where: { expediente_id: { [Op.in]: expedienteIds }, status: true },
+        order: [['created_at', 'DESC']],
+        limit,
+      }),
+    ]);
+
+    const archivos = [
+      ...digitales.map((d) => ({
+        id: `reg-${d.id}`,
+        folio: d.folio,
+        titulo: d.titulo_doc,
+        tipo: 'Digital',
+        expediente_id: d.expediente_id,
+        fecha: d.get('created_at') as Date,
+      })),
+      ...docs.map((d) => ({
+        id: `docs-${d.id}`,
+        folio: d.folio,
+        titulo: d.titulo_doc ?? d.tipo?.tipo_doc ?? 'Documento',
+        tipo: d.tipo?.tipo_doc ?? 'Documento',
+        expediente_id: d.expediente_id,
+        fecha: d.get('created_at') as Date,
+      })),
+      ...fisicos.map((f) => ({
+        id: `fis-${f.id}`,
+        folio: f.folio,
+        titulo: f.titulo_doc,
+        tipo: 'Físico',
+        expediente_id: f.expediente_id,
+        fecha: f.get('created_at') as Date,
+      })),
+    ];
+
+    archivos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+    return archivos.slice(0, limit).map((a) => {
+      const exp = expedienteMap.get(a.expediente_id);
+      return {
+        id: a.id,
+        codigo: a.folio ?? exp?.serie?.codigo ?? exp?.subSerie?.codigo ?? '—',
+        nombre_ex: a.titulo,
+        area: exp?.serie?.serie ?? exp?.subSerie?.subserie ?? '—',
+        estado: a.tipo,
+        fecha: a.fecha,
+      };
+    });
+  }
+
   // GuiaController.expCerrados()
   async getCerrados(rfc: string) {
     return this.getExpedientesPorEstado(rfc, true);
