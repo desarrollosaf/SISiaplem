@@ -17,6 +17,7 @@ import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
 import { ClasificacionModule } from './clasificacion/clasificacion.module';
+import { TransferenciasModule } from './transferencias/transferencias.module';
 
 
 @Module({
@@ -43,8 +44,8 @@ import { ClasificacionModule } from './clasificacion/clasificacion.module';
       host: 'host.docker.internal',
       port: 3306,
       username: 'root',
-      password: '',
-      database: 'adminplem_saf',
+      password: 'root',
+      database: 'saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,
@@ -59,7 +60,7 @@ import { ClasificacionModule } from './clasificacion/clasificacion.module';
     CadidoModule,
     AvisosModule,
     ClasificacionModule,
-  
+    TransferenciasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
