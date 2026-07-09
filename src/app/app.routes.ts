@@ -49,14 +49,25 @@ export const routes: Routes = [
       },
       { path: 'tramite/nuevo-expediente', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Nuevo Expediente', 'Archivo de Trámite') },
       { path: 'tramite/prestamos',        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Consultas y Préstamos', 'Archivo de Trámite') },
-      { path: 'tramite/transferencias',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia Primaria', 'Archivo de Trámite') },
+      {
+        path: 'tramite/transferencias',
+        loadComponent: () => import('./pages/tramite-transferencias/tramite-transferencias').then(m => m.TramiteTransferenciasComponent)
+      },
       { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/tramite-expediente-detalle/tramite-expediente-detalle').then(m => m.TramiteExpedienteDetalleComponent) },
 
       /* ── Archivo de Concentración ── */
-      { path: 'concentracion/expedientes',   loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Expedientes Recibidos', 'Archivo de Concentración') },
+      {
+        path: 'concentracion/expedientes',
+        loadComponent: () => import('./pages/concentracion-transferencias/concentracion-transferencias').then(m => m.ConcentracionTransferenciasComponent),
+        data: { vista: 'expedientes' }
+      },
       { path: 'concentracion/prestamos',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Préstamos', 'Archivo de Concentración') },
       { path: 'concentracion/baja',          loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Baja Documental', 'Archivo de Concentración') },
-      { path: 'concentracion/transferencias',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Transferencia al Histórico', 'Archivo de Concentración') },
+      {
+        path: 'concentracion/transferencias',
+        loadComponent: () => import('./pages/concentracion-transferencias/concentracion-transferencias').then(m => m.ConcentracionTransferenciasComponent),
+        data: { vista: 'todas' }
+      },
 
       /* ── Archivo Histórico ── */
       { path: 'historico/fondos',         loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Fondo Documental', 'Archivo Histórico') },
@@ -78,8 +89,10 @@ export const routes: Routes = [
       { path: 'control/cadido/detalle/:id', loadComponent: () => import('./pages/cadido/detalle/detalle').then(m => m.Detalle)},
 
       //clasificacion archivistica 
-      { path: 'clasificacion', loadComponent: () => import('./pages/clasificacion/clasificacion').then(m => m.Clasificacion)},
- 
+      { path: 'clasificacion/consulta', loadComponent: () => import('./pages/clasificacion/clasificacion').then(m => m.Clasificacion)},
+      { path: 'clasificacion/solicitud', loadComponent: () => import('./pages/clasificacion/solicitud/solicitud').then(m => m.Solicitud)},
+      { path: 'admin/responsables/solicitudes', loadComponent: () => import('./pages/solicitudes/solicitudes').then(m => m.Solicitudes)},
+  
       /* ── Herramientas ── */
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },

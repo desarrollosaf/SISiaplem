@@ -1,0 +1,98 @@
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-folder2-open "></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Solicitudes adición / cancelación.</h4>
+    <p class="archivo-subtitle">
+        Lista de solicitudes para la adición o cancelación de clasificación (serie / subserie / subsubserie).
+    </p>
+  </div>
+</div>
+
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+<!-- ===== TABLA DE SERIES ===== -->
+@else {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Solicitudes
+      </span>
+      <span class="badge-count">{{ solicitudes().length }} Solicitud(es)</span>
+    </div>
+
+    @if (solicitudes().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-folder2"></i>
+        <p>No tienes solicitudes registradas. </p>
+        <small>Contacta al administrador.</small>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:20%" class="text-center">Tipo solicitud</th>
+              <th>Serie / Subserie</th>
+              <th>Motivo</th>
+              <th>Fecha de solicitud</th>
+              <th>Estatus</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of solicitudes(); track item.id) {
+              <!-- Fila de SERIE -->
+              <tr class="row-serie">
+                <td>
+                    @if (item.tipoMov == 1) {
+                        <span class="codigo-badge"> Serie </span>
+                    }
+                    @if (item.tipoMov == 2) {
+                        <span class="subserie-badge"> Sub </span>
+                    }
+                   {{ item.tipoTramite.tipo }}
+                </td>
+                <td class="serie-nombre">
+                    @if (item.tipo == 1 ) {
+                        {{item.codigo}} {{item.adicion}}
+                    }
+                    @if (item.tipo == 2 ){
+                        {{item.serieM?.codigo}} {{item.serieM?.serie}} {{item.subserieM?.codigo}} {{item.subserieM?.subserie}}
+                    }
+                </td>
+                <td>
+                    {{item.motivo}}
+                </td>
+                <td>
+                    {{item.created_at}}
+                </td>
+                <td>
+                    {{item.statusSolicitud.status}}
+                </td>
+                <td></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
