@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { SubSerieModel } from './sub-serie.model';
 
 @Table({
   tableName: 'subsub_series',
@@ -16,8 +17,12 @@ export class SubsubSerieModel extends Model {
   @Column({ type: DataType.STRING(100), allowNull: true })
   declare subsubserie: string;
 
+  @ForeignKey(() => SubSerieModel)
   @Column({ type: DataType.INTEGER, allowNull: true })
   declare idSubserie: number | null;
+
+  @BelongsTo(() => SubSerieModel)
+  declare subSerie: SubSerieModel;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
   declare idSerie: number | null;
