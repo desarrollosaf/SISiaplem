@@ -196,6 +196,18 @@
 .inv-table tbody tr:hover { background: #fafbff; }
 .inv-table tbody td { padding: 11px 14px; font-size: 0.87rem; color: #1e293b; vertical-align: middle; }
 
+.seccion-badge {
+  display: inline-block;
+  background: #CFAFAB;
+  color: #241D1C;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 0.77rem;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: .04em;
+}
+
 .codigo-badge {
   display: inline-block;
   background: var(--primary-soft);
@@ -208,7 +220,6 @@
   letter-spacing: .04em;
 }
 
-
 .subserie-badge {
   display: inline-block;
   background:rgba(178,141,95,.18);
@@ -220,7 +231,6 @@
   font-family: monospace;
   letter-spacing: .04em;
 }
-
 .nombre-cell { font-weight: 600; }
 .dep-cell { color: #475569; font-size: 0.84rem; }
 
@@ -429,6 +439,36 @@
   -webkit-appearance: none;
   appearance: none;
 }
+
+.form-select {
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.87rem;
+  color: #1e293b;
+  background: #f8f9fc;
+  outline: none;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+
+.form-select[multiple] {
+  min-height: 140px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.form-select[multiple] option {
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.form-select:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+}
+
 .field-input:focus,
 .field-select:focus {
   border-color: var(--primary);
@@ -850,3 +890,24 @@
   animation: shimmer 1.4s infinite;
   border-radius: 6px;
 }
+
+.seccion{
+  background-color: #CFAFAB;
+  opacity: 70%;
+}
+
+.fs-badge-pendiente  { background: #FCF5A9; color: black; }
+.fs-badge-revision  { background: #FCDEA9; color: black; }
+.fs-badge-aprobado  { background: #B1FF7D; color: black; }
+.fs-badge-rechazado  { background: #FF917D; color: black; }
+
+  .fs-badge {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        margin-right: 5px;
+        vertical-align: middle;
+    }

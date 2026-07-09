@@ -16,6 +16,7 @@ import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
+import { ClasificacionModule } from './clasificacion/clasificacion.module';
 
 
 @Module({
@@ -42,8 +43,8 @@ import { AvisosModule } from './avisos/avisos.module';
       host: 'host.docker.internal',
       port: 3306,
       username: 'root',
-      password: 'root',
-      database: 'saf',
+      password: '',
+      database: 'adminplem_saf',
       models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
       synchronize: false,
       logging: false,
@@ -57,6 +58,8 @@ import { AvisosModule } from './avisos/avisos.module';
     ResponsablesModule,
     CadidoModule,
     AvisosModule,
+    ClasificacionModule,
+  
   ],
   controllers: [AppController],
   providers: [AppService],

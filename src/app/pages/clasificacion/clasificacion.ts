@@ -12,9 +12,12 @@ import { clasificacion, ClasificacionService } from '../../services/clasificacio
   styleUrl: './clasificacion.css',
 })
 export class Clasificacion {
-   cargando = signal(true);
+    cargando = signal(true);
     error = signal('');
-    clasificacion = signal<clasificacion[]>([]);
+    clasificacion = signal<clasificacion>({
+      series: [],
+      subseries: []
+    });
   
     constructor(
         private clasificacionserv: ClasificacionService,     

@@ -7,7 +7,6 @@ import { SubSerieModel } from 'src/models/sub-serie.model';
 import { SubfondoModel } from 'src/models/subfondo.model';
 import { TDependencia } from 'src/models/t-dependencia.model';
 import { ValorDocumentalSerieSubserieModel } from 'src/models/valor_documental_serie_subserie.model';
-import { ValorDocumentals } from 'src/models/valor_documentals';
 import { ValorDocumentalsModel } from 'src/models/valor_documentals.model';
 
 @Injectable()
@@ -155,7 +154,6 @@ export class CadidoService {
 
     const valores = await ValorDocumentalsModel.findAll();
     const destinos = await DestinoFinalModel.findAll();
-    console.log('hola', valores, destinos, serie);
     const response = {
       series: serie,
       valoresS: valores,
