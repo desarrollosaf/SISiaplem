@@ -9,3 +9,72 @@
     </p>
   </div>
 </div>
+
+<!-- ===== ESTADO: CARGANDO ===== -->
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== ESTADO: ERROR ===== -->
+@else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+}
+<!-- ===== TABLA DE SERIES ===== -->
+@else {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>CADIDO
+      </span>
+      <span class="badge-count">{{ clasificacion().series.length + clasificacion().subseries.length }} Clasificación</span>
+    </div>
+
+    @if (clasificacion().series.length === 0 && clasificacion().subseries.length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-folder2"></i>
+        <p>No tienes clasificación registrada. </p>
+        <small>Contacta al administrador.</small>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:20%" class="text-center">Código</th>
+              <th>Serie / Subserie</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of clasificacion().series; track item.id) {
+              <!-- Fila de SERIE -->
+              <tr class="row-serie">
+                <td>
+                  <span class="codigo-badge"> Serie </span>{{ item.codigo }}
+                </td>
+                <td class="serie-nombre">{{ item.serie }}</td>
+              </tr>
+            }
+            @for (item of clasificacion().subseries; track item.id) {
+              <!-- Fila de SERIE -->
+              <tr class="row-serie">
+                <td>
+                  <span class="subserie-badge"> Sub </span> {{ item.codigo }} 
+                </td>
+                <td class="serie-nombre">{{ item.subserie }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

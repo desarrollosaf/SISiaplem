@@ -37,7 +37,7 @@ async function run() {
     host: process.env.SAF_HOST ?? 'host.docker.internal',
     port: Number(process.env.SAF_PORT ?? 3306),
     username: process.env.SAF_USER ?? 'root',
-    password: process.env.SAF_PASS ?? 'root',
+    password: process.env.SAF_PASS ?? '',
     database: process.env.SAF_DB ?? 'adminplem_saf',
     logging: false,
   });
