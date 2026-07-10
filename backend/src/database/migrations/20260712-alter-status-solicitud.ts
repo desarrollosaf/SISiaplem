@@ -2,7 +2,9 @@ import { Sequelize, QueryTypes } from 'sequelize';
 
 const TABLE = 'solicitud_clasificacions';
 const COLUMNS: Record<string, string> = {
-  status_solicitud: 'BIGINT UNSIGNED NULL DEFAULT 1'
+  status_solicitud: 'BIGINT UNSIGNED NULL DEFAULT 1',
+  id_departamento: 'BIGINT UNSIGNED NULL',
+  motivo: 'VARCHAR(255) NULL',
 };
 
 export async function up(sequelize: Sequelize) {
