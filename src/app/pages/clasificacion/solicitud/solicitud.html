@@ -83,10 +83,15 @@
                         {{item.codigo}} {{item.adicion}}
                     }
                     @if(item.tipo == 2){
-                        {{ item.serie?.codigo}} {{ item.serie?.serie}} {{ item.subserie?.codigo}} {{item.subserie?.subserie }}
+                        {{ item.serieM?.codigo}} {{ item.serieM?.serie}} {{ item.subserieM?.codigo}} {{item.subserieM?.subserie }}
                     }
                 </td>
-                <td> {{ item.motivo }}</td>
+                <td> 
+                    {{ item.motivo }} <br>
+                    @if(item.statusSolicitud.id == 4){
+                        <b>Motivo de rechazo: </b> {{item.motivo_rechazo}}
+                    }
+                </td>
                 <td> {{ item.created_at }} </td>
                 <td> 
                     @switch (item.statusSolicitud.id) {

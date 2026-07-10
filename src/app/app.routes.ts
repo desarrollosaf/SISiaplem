@@ -92,7 +92,7 @@ export const routes: Routes = [
       { path: 'clasificacion/consulta', loadComponent: () => import('./pages/clasificacion/clasificacion').then(m => m.Clasificacion)},
       { path: 'clasificacion/solicitud', loadComponent: () => import('./pages/clasificacion/solicitud/solicitud').then(m => m.Solicitud)},
       { path: 'admin/responsables/solicitudes', loadComponent: () => import('./pages/solicitudes/solicitudes').then(m => m.Solicitudes)},
-  
+      { path: 'admin/responsables/solicitudes/detalle/:id', loadComponent: () => import('./pages/solicitudes/detalle/detalle').then(m => m.Detalle)},
       /* ── Herramientas ── */
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },
