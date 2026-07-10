@@ -25,17 +25,17 @@ export class SerieModel extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
   declare status: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   declare anio_tramite: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   declare anios_consentracion: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   declare total_anios: number;
 
   @ForeignKey(() => DestinoFinalModel)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   declare id_destino: number;
 
 

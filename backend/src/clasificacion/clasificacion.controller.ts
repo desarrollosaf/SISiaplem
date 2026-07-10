@@ -66,12 +66,32 @@ export class ClasificacionController {
   return this.clasificacionService.getSolicitudesAdmin();
   }
 
+  @Get('getstatus')
+  async getstatus(){
+    return this.clasificacionService.getstatus();
+  }
+
+@Get('getSolicitud/:id')
+  async getSolicitud(@Param('id', ParseIntPipe) id: number){
+    return this.clasificacionService.getSolicitud(id);
+  }
+
 @Post('saveSolicitud')
  @UseGuards(JwtAuthGuard)
   saveSolicitud(@Body() form, @Request() req: any) {
     const rfc = req.user.rfc;
     return this.clasificacionService.saveSolicitud(form, rfc);
   }
+
+  @Post('editSolicitud')
+  editSolicitud(@Body() form){
+    return this.clasificacionService.editSolicitud(form);
+  }
+
+
+
+
+
 }
 
 

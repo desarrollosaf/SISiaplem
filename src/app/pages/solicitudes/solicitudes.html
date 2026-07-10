@@ -49,12 +49,12 @@
         <table class="inv-table">
           <thead>
             <tr>
-              <th style="width:20%" class="text-center">Tipo solicitud</th>
-              <th>Serie / Subserie</th>
-              <th>Motivo</th>
-              <th>Fecha de solicitud</th>
-              <th>Estatus</th>
-              <th>Acciones</th>
+              <th style="width:12%" class="text-center">Tipo solicitud</th>
+              <th class="text-center">Serie / Subserie</th>
+              <th class="text-center">Motivo</th>
+              <th class="text-center">Fecha de solicitud</th>
+              <th style="width: 8%;" class="text-center">Estatus</th>
+              <th style="width: 3%;" class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -84,15 +84,141 @@
                 <td>
                     {{item.created_at}}
                 </td>
-                <td>
-                    {{item.statusSolicitud.status}}
+                <td class="text-center">
+                    @if(item.statusSolicitud.id == 1){
+                        <span class="fs-badge fs-badge-pendiente">
+                            {{item.statusSolicitud.status}}
+                        </span>
+                    }
+                    @if(item.statusSolicitud.id == 2){
+                        <span class="fs-badge fs-badge-revision">
+                            {{item.statusSolicitud.status}}
+                        </span>
+                    }
+                     @if(item.statusSolicitud.id == 3){
+                        <span class="fs-badge fs-badge-aprobado">
+                            {{item.statusSolicitud.status}}
+                        </span>
+                    }
+                     @if(item.statusSolicitud.id == 4){
+                        <span class="fs-badge fs-badge-rechazado">
+                            {{item.statusSolicitud.status}}
+                        </span>
+                    }
                 </td>
-                <td></td>
+                <td class="text-center">
+                    <a (click)="abrirDetalle(item.id)" class="btn-icon" title="Ver solicitud">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
     }
+
+
+    <!-- //ventanita -->
+    <div class="drawer" [class.drawer-open]="drawerOpen()">
+        <div class="drawer-header">
+            <div>
+                <h5 class="drawer-title">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    Detalles de solicitud
+                </h5>
+            </div>
+            <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="drawer-body">
+          @if (cargandoSolicitud()) {
+            <div class="skeleton-loader">
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="skeleton-row"></div>
+              }
+            </div>
+          } @else {
+            <div class="field-group">
+                <label class="field-label">Unidad administrativa</label>
+                 <input type="text" class="field-input" [(ngModel)]="formSolicitudD.unidad" name="unidad" disabled="true"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Solicitante</label>
+                 <input type="text" class="field-input" [(ngModel)]="formSolicitudD.solicitante" name="solicitante" disabled="true"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Tipo de solicitud</label>
+                 <input type="text" class="field-input" [(ngModel)]="formSolicitudD.tipo" name="tipo" disabled="true"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Clasificación</label>
+                 <input type="text" class="field-input" [(ngModel)]="formSolicitudD.clasificacion" name="clasificacion" disabled="true"/>
+            </div>
+
+            @if (formSolicitudD.tipo == 'Adición' && formSolicitudD.clasificacion == 'Serie') {
+                <div class="field-group">
+                    <label class="field-label">Sección</label>
+                    <input type="text" class="field-input" [(ngModel)]="formSolicitudD.seccion" name="seccion" disabled="true"/>
+                </div>
+            }
+           
+            @if (formSolicitudD.tipo == 'Adición') {
+                <div class="field-group">
+                    <label class="field-label">Código </label>
+                    <input type="text" class="field-input" [(ngModel)]="formSolicitudD.codigo" name="codigo" disabled="true"/>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">{{ formSolicitudD.clasificacion }} </label>
+                    <input type="text" class="field-input" [(ngModel)]="formSolicitudD.adicion" name="adicion" disabled="true"/>
+                </div>
+            }
+
+             @if (formSolicitudD.tipo == 'Cancelación') {
+                 <div class="field-group">
+                    <label class="field-label">{{ formSolicitudD.tipo }} {{ formSolicitudD.clasificacion }}  </label>
+                    <input type="text" class="field-input" [(ngModel)]="formSolicitudD.cancelar" name="cancelar" disabled="true"/>
+                </div>
+             }
+           
+            
+            <div class="field-group">
+                <label class="field-label">Motivo </label>
+                <input type="text" class="field-input"  name="motivo" [(ngModel)]="formSolicitudD.motivo" disabled="true"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Estatus de solicitud <span class="required-star">*</span></label>
+                <select class="field-input" [(ngModel)]="formSolicitudD.status"  name="status" >
+                    @for (item of statusArray; track item.id) {
+                        <option [ngValue]="item.id">
+                        {{ item.name }}
+                        </option>
+                    }
+                </select>
+            </div>
+            @if(formSolicitudD.status == 4){
+                <div class="field-group">
+                    <label class="field-label">Motivo de rechazo </label>
+                    <input type="text" class="field-input"  name="motivo_rechazo" [(ngModel)]="formSolicitudD.motivo_rechazo"/>
+                </div>
+            }
+            
+          }
+        </div>
+
+        <div class="drawer-footer">
+            <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn-save" (click)="guardar()">
+            @if (guardando()) { <span class="spinner"></span> Guardando… }
+            @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+            </button>
+        </div>
+    </div>
+
   </div>
 }
