@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvisosService, Aviso } from '../../services/avisos.service';
 import { AuthService } from '../../services/auth.service';
+import { GuiaService, ActividadReciente } from '../../services/guia.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,18 +13,31 @@ import { AuthService } from '../../services/auth.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   protected avisosSvc = inject(AvisosService);
   protected auth = inject(AuthService);
+  protected guiaSvc = inject(GuiaService);
 
   currentTime = signal('');
   currentDate = signal('');
   greeting = signal('Buenos días');
   avisosRecientes = signal<Aviso[]>([]);
+  actividadReciente = signal<ActividadReciente[]>([]);
+
+  // La actividad reciente es de Archivo de Trámite: no aplica para RAC/RAH (solo Concentración/Histórico)
+  mostrarActividad = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes('RAT') || roles.includes('ADMIM');
+  });
 
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
-    this.avisosSvc.getRecientes(4).subscribe({ next: (data) => this.avisosRecientes.set(data) });
+    this.avisosSvc.getRecientes(6).subscribe({ next: (data) => this.avisosRecientes.set(data) });
+
+    const rfc = this.auth.userRfc();
+    if (rfc && this.mostrarActividad()) {
+      this.guiaSvc.getActividadReciente(rfc, 6).subscribe({ next: (data) => this.actividadReciente.set(data) });
+    }
   }
 
   ngOnDestroy() {

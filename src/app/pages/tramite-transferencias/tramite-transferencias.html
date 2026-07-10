@@ -1,0 +1,132 @@
+<!-- ===== ENCABEZADO ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-arrow-right-circle"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Transferencia Primaria</h4>
+    <p class="archivo-subtitle">Solicita la transferencia de expedientes concluidos al Archivo de Concentración.</p>
+  </div>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="tt-tabs mb-3">
+  <button class="tt-tab" [class.tt-tab-active]="tab() === 'nueva'" (click)="cambiarTab('nueva')">
+    <i class="bi bi-plus-circle me-1"></i>Nueva Solicitud
+  </button>
+  <button class="tt-tab" [class.tt-tab-active]="tab() === 'mias'" (click)="cambiarTab('mias')">
+    <i class="bi bi-clock-history me-1"></i>Mis Solicitudes
+  </button>
+</div>
+
+<!-- ===== NUEVA SOLICITUD ===== -->
+@if (tab() === 'nueva') {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-folder2-open me-2" style="color:var(--primary)"></i>
+        @if (cargando()) { Cargando… } @else { {{ elegibles().length }} expediente(s) elegible(s) }
+      </span>
+      <button class="btn btn-primary btn-sm" [disabled]="seleccionados().size === 0 || enviando()" (click)="pedirConfirmarSolicitud()">
+        @if (enviando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        Solicitar transferencia ({{ seleccionados().size }})
+      </button>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (!cargando() && elegibles().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>No hay expedientes concluidos disponibles para transferir.</p>
+        </div>
+      } @else {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th style="width:40px"></th>
+              <th>Expediente</th>
+              <th>Serie / Subserie</th>
+              <th>Año</th>
+              <th>Fecha de cierre</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of elegibles(); track exp.id) {
+              <tr (click)="toggleSeleccion(exp.id)" style="cursor:pointer">
+                <td><input type="checkbox" [checked]="estaSeleccionado(exp.id)" (click)="$event.stopPropagation(); toggleSeleccion(exp.id)" /></td>
+                <td class="fw-semibold" style="color:var(--primary)">{{ exp.nombre_ex }}</td>
+                <td>{{ exp.serie_nombre ?? '—' }}</td>
+                <td class="text-muted">{{ exp.anio }}</td>
+                <td class="text-muted">{{ exp.fecha_cierre_exp | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== MIS SOLICITUDES ===== -->
+@if (tab() === 'mias') {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>{{ misSolicitudes().length }} solicitud(es)
+      </span>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (misSolicitudes().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Aún no has generado ninguna solicitud de transferencia.</p>
+        </div>
+      } @else {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Solicitud</th>
+              <th>Estado</th>
+              <th>Motivo de rechazo</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of misSolicitudes(); track s.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                <td><span class="status-badge" [class]="estadoClase(s.estado)">{{ estadoLabel(s.estado) }}</span></td>
+                <td class="text-muted">{{ s.motivo_rechazo ?? '—' }}</td>
+                <td class="text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  @if (s.estado === 'autorizada' || s.estado === 'recibida') {
+                    <a [href]="actaUrl(s.id)" target="_blank" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-file-earmark-pdf me-1"></i>Ver acta
+                    </a>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL CONFIRMAR SOLICITUD ===== -->
+@if (confirmSolicitarOpen()) {
+  <div class="modal-backdrop" (click)="cancelarSolicitud()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-send"></i></div>
+    <h6 class="confirm-title">¿Solicitar transferencia?</h6>
+    <p class="confirm-msg">Se enviarán {{ seleccionados().size }} expediente(s) a revisión de Archivo de Concentración.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" [disabled]="enviando()" (click)="cancelarSolicitud()">Cancelar</button>
+      <button class="btn-confirm" [disabled]="enviando()" (click)="confirmarSolicitud()">
+        @if (enviando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        <i class="bi bi-check-lg me-1"></i>Sí, solicitar
+      </button>
+    </div>
+  </div>
+}

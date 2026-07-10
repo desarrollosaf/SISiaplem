@@ -84,13 +84,15 @@
 
 </div>
 
-<!-- ===== ACCESOS RÁPIDOS ===== -->
-<p class="section-title"><i class="bi bi-lightning-fill me-1"></i>Accesos Rápidos</p>
+<!-- ===== ACCESOS RÁPIDOS + AVISOS + ACTIVIDAD/POR VENCER ===== -->
 <div class="row g-3 mb-4">
+<div class="col-lg-8">
+<p class="section-title"><i class="bi bi-lightning-fill me-1"></i>Accesos Rápidos</p>
+<div class="row g-3">
 
   <!-- RAT: Trámite -->
   @if (auth.hasRole('RAT') && !auth.hasRole('ADMIM')) {
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/tramite/inventario">
         <div class="quick-card-icon" style="background:rgba(123,29,76,0.1);color:#7B1D4C">
           <i class="bi bi-file-earmark-plus"></i>
@@ -98,7 +100,7 @@
         <div class="quick-card-label">Expedientes<br>en Trámite</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/tramite/prestamos">
         <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
           <i class="bi bi-search"></i>
@@ -106,7 +108,7 @@
         <div class="quick-card-label">Consultas y<br>Préstamos</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/tramite/transferencias">
         <div class="quick-card-icon" style="background:rgba(25,135,84,0.1);color:#198754">
           <i class="bi bi-arrow-right-circle"></i>
@@ -118,7 +120,7 @@
 
   <!-- RAC: Concentración -->
   @if (auth.hasRole('RAC') && !auth.hasRole('ADMIM')) {
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/concentracion/expedientes">
         <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
           <i class="bi bi-inbox-fill"></i>
@@ -126,7 +128,7 @@
         <div class="quick-card-label">Expedientes<br>Recibidos</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/concentracion/prestamos">
         <div class="quick-card-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
           <i class="bi bi-hand-index-thumb"></i>
@@ -134,7 +136,7 @@
         <div class="quick-card-label">Préstamos<br>Activos</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/concentracion/baja">
         <div class="quick-card-icon" style="background:rgba(220,53,69,0.1);color:#dc3545">
           <i class="bi bi-trash3"></i>
@@ -146,7 +148,7 @@
 
   <!-- RAH: Histórico -->
   @if (auth.hasRole('RAH') && !auth.hasRole('ADMIM')) {
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/historico/fondos">
         <div class="quick-card-icon" style="background:rgba(25,135,84,0.1);color:#198754">
           <i class="bi bi-collection"></i>
@@ -154,7 +156,7 @@
         <div class="quick-card-label">Fondo<br>Documental</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/historico/consulta">
         <div class="quick-card-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd">
           <i class="bi bi-eye"></i>
@@ -162,7 +164,7 @@
         <div class="quick-card-label">Consulta<br>Pública</div>
       </a>
     </div>
-    <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+    <div class="col-xl-4 col-md-4 col-sm-4 col-6">
       <a class="quick-card" routerLink="/concentracion/prestamos">
         <div class="quick-card-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14">
           <i class="bi bi-hand-index-thumb"></i>
@@ -226,125 +228,138 @@
 
 </div>
 
-<!-- ===== ACTIVIDAD RECIENTE + PANEL LATERAL ===== -->
-<div class="row g-3">
+@if (mostrarActividad()) {
+  <!-- Actividad reciente (RAT/ADMIM) -->
+  <div class="content-card mt-3">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Actividad Reciente
+      </span>
+      <a routerLink="/tramite/inventario" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem">Ver todo</a>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Archivo</th>
+            <th>Área</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (actividadReciente().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center text-muted py-3">Sin actividad reciente</td>
+            </tr>
+          }
+          @for (item of actividadReciente(); track item.id) {
+            <tr>
+              <td><span class="fw-semibold" style="color:var(--primary)">{{ item.codigo }}</span></td>
+              <td>{{ item.nombre_ex }}</td>
+              <td>{{ item.area }}</td>
+              <td>
+                <span class="status-badge"
+                  [class.status-active]="item.estado === 'Digital'"
+                  [class.status-transfer]="item.estado === 'Físico'"
+                  [class.status-pending]="item.estado !== 'Digital' && item.estado !== 'Físico'">
+                  {{ item.estado }}
+                </span>
+              </td>
+              <td class="text-muted">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+} @else {
+  <!-- Sin Actividad Reciente (RAC/RAH): Por Vencer sube junto a Accesos Rápidos -->
+  <div class="content-card mt-3">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
+      </span>
+      <span class="status-badge status-pending">5</span>
+    </div>
+    <div class="p-3">
+      @for (item of [
+        { exp: 'EXP-2026-0812', dias: 1 },
+        { exp: 'EXP-2026-0798', dias: 2 },
+        { exp: 'EXP-2026-0776', dias: 3 }
+      ]; track item.exp) {
+        <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
+          <div>
+            <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">{{ item.exp }}</div>
+            <div class="text-muted" style="font-size:0.72rem">Devolución en {{ item.dias }} día(s)</div>
+          </div>
+          <span class="status-badge status-pending">{{ item.dias }}d</span>
+        </div>
+      }
+      <a href="#" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+    </div>
+  </div>
+}
 
-  <!-- Actividad reciente -->
-  <div class="col-lg-8">
-    <div class="content-card">
-      <div class="content-card-header">
-        <span class="content-card-title">
-          <i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Actividad Reciente
-        </span>
-        <a href="#" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem">Ver todo</a>
+</div>
+
+<!-- Columna derecha: Avisos + (Por Vencer/Transferencias si hay Actividad Reciente) -->
+<div class="col-lg-4">
+  <div class="avisos-widget avisos-widget-compact mb-3" [class.avisos-fill]="!mostrarActividad()">
+    <div class="avisos-widget-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="avisos-widget-icon" [class.tiene-avisos]="avisosRecientes().length > 0">
+          <i class="bi bi-megaphone-fill"></i>
+          @if (avisosRecientes().length > 0) { <span class="avisos-dot"></span> }
+        </div>
+        <div>
+          <div class="avisos-widget-title">Avisos Recientes</div>
+          <div class="avisos-widget-sub">Comunicados y noticias</div>
+        </div>
       </div>
-      <div class="content-card-body" style="overflow-x:auto">
-        <table class="activity-table">
-          <thead>
-            <tr>
-              <th>Expediente</th>
-              <th>Descripción</th>
-              <th>Área</th>
-              <th>Estado</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0842</span></td>
-              <td>Contratos de Servicios 2026</td>
-              <td>Área Jurídica</td>
-              <td><span class="status-badge status-active">Activo</span></td>
-              <td class="text-muted">26/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0841</span></td>
-              <td>Nómina Quincenal – Junio</td>
-              <td>Recursos Humanos</td>
-              <td><span class="status-badge status-pending">Préstamo</span></td>
-              <td class="text-muted">25/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2025-1204</span></td>
-              <td>Dictámenes Legislativos 2025</td>
-              <td>Coordinación Leg.</td>
-              <td><span class="status-badge status-transfer">Transferido</span></td>
-              <td class="text-muted">24/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2024-0530</span></td>
-              <td>Actas de Sesión Plenaria</td>
-              <td>Secretaría General</td>
-              <td><span class="status-badge status-closed">Cerrado</span></td>
-              <td class="text-muted">23/06/2026</td>
-            </tr>
-            <tr>
-              <td><span class="fw-semibold" style="color:var(--primary)">EXP-2026-0839</span></td>
-              <td>Adquisición de Equipo TI</td>
-              <td>Administración</td>
-              <td><span class="status-badge status-active">Activo</span></td>
-              <td class="text-muted">22/06/2026</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @if (auth.hasRole('ADMIM')) {
+        <a routerLink="/admin/avisos" class="btn btn-sm avisos-admin-btn">
+          <i class="bi bi-pencil-square me-1"></i>Gestionar
+        </a>
+      }
+    </div>
+    <div class="avisos-widget-body">
+      @if (avisosRecientes().length === 0) {
+        <div class="avisos-empty">
+          <i class="bi bi-megaphone fs-2 opacity-25 d-block mb-1"></i>
+          Sin avisos activos
+        </div>
+      }
+      @for (a of avisosRecientes(); track a.id) {
+        <div class="aviso-card" [class.aviso-card-urgente]="a.tipo === 'urgente'">
+          <div class="aviso-card-stripe"
+            [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
+          </div>
+          <div class="aviso-card-content">
+            <div class="d-flex align-items-start justify-content-between gap-1">
+              <p class="aviso-card-titulo">{{ a.titulo }}</p>
+              <span class="aviso-badge"
+                [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
+                {{ a.tipo }}
+              </span>
+            </div>
+            <p class="aviso-card-desc">{{ a.descripcion | slice:0:90 }}{{ a.descripcion.length > 90 ? '…' : '' }}</p>
+            <div class="aviso-card-footer">
+              <span><i class="bi bi-calendar3 me-1"></i>{{ a.created_at | date:'dd MMM yyyy' }}</span>
+              @if (a.pdf_path) {
+                <a [href]="avisosSvc.pdfUrl(a.pdf_path)" target="_blank" class="aviso-pdf-link">
+                  <i class="bi bi-file-earmark-pdf-fill me-1"></i>Ver PDF
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      }
     </div>
   </div>
 
-  <!-- Panel lateral -->
-  <div class="col-lg-4">
-
-    <!-- Avisos Recientes -->
-    <div class="avisos-widget mb-3">
-      <div class="avisos-widget-header">
-        <div class="d-flex align-items-center gap-2">
-          <div class="avisos-widget-icon"><i class="bi bi-megaphone-fill"></i></div>
-          <div>
-            <div class="avisos-widget-title">Avisos Recientes</div>
-            <div class="avisos-widget-sub">Comunicados y noticias</div>
-          </div>
-        </div>
-        @if (auth.hasRole('ADMIM')) {
-          <a routerLink="/admin/avisos" class="btn btn-sm avisos-admin-btn">
-            <i class="bi bi-pencil-square me-1"></i>Gestionar
-          </a>
-        }
-      </div>
-      <div class="avisos-widget-body">
-        @if (avisosRecientes().length === 0) {
-          <div class="avisos-empty">
-            <i class="bi bi-megaphone fs-2 opacity-25 d-block mb-1"></i>
-            Sin avisos activos
-          </div>
-        }
-        @for (a of avisosRecientes(); track a.id) {
-          <div class="aviso-card">
-            <div class="aviso-card-stripe"
-              [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
-            </div>
-            <div class="aviso-card-content">
-              <div class="d-flex align-items-start justify-content-between gap-1">
-                <p class="aviso-card-titulo">{{ a.titulo }}</p>
-                <span class="aviso-badge"
-                  [style.background]="a.tipo==='urgente'?'#dc3545':a.tipo==='curso'?'#198754':a.tipo==='evento'?'#0d6efd':'#f59e0b'">
-                  {{ a.tipo }}
-                </span>
-              </div>
-              <p class="aviso-card-desc">{{ a.descripcion | slice:0:90 }}{{ a.descripcion.length > 90 ? '…' : '' }}</p>
-              <div class="aviso-card-footer">
-                <span><i class="bi bi-calendar3 me-1"></i>{{ a.created_at | date:'dd MMM yyyy' }}</span>
-                @if (a.pdf_path) {
-                  <a [href]="avisosSvc.pdfUrl(a.pdf_path)" target="_blank" class="aviso-pdf-link">
-                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Ver PDF
-                  </a>
-                }
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-
+  @if (mostrarActividad()) {
     <!-- Préstamos por vencer -->
     <div class="content-card mb-3">
       <div class="content-card-header">
@@ -371,37 +386,41 @@
       </div>
     </div>
 
-    <!-- Transferencias recientes -->
-    <div class="content-card">
-      <div class="content-card-header">
-        <span class="content-card-title">
-          <i class="bi bi-send-fill me-2" style="color:#0d6efd"></i>Transferencias
-        </span>
+    <!-- Transferencias recientes (solo ADMIM) -->
+    @if (auth.hasRole('ADMIM')) {
+      <div class="content-card">
+        <div class="content-card-header">
+          <span class="content-card-title">
+            <i class="bi bi-send-fill me-2" style="color:#0d6efd"></i>Transferencias
+          </span>
+        </div>
+        <div class="p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="transfer-dot" style="background:#0d6efd"></div>
+              <span class="transfer-label">Trámite → Concentración</span>
+            </div>
+            <span class="transfer-count" style="color:#0d6efd">12</span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="transfer-dot" style="background:#198754"></div>
+              <span class="transfer-label">Concentración → Histórico</span>
+            </div>
+            <span class="transfer-count" style="color:#198754">4</span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="transfer-dot" style="background:#dc3545"></div>
+              <span class="transfer-label">Pendientes de Baja</span>
+            </div>
+            <span class="transfer-count" style="color:#dc3545">7</span>
+          </div>
+        </div>
       </div>
-      <div class="p-3">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <div class="d-flex align-items-center gap-2">
-            <div class="transfer-dot" style="background:#0d6efd"></div>
-            <span class="transfer-label">Trámite → Concentración</span>
-          </div>
-          <span class="transfer-count" style="color:#0d6efd">12</span>
-        </div>
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <div class="d-flex align-items-center gap-2">
-            <div class="transfer-dot" style="background:#198754"></div>
-            <span class="transfer-label">Concentración → Histórico</span>
-          </div>
-          <span class="transfer-count" style="color:#198754">4</span>
-        </div>
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <div class="d-flex align-items-center gap-2">
-            <div class="transfer-dot" style="background:#dc3545"></div>
-            <span class="transfer-label">Pendientes de Baja</span>
-          </div>
-          <span class="transfer-count" style="color:#dc3545">7</span>
-        </div>
-      </div>
-    </div>
+    }
+  }
 
-  </div>
+</div>
+
 </div>
