@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Roles } from './roles.decorator';
@@ -28,6 +28,13 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIM')
+  @Get('users/search')
+  searchUsers(@Query('q') q: string) {
+    return this.svc.searchUsers(q ?? '');
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIM')
   @Get('roles')
   getRoles() {
     return this.svc.getAllRoles();
@@ -45,5 +52,26 @@ export class AuthController {
   @Delete('users/:id/roles/:role')
   removeRole(@Param('id', ParseIntPipe) id: number, @Param('role') role: string) {
     return this.svc.removeRole(id, role);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIM')
+  @Get('permissions')
+  getPermissions() {
+    return this.svc.getAllPermissions();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIM')
+  @Post('users/:id/permissions')
+  assignPermission(@Param('id', ParseIntPipe) id: number, @Body() body: { permission: string }) {
+    return this.svc.assignPermission(id, body.permission);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIM')
+  @Delete('users/:id/permissions/:permission')
+  removePermission(@Param('id', ParseIntPipe) id: number, @Param('permission') permission: string) {
+    return this.svc.removePermission(id, permission);
   }
 }

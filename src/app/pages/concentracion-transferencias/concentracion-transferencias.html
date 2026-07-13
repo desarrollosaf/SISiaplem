@@ -56,14 +56,18 @@
 } @else {
   <!-- ===== TABS ===== -->
   <div class="tt-tabs mb-3">
-    <button class="tt-tab" [class.tt-tab-active]="tab() === 'revisar'" (click)="cambiarTab('revisar')">
-      <i class="bi bi-clipboard-check me-1"></i>Por Revisar
-      @if (pendientes().length > 0) { <span class="status-badge status-pending ms-1">{{ pendientes().length }}</span> }
-    </button>
-    <button class="tt-tab" [class.tt-tab-active]="tab() === 'recibir'" (click)="cambiarTab('recibir')">
-      <i class="bi bi-inbox-fill me-1"></i>Por Recibir
-      @if (autorizadas().length > 0) { <span class="status-badge status-transfer ms-1">{{ autorizadas().length }}</span> }
-    </button>
+    @if (auth.hasPermission('transferencias.revisar')) {
+      <button class="tt-tab" [class.tt-tab-active]="tab() === 'revisar'" (click)="cambiarTab('revisar')">
+        <i class="bi bi-clipboard-check me-1"></i>Por Revisar
+        @if (pendientes().length > 0) { <span class="status-badge status-pending ms-1">{{ pendientes().length }}</span> }
+      </button>
+    }
+    @if (auth.hasPermission('transferencias.recibir')) {
+      <button class="tt-tab" [class.tt-tab-active]="tab() === 'recibir'" (click)="cambiarTab('recibir')">
+        <i class="bi bi-inbox-fill me-1"></i>Por Recibir
+        @if (autorizadas().length > 0) { <span class="status-badge status-transfer ms-1">{{ autorizadas().length }}</span> }
+      </button>
+    }
     <button class="tt-tab" [class.tt-tab-active]="tab() === 'recibidas'" (click)="cambiarTab('recibidas')">
       <i class="bi bi-check2-circle me-1"></i>Recibidas
     </button>
