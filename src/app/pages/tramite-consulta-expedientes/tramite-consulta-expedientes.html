@@ -86,6 +86,7 @@
               <th>Estado</th>
               <th>Motivo de rechazo</th>
               <th>Fecha</th>
+              <th>Vigente hasta</th>
               <th></th>
             </tr>
           </thead>
@@ -93,11 +94,12 @@
             @for (s of misSolicitudes(); track s.id) {
               <tr>
                 <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
-                <td><span class="status-badge" [class]="estadoClase(s.estado)">{{ estadoLabel(s.estado) }}</span></td>
+                <td><span class="status-badge" [class]="estadoClase(s.estado, s.vigente)">{{ estadoLabel(s.estado, s.vigente) }}</span></td>
                 <td class="text-muted">{{ s.motivo_rechazo ?? '—' }}</td>
                 <td class="text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="text-muted">{{ s.fecha_limite ? (s.fecha_limite | date:'dd/MM/yyyy') : '—' }}</td>
                 <td>
-                  @if (s.estado === 'autorizada') {
+                  @if (s.estado === 'autorizada' && s.vigente) {
                     <button class="btn-ver" (click)="verDetalle(s.id)">
                       <i class="bi bi-eye-fill"></i>Consultar
                     </button>
@@ -144,12 +146,18 @@
         <div class="detalle-info-grid">
           <div>
             <span class="detalle-info-label">Estado</span>
-            <span class="status-badge" [class]="estadoClase(d.estado)">{{ estadoLabel(d.estado) }}</span>
+            <span class="status-badge" [class]="estadoClase(d.estado, d.vigente)">{{ estadoLabel(d.estado, d.vigente) }}</span>
           </div>
           @if (d.nombre_revisa) {
             <div>
               <span class="detalle-info-label">Autorizó</span>
               <span>{{ d.nombre_revisa }} — {{ d.fecha_revision | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+          @if (d.fecha_limite) {
+            <div>
+              <span class="detalle-info-label">Vigente hasta</span>
+              <span>{{ d.fecha_limite | date:'dd/MM/yyyy' }}</span>
             </div>
           }
         </div>

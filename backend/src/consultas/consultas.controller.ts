@@ -56,8 +56,8 @@ export class ConsultasController {
   @Patch(':id/autorizar')
   autorizar(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { rfc: string; autoriza: boolean; motivo?: string },
+    @Body() dto: { rfc: string; autoriza: boolean; motivo?: string; fechaLimite?: string },
   ) {
-    return this.consultasService.autorizar(id, dto.rfc, dto.autoriza, dto.motivo);
+    return this.consultasService.autorizar(id, dto.rfc, dto.autoriza, dto.motivo, dto.fechaLimite);
   }
 }

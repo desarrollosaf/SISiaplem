@@ -25,6 +25,8 @@ export interface SolicitudConsulta {
   autorizada: boolean | null;
   motivo_rechazo: string | null;
   estado: EstadoSolicitudConsulta;
+  fecha_limite: string | null;
+  vigente: boolean;
   created_at: string;
 }
 
@@ -64,7 +66,7 @@ export class ConsultasService {
     return this.http.get<SolicitudConsultaDetalle>(`${API}/${id}`);
   }
 
-  autorizar(id: number, rfc: string, autoriza: boolean, motivo?: string) {
-    return this.http.patch<SolicitudConsultaDetalle>(`${API}/${id}/autorizar`, { rfc, autoriza, motivo });
+  autorizar(id: number, rfc: string, autoriza: boolean, motivo?: string, fechaLimite?: string) {
+    return this.http.patch<SolicitudConsultaDetalle>(`${API}/${id}/autorizar`, { rfc, autoriza, motivo, fechaLimite });
   }
 }
