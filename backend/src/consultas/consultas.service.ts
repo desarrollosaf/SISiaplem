@@ -82,7 +82,15 @@ export class ConsultasService {
       ...s.get({ plain: true }),
       nombre_solicita: nombres.get(s.rfc_solicita) ?? s.rfc_solicita,
       nombre_revisa: s.rfc_revisa ? (nombres.get(s.rfc_revisa) ?? s.rfc_revisa) : null,
+      vigente: this.esVigente(s),
     }));
+  }
+
+  // Una consulta autorizada solo sigue vigente mientras no se pase de la fecha límite fijada por RAC.
+  private esVigente(s: SolicitudConsultaModel): boolean {
+    if (s.estado !== 'autorizada' || !s.fecha_limite) return false;
+    const hoy = new Date().toISOString().slice(0, 10);
+    return s.fecha_limite >= hoy;
   }
 
   private clasificacionExpediente(e: ExpedienteSerieSubseModel): string {
@@ -116,11 +124,16 @@ export class ConsultasService {
     });
     if (!expedientes.length) return [];
 
-    const vigentes = await this.solicitudExpedienteModel.findAll({
+    const conSolicitud = await this.solicitudExpedienteModel.findAll({
       where: { id_expediente: { [Op.in]: expedientes.map((e) => e.id) } },
       include: [{ model: SolicitudConsultaModel, as: 'solicitud', where: { estado: { [Op.in]: ['pendiente', 'autorizada'] } } }],
     });
-    const idsConConsultaVigente = new Set(vigentes.map((v) => v.id_expediente));
+    // Una consulta autorizada que ya venció no bloquea una nueva solicitud sobre el mismo expediente.
+    const idsConConsultaVigente = new Set(
+      conSolicitud
+        .filter((v) => v.solicitud.estado === 'pendiente' || this.esVigente(v.solicitud))
+        .map((v) => v.id_expediente),
+    );
 
     return expedientes
       .filter((e) => !idsConConsultaVigente.has(e.id))
@@ -173,11 +186,17 @@ export class ConsultasService {
     return this.decorarConNombres(solicitudes);
   }
 
-  async autorizar(id: number, rfc: string, autoriza: boolean, motivo?: string) {
+  async autorizar(id: number, rfc: string, autoriza: boolean, motivo?: string, fechaLimite?: string) {
     const solicitud = await this.solicitudModel.findByPk(id);
     if (!solicitud) throw new NotFoundException('Solicitud no encontrada');
     if (solicitud.estado !== 'pendiente') {
       throw new BadRequestException('La solicitud ya fue revisada.');
+    }
+    if (autoriza) {
+      const hoy = new Date().toISOString().slice(0, 10);
+      if (!fechaLimite || fechaLimite < hoy) {
+        throw new BadRequestException('Debes definir una fecha límite de vigencia (posterior a hoy) para autorizar la consulta.');
+      }
     }
 
     await solicitud.update({
@@ -186,6 +205,7 @@ export class ConsultasService {
       autorizada: autoriza,
       motivo_rechazo: autoriza ? null : (motivo ?? null),
       estado: autoriza ? 'autorizada' : 'rechazada',
+      fecha_limite: autoriza ? fechaLimite : null,
     });
 
     return this.getDetalle(id);
@@ -232,6 +252,8 @@ export class ConsultasService {
       autorizada: solicitud.autorizada,
       motivo_rechazo: solicitud.motivo_rechazo,
       estado: solicitud.estado,
+      fecha_limite: solicitud.fecha_limite,
+      vigente: this.esVigente(solicitud),
       created_at: solicitud.get('created_at'),
       expedientes: (solicitud.expedientes ?? []).map((je) => {
         const e = je.expediente;

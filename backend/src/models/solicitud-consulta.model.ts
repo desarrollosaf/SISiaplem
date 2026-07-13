@@ -32,6 +32,9 @@ export class SolicitudConsultaModel extends Model {
   @Column({ type: DataType.STRING(20), allowNull: false, defaultValue: 'pendiente' })
   declare estado: 'pendiente' | 'rechazada' | 'autorizada';
 
+  @Column({ type: DataType.DATEONLY, allowNull: true })
+  declare fecha_limite: string | null;
+
   @HasMany(() => SolicitudConsultaExpedienteModel, { foreignKey: 'id_solicitud_consulta' })
   declare expedientes: SolicitudConsultaExpedienteModel[];
 }

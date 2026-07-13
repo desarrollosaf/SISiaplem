@@ -106,7 +106,8 @@ export class TramiteConsultaExpedientesComponent implements OnInit {
     });
   }
 
-  estadoClase(estado: string): string {
+  estadoClase(estado: string, vigente?: boolean): string {
+    if (estado === 'autorizada' && vigente === false) return 'status-closed';
     switch (estado) {
       case 'pendiente': return 'status-pending';
       case 'autorizada': return 'status-active';
@@ -115,7 +116,8 @@ export class TramiteConsultaExpedientesComponent implements OnInit {
     }
   }
 
-  estadoLabel(estado: string): string {
+  estadoLabel(estado: string, vigente?: boolean): string {
+    if (estado === 'autorizada' && vigente === false) return 'Vencida';
     switch (estado) {
       case 'pendiente': return 'Pendiente';
       case 'autorizada': return 'Autorizada';
