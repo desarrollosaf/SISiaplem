@@ -1,0 +1,262 @@
+<!-- ===== ENCABEZADO ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-search"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Solicitudes de Consulta</h4>
+    <p class="archivo-subtitle">Autoriza o rechaza las solicitudes de Archivo de Trámite para consultar expedientes de Concentración.</p>
+  </div>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="tt-tabs mb-3">
+  @if (auth.hasPermission('transferencias.revisar')) {
+    <button class="tt-tab" [class.tt-tab-active]="tab() === 'revisar'" (click)="cambiarTab('revisar')">
+      <i class="bi bi-clipboard-check me-1"></i>Por Revisar
+      @if (pendientes().length > 0) { <span class="status-badge status-pending ms-1">{{ pendientes().length }}</span> }
+    </button>
+  }
+  <button class="tt-tab" [class.tt-tab-active]="tab() === 'autorizadas'" (click)="cambiarTab('autorizadas')">
+    <i class="bi bi-check2-circle me-1"></i>Autorizadas
+  </button>
+  <button class="tt-tab" [class.tt-tab-active]="tab() === 'rechazadas'" (click)="cambiarTab('rechazadas')">
+    <i class="bi bi-x-circle me-1"></i>Rechazadas
+  </button>
+</div>
+
+@if (tab() === 'revisar') {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-clipboard-check me-2" style="color:var(--primary)"></i>
+        @if (cargando()) { Cargando… } @else { {{ pendientes().length }} solicitud(es) pendiente(s) }
+      </span>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (!cargando() && pendientes().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-check2-circle"></i>
+          <p>No hay solicitudes de consulta pendientes de revisión.</p>
+        </div>
+      } @else if (!cargando()) {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Solicitud</th>
+              <th>Solicitó</th>
+              <th>Fecha</th>
+              <th style="text-align:center">Ver</th>
+              <th style="text-align:center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of pendientes(); track s.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                <td>{{ s.nombre_solicita }}</td>
+                <td class="text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
+                <td style="text-align:center">
+                  <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                    <i class="bi bi-eye-fill"></i>Ver
+                  </button>
+                </td>
+                <td style="text-align:center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-sm btn-outline-success" (click)="pedirConfirmarAutorizar(s.id)">
+                      <i class="bi bi-check-lg me-1"></i>Autorizar
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="abrirRechazo(s.id)">
+                      <i class="bi bi-x-lg me-1"></i>Rechazar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+@if (tab() === 'autorizadas') {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-check2-circle me-2" style="color:var(--primary)"></i>{{ autorizadas().length }} solicitud(es) autorizada(s)
+      </span>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (autorizadas().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-check2-circle"></i>
+          <p>No hay solicitudes de consulta autorizadas.</p>
+        </div>
+      } @else {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Solicitud</th>
+              <th>Solicitó</th>
+              <th>Autorizó</th>
+              <th>Fecha</th>
+              <th style="text-align:center">Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of autorizadas(); track s.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                <td>{{ s.nombre_solicita }}</td>
+                <td>{{ s.nombre_revisa }}</td>
+                <td class="text-muted">{{ s.fecha_revision | date:'dd/MM/yyyy' }}</td>
+                <td style="text-align:center">
+                  <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                    <i class="bi bi-eye-fill"></i>Ver
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+@if (tab() === 'rechazadas') {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-x-circle me-2" style="color:#dc3545"></i>{{ rechazadas().length }} solicitud(es) rechazada(s)
+      </span>
+    </div>
+    <div class="content-card-body" style="overflow-x:auto">
+      @if (rechazadas().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-check2-circle"></i>
+          <p>No hay solicitudes rechazadas.</p>
+        </div>
+      } @else {
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Solicitud</th>
+              <th>Solicitó</th>
+              <th>Rechazó</th>
+              <th>Motivo</th>
+              <th>Fecha</th>
+              <th style="text-align:center">Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of rechazadas(); track s.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">#{{ s.id }}</td>
+                <td>{{ s.nombre_solicita }}</td>
+                <td>{{ s.nombre_revisa }}</td>
+                <td class="text-muted">{{ s.motivo_rechazo ?? '—' }}</td>
+                <td class="text-muted">{{ s.fecha_revision | date:'dd/MM/yyyy' }}</td>
+                <td style="text-align:center">
+                  <button class="btn-ver" title="Ver detalle" (click)="verDetalle(s.id)">
+                    <i class="bi bi-eye-fill"></i>Ver
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL RECHAZO ===== -->
+@if (rechazoId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarRechazo()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="bi bi-x-circle"></i></div>
+    <h6 class="confirm-title">Rechazar solicitud #{{ rechazoId() }}</h6>
+    <p class="confirm-msg">El solicitante podrá volver a pedir consulta de estos expedientes más adelante.</p>
+    <textarea class="field-input" rows="3" placeholder="Motivo de improcedencia (opcional)" [(ngModel)]="motivoRechazo" style="width:100%; margin-bottom:1rem"></textarea>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarRechazo()">Cancelar</button>
+      <button class="btn-delete" (click)="confirmarRechazo()"><i class="bi bi-x-lg me-1"></i>Confirmar rechazo</button>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL CONFIRMAR AUTORIZAR ===== -->
+@if (autorizarId() !== null) {
+  <div class="modal-backdrop" (click)="cancelarAutorizar()"></div>
+  <div class="confirm-modal">
+    <div class="confirm-icon" style="background:#dcfce7; color:#16a34a"><i class="bi bi-check-circle"></i></div>
+    <h6 class="confirm-title">¿Autorizar solicitud #{{ autorizarId() }}?</h6>
+    <p class="confirm-msg">El Archivo de Trámite podrá consultar los expedientes de esta solicitud.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelarAutorizar()">Cancelar</button>
+      <button class="btn-confirm" (click)="confirmarAutorizar()"><i class="bi bi-check-lg me-1"></i>Sí, autorizar</button>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL DETALLE (solo lectura, sin visor de documentos) ===== -->
+@if (detalleId() !== null) {
+  <div class="modal-backdrop" (click)="cerrarDetalle()"></div>
+  <div class="detalle-modal">
+    <div class="detalle-modal-header">
+      <h6 class="detalle-modal-title">Solicitud #{{ detalleId() }}</h6>
+      <button class="detalle-modal-close" (click)="cerrarDetalle()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="detalle-modal-body">
+      @if (cargandoDetalle()) {
+        <div class="empty-state"><i class="bi bi-hourglass-split"></i><p>Cargando…</p></div>
+      } @else if (detalle(); as d) {
+        <div class="detalle-info-grid">
+          <div>
+            <span class="detalle-info-label">Estado</span>
+            <span class="status-badge" [class]="estadoClase(d.estado)">{{ estadoLabel(d.estado) }}</span>
+          </div>
+          <div>
+            <span class="detalle-info-label">Solicitó</span>
+            <span>{{ d.nombre_solicita }}</span>
+          </div>
+          @if (d.nombre_revisa) {
+            <div>
+              <span class="detalle-info-label">{{ d.autorizada ? 'Autorizó' : 'Rechazó' }}</span>
+              <span>{{ d.nombre_revisa }} — {{ d.fecha_revision | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+          @if (d.motivo_rechazo) {
+            <div>
+              <span class="detalle-info-label">Motivo</span>
+              <span>{{ d.motivo_rechazo }}</span>
+            </div>
+          }
+        </div>
+
+        <p class="detalle-expedientes-titulo">{{ d.expedientes.length }} expediente(s) en esta solicitud</p>
+
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Expediente</th>
+              <th>Clasificación</th>
+              <th>Año</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of d.expedientes; track e.id) {
+              <tr>
+                <td class="fw-semibold" style="color:var(--primary)">{{ e.nombre_ex }}</td>
+                <td style="font-size:0.8rem">{{ e.clasificacion }}</td>
+                <td class="text-muted">{{ e.anio }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}

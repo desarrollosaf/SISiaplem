@@ -23,7 +23,7 @@ type Tab = 'revisar' | 'recibir' | 'recibidas' | 'rechazadas';
 export class ConcentracionTransferenciasComponent implements OnInit {
   private transferenciasSvc = inject(TransferenciasService);
   private guia = inject(GuiaService);
-  private auth = inject(AuthService);
+  protected auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
 
@@ -60,6 +60,13 @@ export class ConcentracionTransferenciasComponent implements OnInit {
     if (this.soloExpedientes) {
       this.cargarExpedientesRecibidos();
     } else {
+      if (this.auth.hasPermission('transferencias.revisar')) {
+        this.tab.set('revisar');
+      } else if (this.auth.hasPermission('transferencias.recibir')) {
+        this.tab.set('recibir');
+      } else {
+        this.tab.set('recibidas');
+      }
       this.cargarTodo();
     }
   }

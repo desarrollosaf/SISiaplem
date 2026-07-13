@@ -14,6 +14,7 @@ export interface AuthUser {
   rfc: string;
   email: string;
   roles: string[];
+  permissions: string[];
 }
 
 export interface LoginResponse {
@@ -49,6 +50,13 @@ export class AuthService {
     return roles.some(r => userRoles.includes(r));
   }
 
+  hasPermission(...permissions: string[]): boolean {
+    const user = this._user();
+    if (!user) return false;
+    if (user.roles.includes('ADMIM')) return true;
+    return permissions.some(p => user.permissions.includes(p));
+  }
+
   login(rfc: string, password: string) {
     return this.http.post<LoginResponse>(`${API}/login`, { rfc, password }).pipe(
       tap(res => {
@@ -73,6 +81,10 @@ export class AuthService {
     return this.http.get<UserWithRoles[]>(`${API}/users`);
   }
 
+  searchUsers(q: string) {
+    return this.http.get<UserWithRoles[]>(`${API}/users/search`, { params: { q } });
+  }
+
   listRoles() {
     return this.http.get<{ id: number; name: string }[]>(`${API}/roles`);
   }
@@ -85,6 +97,18 @@ export class AuthService {
     return this.http.delete(`${API}/users/${userId}/roles/${role}`);
   }
 
+  listPermissions() {
+    return this.http.get<{ id: number; name: string }[]>(`${API}/permissions`);
+  }
+
+  assignPermission(userId: number, permission: string) {
+    return this.http.post(`${API}/users/${userId}/permissions`, { permission });
+  }
+
+  removePermission(userId: number, permission: string) {
+    return this.http.delete(`${API}/users/${userId}/permissions/${permission}`);
+  }
+
   private loadUserFromToken(): AuthUser | null {
     if (!isPlatformBrowser(this.platformId)) return null;
     const token = localStorage.getItem(TOKEN_KEY);
@@ -93,13 +117,20 @@ export class AuthService {
       // JWT usa Base64URL; atob solo acepta Base64 estándar → convertir antes de decodificar
       const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(atob(b64)) as {
-        sub: number; rfc: string; name: string; email: string; roles: string[]; exp: number;
+        sub: number; rfc: string; name: string; email: string; roles: string[]; permissions: string[]; exp: number;
       };
       if (payload.exp * 1000 < Date.now()) {
         localStorage.removeItem(TOKEN_KEY);
         return null;
       }
-      return { id: payload.sub, rfc: payload.rfc, name: payload.name, email: payload.email, roles: payload.roles ?? [] };
+      return {
+        id: payload.sub,
+        rfc: payload.rfc,
+        name: payload.name,
+        email: payload.email,
+        roles: payload.roles ?? [],
+        permissions: payload.permissions ?? [],
+      };
     } catch {
       localStorage.removeItem(TOKEN_KEY);
       return null;

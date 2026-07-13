@@ -18,6 +18,7 @@ import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
 import { ClasificacionModule } from './clasificacion/clasificacion.module';
 import { TransferenciasModule } from './transferencias/transferencias.module';
+import { ConsultasModule } from './consultas/consultas.module';
 
 
 @Module({
@@ -61,6 +62,7 @@ import { TransferenciasModule } from './transferencias/transferencias.module';
     AvisosModule,
     ClasificacionModule,
     TransferenciasModule,
+    ConsultasModule,
   ],
   controllers: [AppController],
   providers: [AppService],

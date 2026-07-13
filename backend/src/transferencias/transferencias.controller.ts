@@ -1,6 +1,9 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, ParseIntPipe, Res } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, ParseIntPipe, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { TransferenciasService } from './transferencias.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Permissions } from '../auth/permissions.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
 
 @Controller('transferencias')
 export class TransferenciasController {
@@ -61,6 +64,8 @@ export class TransferenciasController {
   }
 
   // PATCH /api/transferencias/:id/autorizar
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('transferencias.revisar')
   @Patch(':id/autorizar')
   autorizar(
     @Param('id', ParseIntPipe) id: number,
@@ -70,6 +75,8 @@ export class TransferenciasController {
   }
 
   // PATCH /api/transferencias/:id/recibir
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('transferencias.recibir')
   @Patch(':id/recibir')
   recibir(@Param('id', ParseIntPipe) id: number, @Body() dto: { rfc: string }) {
     return this.transferenciasService.recibir(id, dto.rfc);

@@ -54,6 +54,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/tramite-transferencias/tramite-transferencias').then(m => m.TramiteTransferenciasComponent)
       },
       { path: 'tramite/expediente/:id',   loadComponent: () => import('./pages/tramite-expediente-detalle/tramite-expediente-detalle').then(m => m.TramiteExpedienteDetalleComponent) },
+      {
+        path: 'tramite/consulta-expedientes',
+        loadComponent: () => import('./pages/tramite-consulta-expedientes/tramite-consulta-expedientes').then(m => m.TramiteConsultaExpedientesComponent)
+      },
 
       /* ── Archivo de Concentración ── */
       {
@@ -68,6 +72,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/concentracion-transferencias/concentracion-transferencias').then(m => m.ConcentracionTransferenciasComponent),
         data: { vista: 'todas' }
       },
+      {
+        path: 'concentracion/consultas',
+        loadComponent: () => import('./pages/concentracion-consultas/concentracion-consultas').then(m => m.ConcentracionConsultasComponent)
+      },
 
       /* ── Archivo Histórico ── */
       { path: 'historico/fondos',         loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Fondo Documental', 'Archivo Histórico') },
@@ -81,7 +89,7 @@ export const routes: Routes = [
       { path: 'admin/responsables/directorio', loadComponent: () => import('./pages/responsables/responsables').then(m => m.ResponsablesComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:id', loadComponent: () => import('./pages/seccion-subfondo/seccion-subfondo').then(m => m.SeccionSubfondoComponent) },
       { path: 'admin/instrumentos/cgca/subfondo/:subfondoId/seccion/:id', loadComponent: () => import('./pages/seccion-detalle/seccion-detalle').then(m => m.SeccionDetalleComponent) },
-      { path: 'admin/usuarios',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Usuarios y Roles', 'Administración') },
+      { path: 'admin/usuarios',     loadComponent: () => import('./pages/admin-usuarios/admin-usuarios').then(m => m.AdminUsuariosComponent) },
       { path: 'admin/catalogos',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Catálogos', 'Administración') },
       { path: 'admin/series',       loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Series Documentales', 'Administración') },
       { path: 'admin/configuracion',loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Configuración', 'Administración') },
