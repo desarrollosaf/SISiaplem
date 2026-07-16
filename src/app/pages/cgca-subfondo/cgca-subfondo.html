@@ -212,11 +212,11 @@
           <i class="bi bi-file-earmark-text-fill me-2" style="color:#16a34a"></i>Tipos documentales registrados
         </span>
         <div class="header-right">
-          <span class="badge-count" style="background:#f0fdf4;color:#16a34a">{{ fichasFiltradas().length }} registro(s)</span>
+          <span class="badge-count" style="background:#f0fdf4;color:#16a34a">{{ fichaTotalFiltrados() }} registro(s)</span>
           <div class="search-wrap">
             <i class="bi bi-search search-icon"></i>
             <input type="text" class="search-input" placeholder="Buscar tipo documental…"
-              [ngModel]="fichaFiltro()" (ngModelChange)="fichaFiltro.set($event)" />
+              [ngModel]="fichaFiltro()" (ngModelChange)="onFichaFiltroChange($event)" />
           </div>
         </div>
       </div>
@@ -232,13 +232,17 @@
           <table class="inv-table">
             <thead>
               <tr>
-                <th>Tipo Documental</th>
-                <th style="width:14%;text-align:center">Estatus</th>
+                <th class="th-sortable" (click)="ordenarFicha('tipo_doc')">
+                  Tipo Documental <i class="bi {{ fichaSortIcon('tipo_doc') }} ms-1"></i>
+                </th>
+                <th class="th-sortable" style="width:14%;text-align:center" (click)="ordenarFicha('status')">
+                  Estatus <i class="bi {{ fichaSortIcon('status') }} ms-1"></i>
+                </th>
                 <th style="width:14%;text-align:center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              @for (item of fichasFiltradas(); track item.id) {
+              @for (item of fichasPaginadas(); track item.id) {
                 <tr>
                   <td class="nombre-cell">{{ item.tipo_doc }}</td>
                   <td class="text-center">
@@ -269,6 +273,29 @@
             </tbody>
           </table>
         </div>
+
+        @if (fichaTotalPaginas() > 1) {
+          <div class="dt-footer">
+            <span class="dt-info">
+              Mostrando {{ fichaPaginaDesde }}–{{ fichaPaginaHasta }} de {{ fichaTotalFiltrados() }} registros
+            </span>
+            <div class="dt-pager">
+              <button class="pager-btn" (click)="fichaAnterior()" [disabled]="fichaPagina() === 1">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              @for (p of fichaPaginasVisibles(); track $index) {
+                @if (p === null) {
+                  <span class="pager-dots">…</span>
+                } @else {
+                  <button class="pager-btn" [class.pager-active]="p === fichaPagina()" (click)="fichaIrA(+p)">{{ p }}</button>
+                }
+              }
+              <button class="pager-btn" (click)="fichaSiguiente()" [disabled]="fichaPagina() === fichaTotalPaginas()">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        }
       }
     </div>
   }

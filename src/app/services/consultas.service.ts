@@ -34,6 +34,11 @@ export interface SolicitudConsultaDetalle extends SolicitudConsulta {
   expedientes: ExpedienteElegibleConsulta[];
 }
 
+export interface SolicitudPorVencer extends SolicitudConsulta {
+  total_expedientes: number;
+  dias_restantes: number | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConsultasService {
   private http = inject(HttpClient);
@@ -60,6 +65,10 @@ export class ConsultasService {
 
   getRechazadas() {
     return this.http.get<SolicitudConsulta[]>(`${API}/rechazadas`);
+  }
+
+  getPorVencer(dias = 7) {
+    return this.http.get<SolicitudPorVencer[]>(`${API}/por-vencer`, { params: { dias } });
   }
 
   getDetalle(id: number) {

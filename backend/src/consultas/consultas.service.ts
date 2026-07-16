@@ -227,6 +227,45 @@ export class ConsultasService {
     return this.decorarConNombres(solicitudes);
   }
 
+  // Consultas autorizadas (préstamos) cuya fecha_limite cae dentro de los próximos `diasVentana` días.
+  // Para el widget "Por Vencer" del dashboard (ADMIM / RAC, de todos los departamentos).
+  async getPorVencer(diasVentana = 7) {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const limite = new Date();
+    limite.setDate(limite.getDate() + diasVentana);
+    const limiteStr = limite.toISOString().slice(0, 10);
+
+    const solicitudes = await this.solicitudModel.findAll({
+      where: { estado: 'autorizada', fecha_limite: { [Op.between]: [hoy, limiteStr] } },
+      order: [['fecha_limite', 'ASC']],
+    });
+    if (!solicitudes.length) return [];
+
+    const joins = await this.solicitudExpedienteModel.findAll({
+      where: { id_solicitud_consulta: { [Op.in]: solicitudes.map((s) => s.id) } },
+      attributes: ['id_solicitud_consulta'],
+    });
+    const totalPorSolicitud = new Map<number, number>();
+    for (const j of joins) {
+      totalPorSolicitud.set(j.id_solicitud_consulta, (totalPorSolicitud.get(j.id_solicitud_consulta) ?? 0) + 1);
+    }
+
+    const decoradas = await this.decorarConNombres(solicitudes);
+    return decoradas.map((s) => ({
+      ...s,
+      total_expedientes: totalPorSolicitud.get(s.id) ?? 0,
+      dias_restantes: this.diasRestantes(s.fecha_limite),
+    }));
+  }
+
+  private diasRestantes(fechaLimite: string | null): number | null {
+    if (!fechaLimite) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const limite = new Date(`${fechaLimite}T00:00:00`);
+    return Math.round((limite.getTime() - hoy.getTime()) / 86400000);
+  }
+
   async getDetalle(id: number) {
     const solicitud = await this.solicitudModel.findByPk(id, {
       include: [

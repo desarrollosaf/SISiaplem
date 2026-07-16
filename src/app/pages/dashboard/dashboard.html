@@ -276,30 +276,31 @@
   </div>
 } @else {
   <!-- Sin Actividad Reciente (RAC/RAH): Por Vencer sube junto a Accesos Rápidos -->
-  <div class="content-card mt-3">
-    <div class="content-card-header">
-      <span class="content-card-title">
-        <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
-      </span>
-      <span class="status-badge status-pending">5</span>
-    </div>
-    <div class="p-3">
-      @for (item of [
-        { exp: 'EXP-2026-0812', dias: 1 },
-        { exp: 'EXP-2026-0798', dias: 2 },
-        { exp: 'EXP-2026-0776', dias: 3 }
-      ]; track item.exp) {
-        <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
-          <div>
-            <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">{{ item.exp }}</div>
-            <div class="text-muted" style="font-size:0.72rem">Devolución en {{ item.dias }} día(s)</div>
+  @if (auth.hasRole('RAC')) {
+    <div class="content-card mt-3">
+      <div class="content-card-header">
+        <span class="content-card-title">
+          <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
+        </span>
+        <span class="status-badge status-pending">{{ porVencer().length }}</span>
+      </div>
+      <div class="p-3">
+        @if (porVencer().length === 0) {
+          <p class="text-muted text-center mb-0" style="font-size:0.8rem">Sin préstamos por vencer en los próximos días.</p>
+        }
+        @for (item of porVencer(); track item.id) {
+          <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
+            <div>
+              <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">Solicitud #{{ item.id }} — {{ item.nombre_solicita }}</div>
+              <div class="text-muted" style="font-size:0.72rem">{{ item.total_expedientes }} expediente(s) · vence {{ item.dias_restantes === 0 ? 'hoy' : 'en ' + item.dias_restantes + ' día(s)' }}</div>
+            </div>
+            <span class="status-badge status-pending">{{ item.dias_restantes }}d</span>
           </div>
-          <span class="status-badge status-pending">{{ item.dias }}d</span>
-        </div>
-      }
-      <a href="#" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+        }
+        <a routerLink="/concentracion/consultas" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+      </div>
     </div>
-  </div>
+  }
 }
 
 </div>
@@ -360,31 +361,32 @@
   </div>
 
   @if (mostrarActividad()) {
-    <!-- Préstamos por vencer -->
-    <div class="content-card mb-3">
-      <div class="content-card-header">
-        <span class="content-card-title">
-          <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
-        </span>
-        <span class="status-badge status-pending">5</span>
-      </div>
-      <div class="p-3">
-        @for (item of [
-          { exp: 'EXP-2026-0812', dias: 1 },
-          { exp: 'EXP-2026-0798', dias: 2 },
-          { exp: 'EXP-2026-0776', dias: 3 }
-        ]; track item.exp) {
-          <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
-            <div>
-              <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">{{ item.exp }}</div>
-              <div class="text-muted" style="font-size:0.72rem">Devolución en {{ item.dias }} día(s)</div>
+    <!-- Préstamos por vencer (solo ADMIM / RAC) -->
+    @if (auth.hasRole('RAC')) {
+      <div class="content-card mb-3">
+        <div class="content-card-header">
+          <span class="content-card-title">
+            <i class="bi bi-exclamation-triangle-fill me-2" style="color:#fd7e14"></i>Por Vencer
+          </span>
+          <span class="status-badge status-pending">{{ porVencer().length }}</span>
+        </div>
+        <div class="p-3">
+          @if (porVencer().length === 0) {
+            <p class="text-muted text-center mb-0" style="font-size:0.8rem">Sin préstamos por vencer en los próximos días.</p>
+          }
+          @for (item of porVencer(); track item.id) {
+            <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background:#fff8f0">
+              <div>
+                <div class="fw-semibold" style="font-size:0.8rem; color:var(--primary)">Solicitud #{{ item.id }} — {{ item.nombre_solicita }}</div>
+                <div class="text-muted" style="font-size:0.72rem">{{ item.total_expedientes }} expediente(s) · vence {{ item.dias_restantes === 0 ? 'hoy' : 'en ' + item.dias_restantes + ' día(s)' }}</div>
+              </div>
+              <span class="status-badge status-pending">{{ item.dias_restantes }}d</span>
             </div>
-            <span class="status-badge status-pending">{{ item.dias }}d</span>
-          </div>
-        }
-        <a href="#" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+          }
+          <a routerLink="/concentracion/consultas" class="btn btn-outline-primary w-100 mt-2" style="font-size:0.78rem">Ver todos los préstamos</a>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Transferencias recientes (solo ADMIM) -->
     @if (auth.hasRole('ADMIM')) {
