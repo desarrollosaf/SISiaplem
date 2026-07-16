@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Patch, Param, Query, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ConsultasService } from './consultas.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Permissions } from '../auth/permissions.decorator';
-import { PermissionsGuard } from '../auth/permissions.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('consultas')
 export class ConsultasController {
@@ -44,6 +44,14 @@ export class ConsultasController {
     return this.consultasService.getRechazadas();
   }
 
+  // GET /api/consultas/por-vencer?dias=7
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('RAC')
+  @Get('por-vencer')
+  porVencer(@Query('dias') dias?: string) {
+    return this.consultasService.getPorVencer(dias ? Number(dias) : 7);
+  }
+
   // GET /api/consultas/:id
   @Get(':id')
   detalle(@Param('id', ParseIntPipe) id: number) {
@@ -51,8 +59,8 @@ export class ConsultasController {
   }
 
   // PATCH /api/consultas/:id/autorizar
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('transferencias.revisar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('RAC')
   @Patch(':id/autorizar')
   autorizar(
     @Param('id', ParseIntPipe) id: number,

@@ -11,7 +11,7 @@
 
 <!-- ===== TABS ===== -->
 <div class="tt-tabs mb-3">
-  @if (auth.hasPermission('transferencias.revisar')) {
+  @if (auth.hasRole('RAC')) {
     <button class="tt-tab" [class.tt-tab-active]="tab() === 'revisar'" (click)="cambiarTab('revisar')">
       <i class="bi bi-clipboard-check me-1"></i>Por Revisar
       @if (pendientes().length > 0) { <span class="status-badge status-pending ms-1">{{ pendientes().length }}</span> }

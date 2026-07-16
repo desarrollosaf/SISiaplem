@@ -49,7 +49,7 @@ export class ConcentracionConsultasComponent implements OnInit {
   documentoError = signal('');
 
   ngOnInit() {
-    this.tab.set(this.auth.hasPermission('transferencias.revisar') ? 'revisar' : 'autorizadas');
+    this.tab.set(this.auth.hasRole('RAC') ? 'revisar' : 'autorizadas');
     this.cargarTodo();
   }
 

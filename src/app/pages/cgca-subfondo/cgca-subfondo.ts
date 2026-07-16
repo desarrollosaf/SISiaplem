@@ -12,6 +12,7 @@ import {
 import { FichaValoracionService, TipoDoc } from '../../services/ficha-valoracion.service';
 
 type TabId = 'subfondos' | 'disposicion' | 'fichas';
+type FichaSortCol = 'tipo_doc' | 'status';
 
 @Component({
   selector: 'app-cgca-subfondo',
@@ -64,10 +65,55 @@ export class CgcaSubfondoComponent implements OnInit {
   fichaForm = { tipo_doc: '' };
   fichaCargada = false;
 
+  fichaSortCol = signal<FichaSortCol>('tipo_doc');
+  fichaSortDir = signal<'asc' | 'desc'>('asc');
+  fichaPagina = signal(1);
+  readonly fichaPorPagina = 10;
+
   fichasFiltradas = computed(() => {
     const q = this.fichaFiltro().toLowerCase();
     if (!q) return this.fichas();
     return this.fichas().filter(f => f.tipo_doc.toLowerCase().includes(q));
+  });
+
+  private fichasSortedFiltradas = computed(() => {
+    const col = this.fichaSortCol();
+    const dir = this.fichaSortDir() === 'asc' ? 1 : -1;
+    return [...this.fichasFiltradas()].sort((a, b) => {
+      const va = col === 'status' ? a.status : a.tipo_doc.toLowerCase();
+      const vb = col === 'status' ? b.status : b.tipo_doc.toLowerCase();
+      if (va === vb) return 0;
+      return va < vb ? -dir : dir;
+    });
+  });
+
+  fichasPaginadas = computed(() => {
+    const start = (this.fichaPagina() - 1) * this.fichaPorPagina;
+    return this.fichasSortedFiltradas().slice(start, start + this.fichaPorPagina);
+  });
+
+  fichaTotalFiltrados = computed(() => this.fichasFiltradas().length);
+  fichaTotalPaginas = computed(() => Math.max(1, Math.ceil(this.fichaTotalFiltrados() / this.fichaPorPagina)));
+
+  fichaPaginasVisibles = computed<(number | null)[]>(() => {
+    const total = this.fichaTotalPaginas();
+    const actual = this.fichaPagina();
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+    const set = new Set<number>([1, total]);
+    for (let i = actual - 1; i <= actual + 1; i++) {
+      if (i >= 1 && i <= total) set.add(i);
+    }
+
+    const sorted = [...set].sort((a, b) => a - b);
+    const result: (number | null)[] = [];
+    let prev = 0;
+    for (const p of sorted) {
+      if (prev && p - prev > 1) result.push(null);
+      result.push(p);
+      prev = p;
+    }
+    return result;
   });
 
   constructor(
@@ -275,4 +321,30 @@ export class CgcaSubfondoComponent implements OnInit {
       error: () => alert('No se pudo actualizar el estatus.'),
     });
   }
+
+  ordenarFicha(col: FichaSortCol) {
+    if (this.fichaSortCol() === col) {
+      this.fichaSortDir.set(this.fichaSortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.fichaSortCol.set(col);
+      this.fichaSortDir.set('asc');
+    }
+  }
+
+  onFichaFiltroChange(v: string) {
+    this.fichaFiltro.set(v);
+    this.fichaPagina.set(1);
+  }
+
+  fichaSortIcon(col: FichaSortCol): string {
+    if (this.fichaSortCol() !== col) return 'bi-arrow-down-up text-muted';
+    return this.fichaSortDir() === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+  }
+
+  fichaIrA(p: number) { this.fichaPagina.set(p); }
+  fichaAnterior() { if (this.fichaPagina() > 1) this.fichaPagina.update(p => p - 1); }
+  fichaSiguiente() { if (this.fichaPagina() < this.fichaTotalPaginas()) this.fichaPagina.update(p => p + 1); }
+
+  get fichaPaginaDesde() { return (this.fichaPagina() - 1) * this.fichaPorPagina + 1; }
+  get fichaPaginaHasta() { return Math.min(this.fichaPagina() * this.fichaPorPagina, this.fichaTotalFiltrados()); }
 }

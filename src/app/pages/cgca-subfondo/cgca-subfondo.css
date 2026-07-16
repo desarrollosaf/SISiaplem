@@ -196,6 +196,28 @@
 .inv-table tbody tr:hover { background: #fafbff; }
 .inv-table tbody td { padding: 11px 14px; font-size: 0.87rem; color: #1e293b; vertical-align: middle; }
 
+.th-sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+.th-sortable:hover { background: #f1f5f9; }
+
+/* ── Paginación ── */
+.dt-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; padding: 12px 18px;
+  border-top: 1px solid #e2e8f0; background: #f8f9fc;
+}
+.dt-info { font-size: .78rem; color: #64748b; }
+.dt-pager { display: flex; align-items: center; gap: 4px; }
+.pager-btn {
+  min-width: 32px; height: 32px; padding: 0 8px;
+  border: 1.5px solid #e2e8f0; border-radius: 7px;
+  background: #fff; color: #475569; font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.pager-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.pager-btn:disabled { opacity: .4; cursor: default; }
+.pager-active { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
+.pager-dots { font-size: .85rem; color: #94a3b8; padding: 0 4px; }
+
 .codigo-badge {
   display: inline-block;
   background: var(--primary-soft);
