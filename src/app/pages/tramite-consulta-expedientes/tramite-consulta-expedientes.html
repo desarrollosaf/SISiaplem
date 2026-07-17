@@ -225,10 +225,10 @@
                             <span class="ws-meta-lbl"><i class="bi bi-person-badge me-1"></i>Responsable</span>
                             <span class="ws-meta-val">{{ det.responsable?.Nombre || 'Sin asignación directa' }}</span>
                           </div>
-                          @if (det.expediente.fecha_cierre_exp) {
+                          @if (det.expediente.fecha_transferencia) {
                             <div class="ws-meta-row">
-                              <span class="ws-meta-lbl"><i class="bi bi-lock me-1"></i>Cierre</span>
-                              <span class="ws-meta-val">{{ det.expediente.fecha_cierre_exp }}</span>
+                              <span class="ws-meta-lbl"><i class="bi bi-send me-1"></i>Transferido a Concentración</span>
+                              <span class="ws-meta-val">{{ det.expediente.fecha_transferencia | date:'dd/MM/yyyy' }}</span>
                             </div>
                           }
                         </div>

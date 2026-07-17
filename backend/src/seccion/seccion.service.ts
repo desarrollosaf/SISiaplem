@@ -101,9 +101,23 @@ export class SeccionService {
     return resueltos;
   }
 
-  async getAreaAdministrativa(idDireccion: number) {
+  // idSeleccionado es el "id" que entregó getDirecciones(): si el subfondo es de dependencia 3
+  // ya es un id_Direccion real; en cualquier otro caso es el id_Departamento de la "cabecera"
+  // que representa esa dirección, así que primero resolvemos su id_Direccion real antes de buscar
+  // los departamentos (áreas administrativas) que cuelgan de ella.
+  async getAreaAdministrativa(idSeleccionado: number, subfondoId?: number) {
+    let idDireccionReal = idSeleccionado;
+
+    if (subfondoId) {
+      const subfondo = await this.subfondoModel.findByPk(subfondoId);
+      if (subfondo?.id_Dependencia !== 3) {
+        const cabecera = await this.departamentoModel.findByPk(idSeleccionado);
+        idDireccionReal = cabecera?.id_Direccion ?? idSeleccionado;
+      }
+    }
+
     const deptos = await this.departamentoModel.findAll({
-      where: { id_Direccion: idDireccion },
+      where: { id_Direccion: idDireccionReal },
       order: [['nombre_completo', 'ASC']],
     });
     return deptos.map((d) => ({
@@ -112,10 +126,25 @@ export class SeccionService {
     }));
   }
 
-  async getDepartamentoInfo(id: number) {
+  // Devuelve el id que hay que preseleccionar en el <select> "Dirección" para este departamento:
+  // en dependencia 3 (catálogo real de t_direccion) es su id_Direccion tal cual; en cualquier otra
+  // dependencia el <select> "Dirección" lista id_Departamento de las "cabeceras" (c_presup termina en '01'),
+  // así que hay que ubicar cuál de sus hermanos (mismo id_Direccion) es la cabecera.
+  async getDepartamentoInfo(id: number, subfondoId?: number) {
     const depto = await this.departamentoModel.findByPk(id);
     if (!depto) return null;
-    return { id_Direccion: depto.id_Direccion, label: depto.nombre_completo };
+
+    let idParaSelect = depto.id_Direccion;
+    if (subfondoId && depto.id_Direccion) {
+      const subfondo = await this.subfondoModel.findByPk(subfondoId);
+      if (subfondo?.id_Dependencia !== 3) {
+        const hermanos = await this.departamentoModel.findAll({ where: { id_Direccion: depto.id_Direccion } });
+        const cabecera = hermanos.find((h) => String(h.c_presup ?? '').endsWith('01'));
+        idParaSelect = cabecera?.id_Departamento ?? depto.id_Direccion;
+      }
+    }
+
+    return { id_Direccion: idParaSelect, label: depto.nombre_completo };
   }
 
   async getAreaNames(ids: number[]) {

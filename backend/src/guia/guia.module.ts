@@ -14,6 +14,7 @@ import { TipoDocModel } from '../models/tipo-doc.model';
 import { TipoExpedienteTratamientoModel } from '../models/tipo-expediente-tratamiento.model';
 import { SolicitudTransferenciaModel } from '../models/solicitud-transferencia.model';
 import { SUsuario } from '../models/s-usuario.model';
+import { TDepartamento } from '../models/t-departamento.model';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { SUsuario } from '../models/s-usuario.model';
       TipoExpedienteTratamientoModel,
       SolicitudTransferenciaModel,
     ]),
-    SequelizeModule.forFeature([SUsuario], 'saf'),
+    SequelizeModule.forFeature([SUsuario, TDepartamento], 'saf'),
   ],
   controllers: [GuiaController],
   providers: [GuiaService],
