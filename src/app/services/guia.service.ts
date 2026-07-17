@@ -16,6 +16,8 @@ export interface Serie {
   codigo: string;
   serie: string;
   total_expedientes: number;
+  departamento_id: number | null;
+  departamento_nombre: string | null;
   subseries: Subserie[];
 }
 
@@ -95,6 +97,7 @@ export interface ExpedienteDetalle {
     nombre_ex: string;
     anio: string;
     fecha_cierre_exp: string | null;
+    fecha_transferencia: string | null;
     status: number;
     id_serie: number | null;
     id_subserie: number | null;

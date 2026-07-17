@@ -93,8 +93,8 @@
               <span class="serie-codigo">{{ ser.codigo }}</span>
               <div class="serie-meta">
                 <span class="serie-nombre">{{ ser.serie }}</span>
-                @if (ser.departamento_id) {
-                  <span class="serie-dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ nombreDir(ser.departamento_id) }}</span>
+                @if (dirLabelParaMostrar(ser.departamento_id); as label) {
+                  <span class="serie-dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ label }}</span>
                 }
               </div>
               @if (ser.tipo_documental_ids && ser.tipo_documental_ids.length > 0) {
@@ -175,7 +175,7 @@
                         <tr [class.row-inactive]="sub.status === 0">
                           <td><span class="codigo-badge">{{ sub.codigo }}</span></td>
                           <td class="sub-nombre">{{ sub.subserie }}</td>
-                          <td class="sub-dir">{{ nombreDir(sub.id_Departamento) }}</td>
+                          <td class="sub-dir">{{ dirLabelParaMostrar(sub.id_Departamento) ?? '—' }}</td>
                           <td class="text-center">
                             @if (sub.status === 1) {
                               <span class="status-dot status-dot-active"></span>
@@ -220,7 +220,7 @@
                               <td class="sub-nombre">
                                 <span class="subsub-label">{{ sss.subsubserie }}</span>
                               </td>
-                              <td class="sub-dir">{{ nombreDir(sss.id_departamento) }}</td>
+                              <td class="sub-dir">{{ dirLabelParaMostrar(sss.id_departamento) ?? '—' }}</td>
                               <td class="text-center">
                                 @if (sss.status === 1) {
                                   <span class="status-dot status-dot-active"></span>
@@ -358,39 +358,56 @@
           [(ngModel)]="formSerie.serie" name="ser-nombre" />
       </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
-        @if (cargandoDirecciones()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else {
-          <select class="field-input" name="ser-dir-cascade"
-            [ngModel]="idDireccionSerie()"
-            (ngModelChange)="onDireccionSerieChange($event)">
-            <option [ngValue]="null">— Selecciona dirección —</option>
-            @for (dir of direccionesOpciones(); track dir.id) {
-              <option [ngValue]="dir.id">{{ dir.label }}</option>
-            }
-          </select>
-        }
-      </div>
+      @if (esComun()) {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección / Área Administrativa</label>
+          <div class="field-empty-note">
+            Esta serie hereda la(s) dirección(es) de la sección
+            <strong>{{ seccion()!.seccion }}</strong>:
+          </div>
+          @if (seccion()!.direccion_ids && seccion()!.direccion_ids!.length > 0) {
+            <div class="sic-dirs mt-2">
+              @for (dId of seccion()!.direccion_ids!; track dId) {
+                <span class="dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ nombreDir(dId) }}</span>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
+          @if (cargandoDirecciones()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else {
+            <select class="field-input" name="ser-dir-cascade"
+              [ngModel]="idDireccionSerie()"
+              (ngModelChange)="onDireccionSerieChange($event)">
+              <option [ngValue]="null">— Selecciona dirección —</option>
+              @for (dir of direccionesOpciones(); track dir.id) {
+                <option [ngValue]="dir.id">{{ dir.label }}</option>
+              }
+            </select>
+          }
+        </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
-        @if (cargandoAreas()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else if (idDireccionSerie() === null) {
-          <div class="field-empty-note">Selecciona primero una dirección.</div>
-        } @else if (areasAdministrativas().length === 0) {
-          <div class="field-empty-note">Sin áreas para esta dirección.</div>
-        } @else {
-          <select class="field-input" [(ngModel)]="formSerie.departamento_id" name="ser-depto">
-            <option [ngValue]="null">— Sin área asignada —</option>
-            @for (area of areasAdministrativas(); track area.id) {
-              <option [ngValue]="area.id">{{ area.label }}</option>
-            }
-          </select>
-        }
-      </div>
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+          @if (cargandoAreas()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else if (idDireccionSerie() === null) {
+            <div class="field-empty-note">Selecciona primero una dirección.</div>
+          } @else if (areasAdministrativas().length === 0) {
+            <div class="field-empty-note">Sin áreas para esta dirección.</div>
+          } @else {
+            <select class="field-input" [(ngModel)]="formSerie.departamento_id" name="ser-depto">
+              <option [ngValue]="null">— Sin área asignada —</option>
+              @for (area of areasAdministrativas(); track area.id) {
+                <option [ngValue]="area.id">{{ area.label }}</option>
+              }
+            </select>
+          }
+        </div>
+      }
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
@@ -428,39 +445,56 @@
           [(ngModel)]="formSubsubserie.subsubserie" name="sss-nombre" />
       </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
-        @if (cargandoDirecciones()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else {
-          <select class="field-input" name="sss-dir-cascade"
-            [ngModel]="idDireccionSubsubserie()"
-            (ngModelChange)="onDireccionSubsubserieChange($event)">
-            <option [ngValue]="null">— Selecciona dirección —</option>
-            @for (dir of direccionesOpciones(); track dir.id) {
-              <option [ngValue]="dir.id">{{ dir.label }}</option>
-            }
-          </select>
-        }
-      </div>
+      @if (esComun()) {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección / Área Administrativa</label>
+          <div class="field-empty-note">
+            Esta subsubserie hereda la(s) dirección(es) de la sección
+            <strong>{{ seccion()!.seccion }}</strong>:
+          </div>
+          @if (seccion()!.direccion_ids && seccion()!.direccion_ids!.length > 0) {
+            <div class="sic-dirs mt-2">
+              @for (dId of seccion()!.direccion_ids!; track dId) {
+                <span class="dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ nombreDir(dId) }}</span>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
+          @if (cargandoDirecciones()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else {
+            <select class="field-input" name="sss-dir-cascade"
+              [ngModel]="idDireccionSubsubserie()"
+              (ngModelChange)="onDireccionSubsubserieChange($event)">
+              <option [ngValue]="null">— Selecciona dirección —</option>
+              @for (dir of direccionesOpciones(); track dir.id) {
+                <option [ngValue]="dir.id">{{ dir.label }}</option>
+              }
+            </select>
+          }
+        </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
-        @if (cargandoAreasSubsub()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else if (idDireccionSubsubserie() === null) {
-          <div class="field-empty-note">Selecciona primero una dirección.</div>
-        } @else if (areasAdministrativasSubsub().length === 0) {
-          <div class="field-empty-note">Sin áreas para esta dirección.</div>
-        } @else {
-          <select class="field-input" [(ngModel)]="formSubsubserie.id_departamento" name="sss-depto">
-            <option [ngValue]="null">— Sin área asignada —</option>
-            @for (area of areasAdministrativasSubsub(); track area.id) {
-              <option [ngValue]="area.id">{{ area.label }}</option>
-            }
-          </select>
-        }
-      </div>
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+          @if (cargandoAreasSubsub()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else if (idDireccionSubsubserie() === null) {
+            <div class="field-empty-note">Selecciona primero una dirección.</div>
+          } @else if (areasAdministrativasSubsub().length === 0) {
+            <div class="field-empty-note">Sin áreas para esta dirección.</div>
+          } @else {
+            <select class="field-input" [(ngModel)]="formSubsubserie.id_departamento" name="sss-depto">
+              <option [ngValue]="null">— Sin área asignada —</option>
+              @for (area of areasAdministrativasSubsub(); track area.id) {
+                <option [ngValue]="area.id">{{ area.label }}</option>
+              }
+            </select>
+          }
+        </div>
+      }
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
@@ -498,39 +532,56 @@
           [(ngModel)]="formSubserie.subserie" name="sub-nombre" />
       </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
-        @if (cargandoDirecciones()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else {
-          <select class="field-input" name="sub-dir-cascade"
-            [ngModel]="idDireccionSubserie()"
-            (ngModelChange)="onDireccionSubserieChange($event)">
-            <option [ngValue]="null">— Selecciona dirección —</option>
-            @for (dir of direccionesOpciones(); track dir.id) {
-              <option [ngValue]="dir.id">{{ dir.label }}</option>
-            }
-          </select>
-        }
-      </div>
+      @if (esComun()) {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección / Área Administrativa</label>
+          <div class="field-empty-note">
+            Esta subserie hereda la(s) dirección(es) de la sección
+            <strong>{{ seccion()!.seccion }}</strong>:
+          </div>
+          @if (seccion()!.direccion_ids && seccion()!.direccion_ids!.length > 0) {
+            <div class="sic-dirs mt-2">
+              @for (dId of seccion()!.direccion_ids!; track dId) {
+                <span class="dir-chip"><i class="bi bi-geo-alt-fill me-1"></i>{{ nombreDir(dId) }}</span>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-building me-1"></i>Dirección</label>
+          @if (cargandoDirecciones()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else {
+            <select class="field-input" name="sub-dir-cascade"
+              [ngModel]="idDireccionSubserie()"
+              (ngModelChange)="onDireccionSubserieChange($event)">
+              <option [ngValue]="null">— Selecciona dirección —</option>
+              @for (dir of direccionesOpciones(); track dir.id) {
+                <option [ngValue]="dir.id">{{ dir.label }}</option>
+              }
+            </select>
+          }
+        </div>
 
-      <div class="field-group">
-        <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
-        @if (cargandoAreasSub()) {
-          <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
-        } @else if (idDireccionSubserie() === null) {
-          <div class="field-empty-note">Selecciona primero una dirección.</div>
-        } @else if (areasAdministrativasSub().length === 0) {
-          <div class="field-empty-note">Sin áreas para esta dirección.</div>
-        } @else {
-          <select class="field-input" [(ngModel)]="formSubserie.id_Departamento" name="sub-depto">
-            <option [ngValue]="null">— Sin área asignada —</option>
-            @for (area of areasAdministrativasSub(); track area.id) {
-              <option [ngValue]="area.id">{{ area.label }}</option>
-            }
-          </select>
-        }
-      </div>
+        <div class="field-group">
+          <label class="field-label"><i class="bi bi-geo-alt-fill me-1"></i>Área Administrativa</label>
+          @if (cargandoAreasSub()) {
+            <div class="skeleton-row" style="height:40px;border-radius:8px"></div>
+          } @else if (idDireccionSubserie() === null) {
+            <div class="field-empty-note">Selecciona primero una dirección.</div>
+          } @else if (areasAdministrativasSub().length === 0) {
+            <div class="field-empty-note">Sin áreas para esta dirección.</div>
+          } @else {
+            <select class="field-input" [(ngModel)]="formSubserie.id_Departamento" name="sub-depto">
+              <option [ngValue]="null">— Sin área asignada —</option>
+              @for (area of areasAdministrativasSub(); track area.id) {
+                <option [ngValue]="area.id">{{ area.label }}</option>
+              }
+            </select>
+          }
+        </div>
+      }
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>

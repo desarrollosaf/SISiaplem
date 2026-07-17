@@ -34,6 +34,36 @@ export class TramiteInventarioComponent implements OnInit {
     this.seriesFiltradas().reduce((acc, s) => acc + s.total_expedientes, 0),
   );
 
+  // Un responsable puede tener a su cargo más de un departamento/dirección: se separan en pestañas.
+  gruposPorDepartamento = computed(() => {
+    const grupos = new Map<string, { clave: string; departamentoId: number | null; departamentoNombre: string; series: Serie[] }>();
+    for (const serie of this.seriesFiltradas()) {
+      const key = serie.departamento_id != null ? String(serie.departamento_id) : 'sin-departamento';
+      if (!grupos.has(key)) {
+        grupos.set(key, {
+          clave: key,
+          departamentoId: serie.departamento_id,
+          departamentoNombre: serie.departamento_nombre ?? 'Sin departamento asignado',
+          series: [],
+        });
+      }
+      grupos.get(key)!.series.push(serie);
+    }
+    return [...grupos.values()]
+      .sort((a, b) => a.departamentoNombre.localeCompare(b.departamentoNombre))
+      .map((grupo) => ({
+        ...grupo,
+        totalExpedientes: grupo.series.reduce((acc, s) => acc + s.total_expedientes, 0),
+      }));
+  });
+
+  // Acordeón: qué departamento está desplegado (null = todos cerrados)
+  tabActivo = signal<string | null>(null);
+
+  seleccionarTab(clave: string) {
+    this.tabActivo.set(this.tabActivo() === clave ? null : clave);
+  }
+
   constructor(private guia: GuiaService, private auth: AuthService) {}
 
   ngOnInit() {
@@ -41,6 +71,8 @@ export class TramiteInventarioComponent implements OnInit {
       next: (data) => {
         this.series.set(data);
         this.cargando.set(false);
+        const grupos = this.gruposPorDepartamento();
+        if (grupos.length) this.tabActivo.set(grupos[0].clave);
       },
       error: (err) => {
         this.error.set('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');

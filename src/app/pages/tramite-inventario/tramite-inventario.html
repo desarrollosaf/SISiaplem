@@ -36,100 +36,86 @@
   </div>
 }
 
-<!-- ===== TABLA DE SERIES ===== -->
+<!-- ===== BARRA DE BÚSQUEDA / TOTALES ===== -->
 @else {
-  <div class="content-card">
-    <div class="content-card-header">
-      <span class="content-card-title">
-        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Inventario de Expedientes
-      </span>
-      <div class="header-right">
-        <span class="badge-count">{{ seriesFiltradas().length }} serie(s) · {{ totalExpedientesVisibles() }} expediente(s)</span>
-        @if (series().length > 0) {
-          <div class="search-wrap">
-            <i class="bi bi-search search-icon"></i>
-            <input type="text" class="search-input" placeholder="Buscar serie o subserie…"
-              [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
-          </div>
-        }
-      </div>
+  <div class="inv-toolbar mb-3">
+    <div class="inv-toolbar-total">
+      <i class="bi bi-collection-fill"></i>
+      <span>{{ seriesFiltradas().length }} serie(s) · {{ totalExpedientesVisibles() }} expediente(s)</span>
     </div>
+    @if (series().length > 0) {
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Buscar serie o subserie…"
+          [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+      </div>
+    }
+  </div>
 
-    @if (series().length === 0) {
+  @if (series().length === 0) {
+    <div class="content-card">
       <div class="empty-state">
         <i class="bi bi-folder2"></i>
         <p>No tienes series documentales asignadas.</p>
         <small>Contacta al administrador para que te asigne como responsable de archivo.</small>
       </div>
-    } @else if (seriesFiltradas().length === 0) {
+    </div>
+  } @else if (seriesFiltradas().length === 0) {
+    <div class="content-card">
       <div class="empty-state">
         <i class="bi bi-search"></i>
         <p>Sin resultados para "{{ busqueda() }}".</p>
       </div>
-    } @else {
-      <div class="table-responsive">
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th style="width:18%">Código</th>
-              <th>Serie / Subserie</th>
-              <th style="width:12%; text-align:center">Expedientes</th>
-              <th style="width:10%; text-align:center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (serie of seriesFiltradas(); track serie.id) {
-              <!-- Fila de SERIE -->
-              <tr class="row-serie">
-                <td>
-                  <span class="fs-badge fs-badge-serie">SERIE</span>
-                  {{ serie.codigo }}
-                </td>
-                <td class="serie-nombre">{{ serie.serie }}</td>
-                <td class="text-center">
-                  <span class="exp-count">{{ serie.total_expedientes }}</span>
-                </td>
-                <td class="text-center">
-                  <a
-                    [routerLink]="['/tramite/expedientes/serie', serie.id]"
-                    class="btn-icon"
-                    title="Ver expedientes de esta serie"
-                  >
-                    <i class="bi bi-eye-fill"></i>
-                  </a>
-                </td>
-              </tr>
+    </div>
+  }
 
-              <!-- Filas de SUBSERIE -->
-              @for (sub of serie.subseries; track sub.id) {
-                <tr class="row-sub">
-                  <td>
-                    <span class="fs-badge fs-badge-sub">SUB</span>
-                    {{ sub.codigo }}
-                  </td>
-                  <td class="sub-nombre">
-                    <span class="text-muted me-1" style="font-size:0.78rem">{{ serie.serie }}</span>
-                    <i class="bi bi-chevron-right text-muted" style="font-size:0.65rem"></i>
-                    {{ sub.subserie }}
-                  </td>
-                  <td class="text-center">
-                    <span class="exp-count exp-count-sub">{{ sub.total_expedientes }}</span>
-                  </td>
-                  <td class="text-center">
-                    <a
-                      [routerLink]="['/tramite/expedientes/subserie', sub.id]"
-                      class="btn-icon"
-                      title="Ver expedientes de esta subserie"
-                    >
-                      <i class="bi bi-eye-fill"></i>
+  <!-- ===== "LIBRO" CON SEPARADORES QUE SE DESPLIEGAN HACIA ABAJO ===== -->
+  @if (gruposPorDepartamento().length > 0) {
+    <div class="libro-acordeon">
+      @for (grupo of gruposPorDepartamento(); track grupo.clave) {
+        <div class="libro-item" [class.libro-item-open]="grupo.clave === tabActivo()">
+          <button type="button" class="libro-item-header" (click)="seleccionarTab(grupo.clave)">
+            <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
+            <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
+            <span class="libro-item-title">{{ grupo.departamentoNombre }}</span>
+            <span class="libro-item-count">{{ grupo.series.length }} serie(s) · {{ grupo.totalExpedientes }} expediente(s)</span>
+          </button>
+
+          @if (grupo.clave === tabActivo()) {
+            <div class="libro-item-body">
+              @for (serie of grupo.series; track serie.id) {
+                <div class="serie-tile">
+                  <div class="serie-tile-main">
+                    <span class="serie-tile-codigo">{{ serie.codigo }}</span>
+                    <span class="serie-tile-nombre">{{ serie.serie }}</span>
+                  </div>
+                  <div class="serie-tile-side">
+                    <span class="serie-tile-count">{{ serie.total_expedientes }}</span>
+                    <a [routerLink]="['/tramite/expedientes/serie', serie.id]" class="serie-tile-btn" title="Ver expedientes de esta serie">
+                      <i class="bi bi-arrow-right"></i>
                     </a>
-                  </td>
-                </tr>
+                  </div>
+                </div>
+
+                @for (sub of serie.subseries; track sub.id) {
+                  <div class="serie-tile serie-tile-sub">
+                    <div class="serie-tile-main">
+                      <span class="serie-tile-codigo serie-tile-codigo-sub">{{ sub.codigo }}</span>
+                      <span class="serie-tile-nombre-sub"><i class="bi bi-chevron-right"></i>{{ sub.subserie }}</span>
+                    </div>
+                    <div class="serie-tile-side">
+                      <span class="serie-tile-count serie-tile-count-sub">{{ sub.total_expedientes }}</span>
+                      <a [routerLink]="['/tramite/expedientes/subserie', sub.id]" class="serie-tile-btn" title="Ver expedientes de esta subserie">
+                        <i class="bi bi-arrow-right"></i>
+                      </a>
+                    </div>
+                  </div>
+                }
               }
-            }
-          </tbody>
-        </table>
-      </div>
-    }
-  </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
 }

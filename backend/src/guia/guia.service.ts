@@ -14,7 +14,9 @@ import { RegistroFisicoModel } from '../models/registro-fisico.model';
 import { DocumentosEnvioModel } from '../models/documentos-envio.model';
 import { TipoDocModel } from '../models/tipo-doc.model';
 import { TipoExpedienteTratamientoModel } from '../models/tipo-expediente-tratamiento.model';
+import { SolicitudTransferenciaModel } from '../models/solicitud-transferencia.model';
 import { SUsuario } from '../models/s-usuario.model';
+import { TDepartamento } from '../models/t-departamento.model';
 
 pdfMake.setFonts({
   Roboto: {
@@ -37,7 +39,9 @@ export class GuiaService {
     @InjectModel(RegistroFisicoModel) private registroFisicoModel: typeof RegistroFisicoModel,
     @InjectModel(DocumentosEnvioModel) private documentosEnvioModel: typeof DocumentosEnvioModel,
     @InjectModel(TipoExpedienteTratamientoModel) private tipoTratamientoModel: typeof TipoExpedienteTratamientoModel,
+    @InjectModel(SolicitudTransferenciaModel) private solicitudTransferenciaModel: typeof SolicitudTransferenciaModel,
     @InjectModel(SUsuario, 'saf') private sUsuarioModel: typeof SUsuario,
+    @InjectModel(TDepartamento, 'saf') private departamentoModel: typeof TDepartamento,
   ) {}
 
   private async getDeptIds(rfc: string): Promise<number[]> {
@@ -48,10 +52,14 @@ export class GuiaService {
     return responsables.map((r) => r.get('id_Departamento') as number);
   }
 
-  // Guia.index() — series del usuario con subseries y conteo de expedientes
+  // Guia.index() — series del usuario con subseries y conteo de expedientes, agrupables por departamento
+  // (un responsable puede tener a su cargo más de un departamento/dirección a la vez)
   async getInventario(rfc: string) {
     const deptIds = await this.getDeptIds(rfc);
     if (!deptIds.length) return [];
+
+    const departamentos = await this.departamentoModel.findAll({ where: { id_Departamento: { [Op.in]: deptIds } } });
+    const nombrePorDepto = new Map(departamentos.map((d) => [d.id_Departamento, d.nombre_completo]));
 
     const series = await this.serieModel.findAll({
       where: { departamento_id: { [Op.in]: deptIds }, status: 1 },
@@ -60,6 +68,7 @@ export class GuiaService {
 
     const result: {
       id: number; codigo: string; serie: string; total_expedientes: number;
+      departamento_id: number | null; departamento_nombre: string | null;
       subseries: { id: number; codigo: string; subserie: string; total_expedientes: number }[];
     }[] = [];
     for (const serie of series) {
@@ -74,7 +83,15 @@ export class GuiaService {
         subserie: ss.subserie,
         total_expedientes: await this.expedienteModel.count({ where: { id_subserie: ss.id, status: true } }),
       })));
-      result.push({ id: serie.id, codigo: serie.codigo, serie: serie.serie, total_expedientes, subseries });
+      result.push({
+        id: serie.id,
+        codigo: serie.codigo,
+        serie: serie.serie,
+        total_expedientes,
+        departamento_id: serie.departamento_id ?? null,
+        departamento_nombre: serie.departamento_id ? (nombrePorDepto.get(serie.departamento_id) ?? null) : null,
+        subseries,
+      });
     }
     return result;
   }
@@ -276,6 +293,12 @@ export class GuiaService {
       responsable = await this.sUsuarioModel.findOne({ where: { N_Usuario: expediente.rfc_usuario_expediente } });
     }
 
+    let fechaTransferencia: Date | null = null;
+    if (expediente.id_solicitud_transferencia) {
+      const solicitud = await this.solicitudTransferenciaModel.findByPk(expediente.id_solicitud_transferencia);
+      fechaTransferencia = solicitud?.fecha_recepcion ?? null;
+    }
+
     const [fisicos, digitalesRows, registrosDocs] = await Promise.all([
       this.registroFisicoModel.findAll({ where: { expediente_id: id, status: true }, order: [['folio', 'ASC']] }),
       this.registroModel.findAll({ where: { expediente_id: id, status: true }, order: [['folio', 'ASC']] }),
@@ -302,6 +325,7 @@ export class GuiaService {
         nombre_ex: expediente.nombre_ex,
         anio: expediente.anio,
         fecha_cierre_exp: expediente.fecha_cierre_exp,
+        fecha_transferencia: fechaTransferencia,
         status: expediente.status,
         id_serie: expediente.id_serie,
         id_subserie: expediente.id_subserie,
