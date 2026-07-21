@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        BASE_HREF: /siaplem/
+        BASE_HREF: /seaplem/
     container_name: sisiaplem-frontend
     ports:
       - "8086:80"
