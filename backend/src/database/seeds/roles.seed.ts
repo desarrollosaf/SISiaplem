@@ -10,7 +10,7 @@ const ROLES = [
   { name: 'RAT',   guard_name: 'web', desc: 'Responsable de Archivo de Trámite' },
   { name: 'RAC',   guard_name: 'web', desc: 'Responsable de Archivo de Concentración' },
   { name: 'RAH',   guard_name: 'web', desc: 'Responsable de Archivo Histórico' },
-  { name: 'ADMIM', guard_name: 'web', desc: 'Administrador SIAPLEM (acceso total)' },
+  { name: 'ADMIM', guard_name: 'web', desc: 'Administrador SEAPLEM (acceso total)' },
 ];
 
 const ASSIGNMENTS: { rfc: string; role: string }[] = [
