@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, ParseIntPipe, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Query,
+  Body,
+  ParseIntPipe,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { TransferenciasService } from './transferencias.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,7 +29,10 @@ export class TransferenciasController {
   // POST /api/transferencias
   @Post()
   crear(@Body() dto: { rfc: string; expedienteIds: number[] }) {
-    return this.transferenciasService.crearSolicitud(dto.rfc, dto.expedienteIds);
+    return this.transferenciasService.crearSolicitud(
+      dto.rfc,
+      dto.expedienteIds,
+    );
   }
 
   // GET /api/transferencias/pendientes
@@ -71,7 +85,12 @@ export class TransferenciasController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: { rfc: string; autoriza: boolean; motivo?: string },
   ) {
-    return this.transferenciasService.autorizar(id, dto.rfc, dto.autoriza, dto.motivo);
+    return this.transferenciasService.autorizar(
+      id,
+      dto.rfc,
+      dto.autoriza,
+      dto.motivo,
+    );
   }
 
   // PATCH /api/transferencias/:id/recibir
@@ -89,8 +108,28 @@ export class TransferenciasController {
     @Query('tipo') tipo: 'revision' | 'transferencia',
     @Res() res: Response,
   ) {
-    const buffer = await this.transferenciasService.getActaPdf(id, tipo === 'transferencia' ? 'transferencia' : 'revision');
-    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="Acta.pdf"' });
+    const buffer = await this.transferenciasService.getActaPdf(
+      id,
+      tipo === 'transferencia' ? 'transferencia' : 'revision',
+    );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="Acta.pdf"',
+    });
+    res.send(buffer);
+  }
+
+  // GET /api/transferencias/:id/inventario
+  @Get(':id/inventario')
+  async inventario(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const buffer = await this.transferenciasService.getInventarioPdf(id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="InventarioDeTransferencia.pdf"',
+    });
     res.send(buffer);
   }
 }

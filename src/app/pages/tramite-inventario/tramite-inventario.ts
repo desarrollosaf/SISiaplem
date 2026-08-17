@@ -66,6 +66,18 @@ export class TramiteInventarioComponent implements OnInit {
 
   constructor(private guia: GuiaService, private auth: AuthService) {}
 
+  descargarGuiaSimple() {
+    window.open(this.guia.getGuiaSimpleUrl(this.auth.userRfc()), '_blank');
+  }
+
+  descargarInventarioGeneral() {
+    window.open(this.guia.getInventarioGeneralUrl(this.auth.userRfc()), '_blank');
+  }
+
+  descargarRelacionBaja() {
+    window.open(this.guia.getRelacionBajaUrl(this.auth.userRfc()), '_blank');
+  }
+
   ngOnInit() {
     this.guia.getInventario(this.auth.userRfc()).subscribe({
       next: (data) => {

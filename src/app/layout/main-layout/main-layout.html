@@ -71,12 +71,12 @@
             </a>
           </li>
           <li>
-            <a routerLink="/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/transferencias" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Inventario de transferencia
             </a>
           </li>
           <li>
-            <a routerLink="/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Inventario de baja documental
             </a>
           </li>
@@ -147,6 +147,29 @@
         <i class="bi bi-trash3 nav-icon"></i>
         <span class="nav-label">Baja Documental</span>
       </a>
+
+      <button class="nav-link-item" (click)="toggleMenu('concentracionInventarios')">
+        <i class="bi bi-list-check"></i>
+        <span class="nav-label">Elaboración de inventarios</span>
+        <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('concentracionInventarios')"></i>
+      </button>
+      <ul class="nav-submenu" [class.submenu-open]="isOpen('concentracionInventarios')">
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Inventario general de Archivo de Concentración
+          </a>
+        </li>
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Inventario de transferencia secundaria
+          </a>
+        </li>
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Calendario de caducidades
+          </a>
+        </li>
+      </ul>
 
       <a routerLink="/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-send nav-icon"></i>
