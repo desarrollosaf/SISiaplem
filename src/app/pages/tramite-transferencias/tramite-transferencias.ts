@@ -94,6 +94,10 @@ export class TramiteTransferenciasComponent implements OnInit {
     return this.transferenciasSvc.getActaUrl(id, 'revision');
   }
 
+  inventarioUrl(id: number) {
+    return this.transferenciasSvc.getInventarioUrl(id);
+  }
+
   estadoClase(estado: string): string {
     switch (estado) {
       case 'pendiente': return 'status-pending';

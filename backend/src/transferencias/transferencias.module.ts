@@ -10,6 +10,10 @@ import { SubfondoModel } from '../models/subfondo.model';
 import { ExpedienteSerieSubseModel } from '../models/expediente-serie-subse.model';
 import { SolicitudTransferenciaModel } from '../models/solicitud-transferencia.model';
 import { SUsuario } from '../models/s-usuario.model';
+import { TDepartamento } from '../models/t-departamento.model';
+import { TDependencia } from '../models/t-dependencia.model';
+import { ValorDocumentalSerieSubserieModel } from '../models/valor_documental_serie_subserie.model';
+import { ValorDocumentalsModel } from '../models/valor_documentals.model';
 
 @Module({
   imports: [
@@ -21,8 +25,10 @@ import { SUsuario } from '../models/s-usuario.model';
       SubfondoModel,
       ExpedienteSerieSubseModel,
       SolicitudTransferenciaModel,
+      ValorDocumentalSerieSubserieModel,
+      ValorDocumentalsModel,
     ]),
-    SequelizeModule.forFeature([SUsuario], 'saf'),
+    SequelizeModule.forFeature([SUsuario, TDepartamento, TDependencia], 'saf'),
   ],
   controllers: [TransferenciasController],
   providers: [TransferenciasService],

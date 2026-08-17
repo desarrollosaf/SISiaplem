@@ -66,7 +66,8 @@ export const routes: Routes = [
         data: { vista: 'expedientes' }
       },
       { path: 'concentracion/prestamos',     loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Préstamos', 'Archivo de Concentración') },
-      { path: 'concentracion/baja',          loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Baja Documental', 'Archivo de Concentración') },
+      { path: 'concentracion/baja',          loadComponent: () => import('./pages/concentracion-inventarios/concentracion-inventarios').then(m => m.ConcentracionInventariosComponent) },
+      { path: 'concentracion/inventarios',   loadComponent: () => import('./pages/concentracion-inventarios/concentracion-inventarios').then(m => m.ConcentracionInventariosComponent) },
       {
         path: 'concentracion/transferencias',
         loadComponent: () => import('./pages/concentracion-transferencias/concentracion-transferencias').then(m => m.ConcentracionTransferenciasComponent),

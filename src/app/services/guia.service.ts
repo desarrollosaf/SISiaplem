@@ -206,4 +206,16 @@ export class GuiaService {
   getIndiceUrl(id: number, tipo: 'fisico' | 'electronico'): string {
     return `${API}/expedientes/${id}/indice/${tipo}`;
   }
+
+  getGuiaSimpleUrl(rfc: string): string {
+    return `${API}/guia-simple/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  getInventarioGeneralUrl(rfc: string): string {
+    return `${API}/inventario-general/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  getRelacionBajaUrl(rfc: string): string {
+    return `${API}/relacion-baja/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
 }

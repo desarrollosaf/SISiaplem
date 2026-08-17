@@ -98,7 +98,10 @@
                 <td><span class="status-badge" [class]="estadoClase(s.estado)">{{ estadoLabel(s.estado) }}</span></td>
                 <td class="text-muted">{{ s.motivo_rechazo ?? '—' }}</td>
                 <td class="text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
-                <td>
+                <td class="d-flex gap-1">
+                  <a [href]="inventarioUrl(s.id)" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Inventario de transferencia
+                  </a>
                   @if (s.estado === 'autorizada' || s.estado === 'recibida') {
                     <a [href]="actaUrl(s.id)" target="_blank" class="btn btn-sm btn-outline-primary">
                       <i class="bi bi-file-earmark-pdf me-1"></i>Ver acta

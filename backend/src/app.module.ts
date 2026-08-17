@@ -19,7 +19,7 @@ import { AvisosModule } from './avisos/avisos.module';
 import { ClasificacionModule } from './clasificacion/clasificacion.module';
 import { TransferenciasModule } from './transferencias/transferencias.module';
 import { ConsultasModule } from './consultas/consultas.module';
-
+import { ConcentracionModule } from './concentracion/concentracion.module';
 
 @Module({
   imports: [
@@ -64,6 +64,7 @@ import { ConsultasModule } from './consultas/consultas.module';
     ClasificacionModule,
     TransferenciasModule,
     ConsultasModule,
+    ConcentracionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
