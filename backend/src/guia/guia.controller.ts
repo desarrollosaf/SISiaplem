@@ -1,5 +1,14 @@
 import {
-  Controller, Get, Post, Patch, Put, Param, Query, Body, ParseIntPipe, Res,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Put,
+  Param,
+  Query,
+  Body,
+  ParseIntPipe,
+  Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { GuiaService } from './guia.service';
@@ -12,6 +21,41 @@ export class GuiaController {
   @Get('inventario')
   inventario(@Query('rfc') rfc: string) {
     return this.guiaService.getInventario(rfc ?? '');
+  }
+
+  // GET /api/guia/guia-simple/pdf?rfc=XXXX
+  @Get('guia-simple/pdf')
+  async guiaSimplePdf(@Query('rfc') rfc: string, @Res() res: Response) {
+    const buffer = await this.guiaService.getGuiaSimplePdf(rfc ?? '');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="GuiaSimpleDeArchivos.pdf"',
+    });
+    res.send(buffer);
+  }
+
+  // GET /api/guia/inventario-general/pdf?rfc=XXXX
+  @Get('inventario-general/pdf')
+  async inventarioGeneralPdf(@Query('rfc') rfc: string, @Res() res: Response) {
+    const buffer = await this.guiaService.getInventarioGeneralPdf(rfc ?? '');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition':
+        'inline; filename="InventarioGeneralDeArchivoDeTramite.pdf"',
+    });
+    res.send(buffer);
+  }
+
+  // GET /api/guia/relacion-baja/pdf?rfc=XXXX
+  @Get('relacion-baja/pdf')
+  async relacionBajaPdf(@Query('rfc') rfc: string, @Res() res: Response) {
+    const buffer = await this.guiaService.getRelacionBajaPdf(rfc ?? '');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition':
+        'inline; filename="RelacionDeDocumentosDesincorporados.pdf"',
+    });
+    res.send(buffer);
   }
 
   // GET /api/guia/serie/:id
@@ -53,13 +97,17 @@ export class GuiaController {
   // GET /api/guia/actividad-reciente?rfc=XXXX&limit=5
   @Get('actividad-reciente')
   actividadReciente(@Query('rfc') rfc: string, @Query('limit') limit?: string) {
-    return this.guiaService.getActividadReciente(rfc ?? '', limit ? parseInt(limit, 10) : 5);
+    return this.guiaService.getActividadReciente(
+      rfc ?? '',
+      limit ? parseInt(limit, 10) : 5,
+    );
   }
 
   // POST /api/guia/expedientes
   @Post('expedientes')
   crearExpediente(
-    @Body() dto: {
+    @Body()
+    dto: {
       id_serie?: number;
       id_subserie?: number;
       nombre_ex: string;
@@ -99,7 +147,8 @@ export class GuiaController {
   @Put('expedientes/:id')
   transferirExpediente(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: {
+    @Body()
+    dto: {
       nombre_ex?: string;
       anio?: string;
       id_tipo_expediente?: number | null;
@@ -111,38 +160,59 @@ export class GuiaController {
 
   // GET /api/guia/documento/:id — GuiaController.getDoc()
   @Get('documento/:id')
-  async getDocumento(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async getDocumento(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     const ruta = await this.guiaService.getRutaDocumento(id);
     res.sendFile(ruta);
   }
 
   // GET /api/guia/documento-registro/:id — GuiaController.getDocR()
   @Get('documento-registro/:id')
-  async getDocumentoRegistro(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async getDocumentoRegistro(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     const ruta = await this.guiaService.getRutaDocumentoRegistro(id);
     res.sendFile(ruta);
   }
 
   // GET /api/guia/documento-envio/:id — descarga de documento anidado (documentos_envios)
   @Get('documento-envio/:id')
-  async getDocumentoEnvio(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async getDocumentoEnvio(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     const ruta = await this.guiaService.getRutaDocumentoEnvio(id);
     res.sendFile(ruta);
   }
 
   // GET /api/guia/expedientes/:id/indice/fisico — GuiaController.getIndexExpF()
   @Get('expedientes/:id/indice/fisico')
-  async indiceFisico(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async indiceFisico(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     const buffer = await this.guiaService.getIndicePdf(id, 'fisico');
-    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="Index.pdf"' });
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="Index.pdf"',
+    });
     res.send(buffer);
   }
 
   // GET /api/guia/expedientes/:id/indice/electronico — GuiaController.getIndexExpE()
   @Get('expedientes/:id/indice/electronico')
-  async indiceElectronico(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async indiceElectronico(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     const buffer = await this.guiaService.getIndicePdf(id, 'electronico');
-    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="Index.pdf"' });
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="Index.pdf"',
+    });
     res.send(buffer);
   }
 }

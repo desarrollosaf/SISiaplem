@@ -97,4 +97,8 @@ export class TransferenciasService {
   getActaUrl(id: number, tipo: 'revision' | 'transferencia'): string {
     return `${API}/${id}/acta?tipo=${tipo}`;
   }
+
+  getInventarioUrl(id: number): string {
+    return `${API}/${id}/inventario`;
+  }
 }
