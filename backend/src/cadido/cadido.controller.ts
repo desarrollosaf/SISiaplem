@@ -17,9 +17,16 @@ getcadido(@Param('id', ParseIntPipe) id: number){
 
 @Get('getserie/:id/:tipo')
 getserie(
-  @Param('id', ParseIntPipe) id: number, 
+  @Param('id', ParseIntPipe) id: number,
   @Param('tipo', ParseIntPipe) tipo: number){
     return this.cadidoService.getserie(id, tipo);
+}
+
+@Get('bitacora/:tipo/:id')
+getBitacora(
+  @Param('tipo', ParseIntPipe) tipo: number,
+  @Param('id', ParseIntPipe) id: number){
+    return this.cadidoService.getBitacora(tipo, id);
 }
 
  @Put(':id')
@@ -33,8 +40,10 @@ getserie(
       anios_consentracion: number;
       total_anios: number;
       id_destino: number;
-      valoresSeleccionados: [],
+      id_tecnica: number | null;
+      valoresSeleccionados: number[],
       tipo: number,
+      rfc: string,
     },
   ) {
     return this.cadidoService.update(id, dto);

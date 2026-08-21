@@ -3,6 +3,7 @@ import { SeccionModel } from './seccion.model';
 import { SubSerieModel } from './sub-serie.model';
 import { ValorDocumentalSerieSubserieModel } from './valor_documental_serie_subserie.model';
 import { DestinoFinalModel } from './destino_final.model';
+import { TecnicaSeleccionModel } from './tecnica-seleccion.model';
 
 @Table({ tableName: 'series', timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' })
 export class SerieModel extends Model {
@@ -25,29 +26,35 @@ export class SerieModel extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
   declare status: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  declare anio_tramite: number;
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare anio_tramite: number | null;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  declare anios_consentracion: number;
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare anios_consentracion: number | null;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  declare total_anios: number;
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare total_anios: number | null;
 
   @ForeignKey(() => DestinoFinalModel)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  declare id_destino: number;
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare id_destino: number | null;
 
+  @ForeignKey(() => TecnicaSeleccionModel)
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare id_tecnica: number | null;
 
   @BelongsTo(() => SeccionModel)
   declare seccion: SeccionModel;
 
   @HasMany(() => SubSerieModel, { foreignKey: 'idSerie' })
   declare subSeries: SubSerieModel[];
-  
+
   @HasMany(() => ValorDocumentalSerieSubserieModel, { foreignKey: 'id_serie' })
   declare valores: ValorDocumentalSerieSubserieModel[];
 
   @BelongsTo(() => DestinoFinalModel)
   declare destino: DestinoFinalModel;
+
+  @BelongsTo(() => TecnicaSeleccionModel)
+  declare tecnica: TecnicaSeleccionModel;
 }

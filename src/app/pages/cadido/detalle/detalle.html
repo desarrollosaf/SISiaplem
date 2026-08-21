@@ -4,7 +4,7 @@
   </div>
   <div class="archivo-header-body">
     <h4 class="archivo-title">Catálogo de Disposición Documental (CADIDO).</h4>
-    <p class="archivo-subtitle"></p>
+    <p class="archivo-subtitle">Consulta y actualiza los valores documentales, la técnica de selección, el destino final y los plazos de conservación de cada serie y subserie de este subfondo.</p>
     </div>
 </div>
 
@@ -43,119 +43,116 @@
         <small>Contacta al administrador para que te asigne como responsable de archivo.</small>
       </div>
     } @else {
-      <div class="table-responsive">
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th style="width:10%" >Código</th>
-              <th colspan="6">Sección (SC), Serie (SE), Subserie (SS)</th>
-            </tr>
-          </thead>
-          <tbody>
-             @for (item of cadido(); track item.id) {
-              <!-- Fila de SERIE -->
-              <tr class="seccion" >
-                <td>
-                  <span class="seccion-badge">Sección </span> {{ item.codigo }} 
-                </td>
-                <td class="serie-nombre">{{ item.seccion }}</td>
-                <td class="text-center">Valores primarios</td>
-                <td style="width:10%" >
-                    <table>
-                        <tr>
-                            <td colspan="2">Plazo de conservación</td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">AT</td>
-                            <td class="text-center">AC</td>
-                        </tr>
-                    </table>
-                </td>
-                <td class="text-center">Total de años</td>
-                <td class="text-center">Destino</td>
-                <td style="width:10%; text-align:center">Acciones</td>
-              </tr>
-                @for (ser of item.series; track ser.id) {
-                    <tr class="row-serie">
-                        <td> <span class="codigo-badge">Serie </span>{{ ser.codigo }} </td>
-                        <td class="serie-nombre">{{ ser.serie }}</td>
-                        <td class="serie-nombrer center"> 
-                            <table style="width:100%" >
-                                <tr class="text-center">
-                                    @for (item of ser.valores; track $index) {
-                                        @switch (item.id_valor) {
-                                            @case (1) { <td class="text-center">A</td> }
-                                            @case (2) { <td class="text-center">L</td> }
-                                            @case (3) { <td class="text-center">F</td> }
-                                            @case (4) { <td class="text-center">C</td> }
-                                        }
-                                    }
-                                </tr>
-                            </table> 
-                        </td>
-                        <td>
-                            <table style="width:90%">
-                                <tr>
-                                    <td class="text-center">{{ser.anio_tramite}}</td>
-                                    <td class="text-center">{{ser.anios_consentracion}}</td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td class="text-center"> {{ ser.total_anios }} </td>
-                        <td class="text-center"> {{ser.destino?.valor}} </td>
-                        <td class="text-center">
-                            <a class="btn-icon"title="Editar" (click)="editSerie(ser.id, 1)">
-                                <i class="bi bi-pencil-fill"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    @for (sub of ser.subSeries; track sub.id) {
-                    <tr class="row-serie">
-                        <td>
-                            <span class="subserie-badge">Sub </span>{{ sub.codigo }}
-                        </td>
-                        <td class="serie-nombre">{{ sub.subserie }}</td>
-                        <td class="serie-nombrer"> 
-                            <table  style="width:100%">
-                                <tr class="text-center">
-                                    @for (item of sub.valores; track $index) {
-                                        @switch (item.id_valor) {
-                                            @case (1) { <td class="text-center">A</td> }
-                                            @case (2) { <td class="text-center">L</td> }
-                                            @case (3) { <td class="text-center">F</td> }
-                                            @case (4) { <td class="text-center">C</td> }
-                                        }
-                                    }
-                                </tr>
-                            </table> 
-                        </td>
-                        <td class="text-center"> 
-                            <table style="width:90%">
-                                <tr>
-                                    <td class="text-center">{{sub.anio_tramite}}</td>
-                                    <td class="text-center">{{sub.anios_consentracion}}</td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td class="text-center"> {{sub.total_anios }} </td>
-                        <td class="text-center"> {{sub.destino?.valor}} </td>
-                        <td class="text-center">
-                            <a class="btn-icon"title="Editar"  (click)="editSerie(sub.id, 2)">
-                                <i class="bi bi-pencil-fill"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    }
-                }   
-            }
-          </tbody>
-        </table>
+      <div class="cad-toolbar">
+        <div class="search-wrap flex-grow-1">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" class="search-input w-100" placeholder="Buscar por código o nombre de sección, serie o subserie…"
+                 [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+        </div>
+        <button type="button" class="cad-toolbar-btn" (click)="expandirTodo()"><i class="bi bi-arrows-expand"></i> Expandir todo</button>
+        <button type="button" class="cad-toolbar-btn" (click)="colapsarTodo()"><i class="bi bi-arrows-collapse"></i> Colapsar todo</button>
       </div>
 
+      @if (cadidoFiltrado().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-search"></i>
+          <p>Sin resultados para "{{ busqueda() }}".</p>
+        </div>
+      }
 
+      <div class="cad-list">
+        @for (item of cadidoFiltrado(); track item.id) {
+          <div class="cad-seccion" [class.cad-collapsed]="estaColapsada(item.id)">
+            <button type="button" class="cad-seccion-header" (click)="toggleSeccion(item.id)">
+              <i class="bi bi-chevron-down cad-chevron"></i>
+              <span class="jq-badge jq-sec">SEC</span>
+              <span class="jq-codigo">{{ item.codigo }}</span>
+              <span class="cad-seccion-nombre">{{ item.seccion }}</span>
+              <span class="cad-count-pill">{{ item.series.length }} serie{{ item.series.length === 1 ? '' : 's' }}</span>
+            </button>
 
+            @if (!estaColapsada(item.id)) {
+              <div class="cad-seccion-body">
+                @if (item.series.length === 0) {
+                  <div class="cad-empty-mini">Sin series registradas en esta sección.</div>
+                }
+                @for (ser of item.series; track ser.id) {
+                  <div class="cad-row cad-row-serie">
+                    <span class="jq-badge jq-ser">SER</span>
+                    <div class="cad-row-main">
+                      <div class="cad-row-title">
+                        <span class="jq-codigo">{{ ser.codigo }}</span>
+                        <span class="cad-row-nombre">{{ ser.serie }}</span>
+                      </div>
+                      <div class="cad-row-meta">
+                        <span class="valores-chips">
+                          @for (v of ser.valores; track $index) {
+                            @switch (v.id_valor) {
+                              @case (1) { <span class="valor-chip" title="Administrativo">A</span> }
+                              @case (2) { <span class="valor-chip" title="Legal">L</span> }
+                              @case (3) { <span class="valor-chip" title="Fiscal">F</span> }
+                              @case (4) { <span class="valor-chip" title="Contable">C</span> }
+                            }
+                          }
+                        </span>
+                        <span class="cad-plazo-pill">AT {{ ser.anio_tramite }} · AC {{ ser.anios_consentracion }} · Total <strong>{{ ser.total_anios }}</strong></span>
+                        <span class="cad-tag"><i class="bi bi-diagram-3-fill"></i>{{ ser.tecnica?.valor || 'Sin técnica' }}</span>
+                        <span class="cad-tag"><i class="bi bi-signpost-split-fill"></i>{{ ser.destino?.valor || 'Sin destino' }}</span>
+                      </div>
+                    </div>
+                    <div class="cad-row-actions">
+                      <a class="btn-icon btn-icon-edit" title="Editar" (click)="editSerie(ser.id, 1)">
+                        <i class="bi bi-pencil-fill"></i>
+                      </a>
+                      <a class="btn-icon btn-icon-view" title="Ver historial" (click)="verHistorial(ser.id, 1)">
+                        <i class="bi bi-clock-history"></i>
+                      </a>
+                    </div>
+                  </div>
 
+                  @for (sub of ser.subSeries; track sub.id) {
+                    <div class="cad-row cad-row-subserie">
+                      <span class="jq-badge jq-sub">SUB</span>
+                      <div class="cad-row-main">
+                        <div class="cad-row-title">
+                          <span class="jq-codigo">{{ sub.codigo }}</span>
+                          <span class="cad-row-nombre">{{ sub.subserie }}</span>
+                        </div>
+                        <div class="cad-row-meta">
+                          <span class="valores-chips">
+                            @for (v of sub.valores; track $index) {
+                              @switch (v.id_valor) {
+                                @case (1) { <span class="valor-chip" title="Administrativo">A</span> }
+                                @case (2) { <span class="valor-chip" title="Legal">L</span> }
+                                @case (3) { <span class="valor-chip" title="Fiscal">F</span> }
+                                @case (4) { <span class="valor-chip" title="Contable">C</span> }
+                              }
+                            }
+                          </span>
+                          <span class="cad-plazo-pill">AT {{ sub.anio_tramite }} · AC {{ sub.anios_consentracion }} · Total <strong>{{ sub.total_anios }}</strong></span>
+                          <span class="cad-tag"><i class="bi bi-diagram-3-fill"></i>{{ sub.tecnica?.valor || 'Sin técnica' }}</span>
+                          <span class="cad-tag"><i class="bi bi-signpost-split-fill"></i>{{ sub.destino?.valor || 'Sin destino' }}</span>
+                        </div>
+                      </div>
+                      <div class="cad-row-actions">
+                        <a class="btn-icon btn-icon-edit" title="Editar" (click)="editSerie(sub.id, 2)">
+                          <i class="bi bi-pencil-fill"></i>
+                        </a>
+                        <a class="btn-icon btn-icon-view" title="Ver historial" (click)="verHistorial(sub.id, 2)">
+                          <i class="bi bi-clock-history"></i>
+                        </a>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
 
+      <!-- ===== DRAWER: EDITAR ===== -->
+      @if (drawerOpen()) { <div class="drawer-overlay" (click)="cerrarDrawer()"></div> }
       <div class="drawer" [class.drawer-open]="drawerOpen()">
         <div class="drawer-header">
             <div>
@@ -163,6 +160,7 @@
                 <i class="bi bi-pencil-fill"></i>
                 Modificar CADIDO
             </h5>
+            <p class="drawer-subtitle">Actualiza la clasificación documental de este registro.</p>
             </div>
             <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
         </div>
@@ -176,26 +174,56 @@
             </div>
           } @else {
             <div class="field-group">
-                <label class="field-label"><i class="bi bi-hash me-1"></i>Código <span class="required-star">*</span></label>
+                <label class="field-label"><i class="bi bi-hash me-1"></i>Código</label>
                 <input type="text" class="field-input" [(ngModel)]="formSerie.codigo" name="codigo" disabled="true"/>
             </div>
             @if(formSerie.serie){
                 <div class="field-group">
-                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Serie <span class="required-star">*</span></label>
+                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Serie</label>
                     <input type="text" class="field-input" [(ngModel)]="formSerie.serie" name="serie" disabled="true"/>
                 </div>
             }
             @else{
                 <div class="field-group">
-                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Subserie <span class="required-star">*</span></label>
+                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Subserie</label>
                     <input type="text" class="field-input" [(ngModel)]="formSerie.subserie" name="serie" disabled="true"/>
                 </div>
             }
 
             <div class="field-group">
-                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Valores primarios <span class="required-star">*</span></label>
+                <label class="field-label"><i class="bi bi-tags-fill me-1"></i>Valores primarios <span class="required-star">*</span></label>
                 <select class="form-select" multiple size="4" [(ngModel)]="formSerie.valoresSeleccionados"  name="valoresSeleccionados" >
                     @for (item of valoresArray; track item.id) {
+                        <option [ngValue]="item.id">
+                        {{ item.name }}
+                        </option>
+                    }
+                </select>
+                <span class="field-help">Mantén Ctrl (o Cmd) presionado para seleccionar varias opciones.</span>
+            </div>
+
+            <div class="plazos-grid">
+                <div class="field-group">
+                    <label class="field-label">Archivo trámite (años) <span class="required-star">*</span></label>
+                    <input type="number" min="0" class="field-input" [(ngModel)]="formSerie.anio_tramite" name="anio_tramite" (ngModelChange)="actualizarTotal()" />
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Archivo concentración (años) <span class="required-star">*</span></label>
+                    <input type="number" min="0" class="field-input" [(ngModel)]="formSerie.anios_consentracion" name="anios_consentracion" (ngModelChange)="actualizarTotal()" />
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-calculator me-1"></i>Total de años</label>
+                <input type="text" class="field-input field-input-readonly" [ngModel]="formSerie.total_anios" name="total_anios" disabled="true"/>
+                <span class="field-help">Se calcula automáticamente: trámite + concentración.</span>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label"><i class="bi bi-diagram-3-fill me-1"></i>Técnica de selección</label>
+                <select class="field-input" [(ngModel)]="formSerie.id_tecnica" name="id_tecnica">
+                    @for (item of tecnicasArray; track item.id) {
                         <option [ngValue]="item.id">
                         {{ item.name }}
                         </option>
@@ -204,22 +232,7 @@
             </div>
 
             <div class="field-group">
-                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Plazo archivo trámite <span class="required-star">*</span></label>
-                <input type="text" class="field-input" [(ngModel)]="formSerie.anio_tramite" name="anio_tramite" />
-            </div>
-
-            <div class="field-group">
-                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Plazo archivo concentrasión <span class="required-star">*</span></label>
-                <input type="text" class="field-input" [(ngModel)]="formSerie.anios_consentracion" name="anios_consentracion" />
-            </div>
-
-            <div class="field-group">
-                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Total de años <span class="required-star">*</span></label>
-                <input type="text" class="field-input" [(ngModel)]="formSerie.total_anios" name="total_anios" />
-            </div>
-
-            <div class="field-group">
-                <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Destino <span class="required-star">*</span></label>
+                <label class="field-label"><i class="bi bi-signpost-split-fill me-1"></i>Destino final <span class="required-star">*</span></label>
                 <select class="field-input" [(ngModel)]="formSerie.id_destino"  name="id_destino" >
                     @for (item of destinosArray; track item.id) {
                         <option [ngValue]="item.id">
@@ -239,6 +252,51 @@
             </button>
         </div>
     </div>
+
+      <!-- ===== PANEL: HISTORIAL (BITÁCORA) ===== -->
+      @if (historialOpen()) { <div class="drawer-overlay" (click)="cerrarHistorial()"></div> }
+      <div class="drawer" [class.drawer-open]="historialOpen()">
+        <div class="drawer-header">
+            <div>
+            <h5 class="drawer-title">
+                <i class="bi bi-clock-history"></i>
+                Historial de cambios
+            </h5>
+            <p class="drawer-subtitle">Bitácora de movimientos de clasificación de este registro.</p>
+            </div>
+            <button class="drawer-close" (click)="cerrarHistorial()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="drawer-body">
+          @if (historialCargando()) {
+            <div class="skeleton-loader">
+              @for (i of [1,2,3]; track i) {
+                <div class="skeleton-row"></div>
+              }
+            </div>
+          } @else if (historialItems().length === 0) {
+            <div class="jerarquia-empty">
+                <i class="bi bi-inboxes"></i>
+                <span>Aún no hay movimientos registrados para este elemento.</span>
+            </div>
+          } @else {
+            <div class="hist-list">
+                @for (h of historialItems(); track h.id) {
+                    <div class="hist-item">
+                        <div class="hist-item-top">
+                            <span class="hist-movimiento">{{ h.movimiento }}</span>
+                            <span class="hist-fecha">{{ h.fecha_movimiento }}</span>
+                        </div>
+                        <div class="hist-item-body">
+                            <span class="hist-usuario"><i class="bi bi-person-fill me-1"></i>{{ h.usuario_movimiento }}</span>
+                            <span class="hist-plazos">AT {{ h.anios_tramite ?? '—' }} · AC {{ h.anios_consentracion ?? '—' }} · Total {{ h.total_anios ?? '—' }}</span>
+                        </div>
+                    </div>
+                }
+            </div>
+          }
+        </div>
+      </div>
     }
   </div>
 }
