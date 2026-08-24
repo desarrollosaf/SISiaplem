@@ -13,6 +13,7 @@ import {
   TipoDocumentalItem,
 } from '../../services/seccion.service';
 import { SubfondoService, SubfondoItem } from '../../services/subfondo.service';
+import { MultiSelectComponent, MultiSelectOption } from '../../components/multi-select/multi-select';
 
 type DrawerMode =
   | 'seccion-edit'
@@ -31,7 +32,7 @@ interface ConfirmAction {
 
 @Component({
   selector: 'app-seccion-detalle',
-  imports: [FormsModule],
+  imports: [FormsModule, MultiSelectComponent],
   templateUrl: './seccion-detalle.html',
   styleUrl: './seccion-detalle.css',
 })
@@ -48,6 +49,9 @@ export class SeccionDetalleComponent implements OnInit {
   direccionesOpciones = signal<DireccionItem[]>([]);
   cargandoDirecciones = signal(false);
   tipoDocumentales = signal<TipoDocumentalItem[]>([]);
+  tipoDocumentalOpciones = computed<MultiSelectOption[]>(() =>
+    this.tipoDocumentales().map(td => ({ value: td.id, label: td.tipo_doc })),
+  );
 
   // Cascade serie: dirección → área administrativa
   areasAdministrativas = signal<AreaAdministrativaItem[]>([]);
@@ -209,29 +213,6 @@ export class SeccionDetalleComponent implements OnInit {
     this.selectedDirIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
   }
 
-  // ── Tipo Documental (serie) ───────────────────────────────────────────────
-
-  isTipoDocSerieSelected(id: number): boolean { return this.selectedTipoDocSerieIds().includes(id); }
-  toggleTipoDocSerie(id: number) {
-    const ids = this.selectedTipoDocSerieIds();
-    this.selectedTipoDocSerieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
-
-  // ── Tipo Documental (subserie) ────────────────────────────────────────────
-
-  isTipoDocSubserieSelected(id: number): boolean { return this.selectedTipoDocSubserieIds().includes(id); }
-  toggleTipoDocSubserie(id: number) {
-    const ids = this.selectedTipoDocSubserieIds();
-    this.selectedTipoDocSubserieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
-
-  // ── Tipo Documental (subsubserie) ─────────────────────────────────────────
-
-  isTipoDocSubsubserieSelected(id: number): boolean { return this.selectedTipoDocSubsubserieIds().includes(id); }
-  toggleTipoDocSubsubserie(id: number) {
-    const ids = this.selectedTipoDocSubsubserieIds();
-    this.selectedTipoDocSubsubserieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
 
   // ── Cascading: Dirección → Área Administrativa ───────────────────────────
 

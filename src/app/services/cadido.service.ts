@@ -27,10 +27,12 @@ export interface serieI {
   subSeries: subseriesI[]
   anio_tramite: number,
   anios_consentracion: number
-  total_anios: number, 
+  total_anios: number,
   valores: valoresI[],
   destino: DestinoI,
   id_destino: number,
+  tecnica: TecnicaI | null,
+  id_tecnica: number | null,
 }
 
 export interface FormSerie {
@@ -43,12 +45,14 @@ export interface FormSerie {
   valoresSeleccionados: number[];
   destino: DestinoI | null;
   id_destino: number,
+  id_tecnica: number | null,
 }
 
 export interface resultado {
-  series: serieI, 
+  series: serieI,
   valoresS: [],
-  destinosS: []
+  destinosS: [],
+  tecnicasS: [],
 }
 
 export interface subseriesI{
@@ -61,11 +65,28 @@ export interface subseriesI{
   valores: valoresI[],
   destino: DestinoI,
   id_destino: number
+  tecnica: TecnicaI | null,
+  id_tecnica: number | null,
 }
 
 export interface DestinoI {
   id: number;
   valor: string;
+}
+
+export interface TecnicaI {
+  id: number;
+  valor: string;
+}
+
+export interface BitacoraItem {
+  id: number;
+  movimiento: string;
+  fecha_movimiento: string;
+  usuario_movimiento: string;
+  anios_tramite: number | null;
+  anios_consentracion: number | null;
+  total_anios: number | null;
 }
 
 export interface valoresI{
@@ -99,7 +120,11 @@ export class CadidoSevice {
     return this.http.get<resultado>(`${API}/getserie/${id}/${tipo}`);
   }
 
-  update(id: number, dto: Omit<FormSerie, 'id_subfondo'> & { direccion_ids?: number[] }) {
+  update(id: number, dto: Omit<FormSerie, 'id_subfondo'> & { tipo: number; rfc: string }) {
     return this.http.put<serieI>(`${API}/${id}`, dto);
-  }  
+  }
+
+  getBitacora(tipo: number, id: number) {
+    return this.http.get<BitacoraItem[]>(`${API}/bitacora/${tipo}/${id}`);
+  }
 }

@@ -7,6 +7,8 @@ import { ValorDocumentalsModel } from 'src/models/valor_documentals.model';
 import { DestinoFinalModel } from 'src/models/destino_final.model';
 import { SubfondoModel } from 'src/models/subfondo.model';
 import { TDependencia } from 'src/models/t-dependencia.model';
+import { TecnicaSeleccionModel } from 'src/models/tecnica-seleccion.model';
+import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.model';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { TDependencia } from 'src/models/t-dependencia.model';
       ValorDocumentalsModel,
       DestinoFinalModel,
       SubfondoModel,
+      TecnicaSeleccionModel,
+      BitacoraClasificacionModel,
     ]),
     SequelizeModule.forFeature([TDependencia], 'saf'),
   ],
