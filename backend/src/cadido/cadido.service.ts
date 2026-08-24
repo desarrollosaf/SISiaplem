@@ -8,6 +8,8 @@ import { SubfondoModel } from 'src/models/subfondo.model';
 import { TDependencia } from 'src/models/t-dependencia.model';
 import { ValorDocumentalSerieSubserieModel } from 'src/models/valor_documental_serie_subserie.model';
 import { ValorDocumentalsModel } from 'src/models/valor_documentals.model';
+import { TecnicaSeleccionModel } from 'src/models/tecnica-seleccion.model';
+import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.model';
 
 @Injectable()
 export class CadidoService {
@@ -55,12 +57,14 @@ export class CadidoService {
       include: [
         {
           model: SerieModel,
+          required: false,
           include: [
             {
               model: SubSerieModel,
               where: {
                 status: 1,
               },
+              required: false,
               include: [
                 {
                   model: ValorDocumentalSerieSubserieModel,
@@ -68,6 +72,9 @@ export class CadidoService {
                 },
                 {
                   model: DestinoFinalModel,
+                },
+                {
+                  model: TecnicaSeleccionModel,
                 },
               ],
             },
@@ -78,6 +85,9 @@ export class CadidoService {
             {
               model: DestinoFinalModel,
             },
+            {
+              model: TecnicaSeleccionModel,
+            },
           ],
           where: {
             status: 1,
@@ -85,37 +95,6 @@ export class CadidoService {
         },
       ],
     });
-
-    seccion.map((d) => ({
-      id: d.id,
-      codigoS: d.codigo,
-      seccion: d.seccion,
-      series: (d.series ?? []).map((ser) => ({
-        id: ser.id,
-        codigo: ser.codigo,
-        serie: ser.serie,
-        at: ser.anio_tramite == null ? 0 : ser.anio_tramite,
-        ac: ser.anios_consentracion ?? 0,
-        total: ser.total_anios ?? 0,
-        valores: (ser.valores ?? []).map((v) => ({
-          id: v.id_valor,
-        })),
-        destino: ser.destino?.valor ?? null,
-        id_destino: ser.id_destino,
-        subseries: (ser.subSeries ?? []).map((sub) => ({
-          id: sub.id,
-          codigo: sub.codigo,
-          subserie: sub.subserie,
-          at: sub.anio_tramite ?? 0,
-          ac: sub.anios_consentracion ?? 0,
-          total: sub.total_anios ?? 0,
-          valores: (sub.valores ?? []).map((v) => ({
-            id: v.id_valor,
-          })),
-          destino: sub.destino?.valor ?? null,
-        })),
-      })),
-    }));
 
     return seccion;
   }
@@ -134,6 +113,9 @@ export class CadidoService {
           {
             model: DestinoFinalModel,
           },
+          {
+            model: TecnicaSeleccionModel,
+          },
         ],
       });
     } else {
@@ -148,16 +130,21 @@ export class CadidoService {
           {
             model: DestinoFinalModel,
           },
+          {
+            model: TecnicaSeleccionModel,
+          },
         ],
       });
     }
 
     const valores = await ValorDocumentalsModel.findAll();
     const destinos = await DestinoFinalModel.findAll();
+    const tecnicas = await TecnicaSeleccionModel.findAll();
     const response = {
       series: serie,
       valoresS: valores,
       destinosS: destinos,
+      tecnicasS: tecnicas,
     };
     return response;
   }
@@ -171,14 +158,21 @@ export class CadidoService {
       anios_consentracion: number;
       total_anios: number;
       id_destino: number;
-      valoresSeleccionados: [];
+      id_tecnica: number | null;
+      valoresSeleccionados: number[];
       tipo: number;
+      rfc: string;
     },
   ) {
-    const { valoresSeleccionados, ...data } = dto;
+    const { valoresSeleccionados, tipo, rfc, ...data } = dto;
 
-    if (dto.tipo == 1) {
+    let idSeccion: number | null = null;
+
+    if (tipo == 1) {
       await SerieModel.update(data, { where: { id } });
+      idSeccion = (
+        await SerieModel.findByPk(id, { attributes: ['idSeccion'] })
+      )?.idSeccion ?? null;
 
       if (valoresSeleccionados !== undefined) {
         await ValorDocumentalSerieSubserieModel.destroy({
@@ -196,6 +190,17 @@ export class CadidoService {
     } else {
       await SubSerieModel.update(data, { where: { id } });
 
+      const subserie = await SubSerieModel.findByPk(id, {
+        attributes: ['idSerie'],
+      });
+      if (subserie) {
+        idSeccion = (
+          await SerieModel.findByPk(subserie.idSerie, {
+            attributes: ['idSeccion'],
+          })
+        )?.idSeccion ?? null;
+      }
+
       if (valoresSeleccionados !== undefined) {
         await ValorDocumentalSerieSubserieModel.destroy({
           where: { id_subserie: id },
@@ -211,6 +216,30 @@ export class CadidoService {
       }
     }
 
+    await BitacoraClasificacionModel.create({
+      movimiento: 'Actualización',
+      fecha_movimiento: new Date().toISOString().slice(0, 10),
+      usuario_movimiento: rfc,
+      id_destino: data.id_destino,
+      id_tecnica: data.id_tecnica,
+      anios_tramite: data.anio_tramite,
+      anios_consentracion: data.anios_consentracion,
+      total_anios: data.total_anios,
+      id_serie: tipo == 1 ? id : null,
+      id_subserie: tipo == 2 ? id : null,
+      id_seccion: idSeccion,
+    });
+
     return { id, ...data };
+  }
+
+  async getBitacora(tipo: number, id: number) {
+    return BitacoraClasificacionModel.findAll({
+      where: tipo == 1 ? { id_serie: id } : { id_subserie: id },
+      order: [
+        ['fecha_movimiento', 'DESC'],
+        ['id', 'DESC'],
+      ],
+    });
   }
 }

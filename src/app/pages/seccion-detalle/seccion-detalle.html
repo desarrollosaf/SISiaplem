@@ -411,23 +411,11 @@
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
-        @if (tipoDocumentales().length === 0) {
-          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
-        } @else {
-          <div class="tipo-doc-list">
-            @for (td of tipoDocumentales(); track td.id) {
-              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSerieSelected(td.id)">
-                <input type="checkbox" class="tipo-doc-cb"
-                  [checked]="isTipoDocSerieSelected(td.id)"
-                  (change)="toggleTipoDocSerie(td.id)" />
-                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
-              </label>
-            }
-          </div>
-          @if (selectedTipoDocSerieIds().length > 0) {
-            <span class="field-help">{{ selectedTipoDocSerieIds().length }} tipo(s) seleccionado(s).</span>
-          }
-        }
+        <app-multi-select
+          [options]="tipoDocumentalOpciones()"
+          [value]="selectedTipoDocSerieIds()"
+          (valueChange)="selectedTipoDocSerieIds.set($event)"
+          emptyLabel="Sin tipos documentales disponibles." />
       </div>
     }
 
@@ -498,23 +486,11 @@
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
-        @if (tipoDocumentales().length === 0) {
-          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
-        } @else {
-          <div class="tipo-doc-list">
-            @for (td of tipoDocumentales(); track td.id) {
-              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSubsubserieSelected(td.id)">
-                <input type="checkbox" class="tipo-doc-cb"
-                  [checked]="isTipoDocSubsubserieSelected(td.id)"
-                  (change)="toggleTipoDocSubsubserie(td.id)" />
-                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
-              </label>
-            }
-          </div>
-          @if (selectedTipoDocSubsubserieIds().length > 0) {
-            <span class="field-help">{{ selectedTipoDocSubsubserieIds().length }} tipo(s) seleccionado(s).</span>
-          }
-        }
+        <app-multi-select
+          [options]="tipoDocumentalOpciones()"
+          [value]="selectedTipoDocSubsubserieIds()"
+          (valueChange)="selectedTipoDocSubsubserieIds.set($event)"
+          emptyLabel="Sin tipos documentales disponibles." />
       </div>
     }
 
@@ -585,23 +561,11 @@
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-file-earmark-text me-1"></i>Tipo Documental</label>
-        @if (tipoDocumentales().length === 0) {
-          <div class="field-empty-note">Sin tipos documentales disponibles.</div>
-        } @else {
-          <div class="tipo-doc-list">
-            @for (td of tipoDocumentales(); track td.id) {
-              <label class="tipo-doc-item" [class.tipo-doc-selected]="isTipoDocSubserieSelected(td.id)">
-                <input type="checkbox" class="tipo-doc-cb"
-                  [checked]="isTipoDocSubserieSelected(td.id)"
-                  (change)="toggleTipoDocSubserie(td.id)" />
-                <span class="tipo-doc-label">{{ td.tipo_doc }}</span>
-              </label>
-            }
-          </div>
-          @if (selectedTipoDocSubserieIds().length > 0) {
-            <span class="field-help">{{ selectedTipoDocSubserieIds().length }} tipo(s) seleccionado(s).</span>
-          }
-        }
+        <app-multi-select
+          [options]="tipoDocumentalOpciones()"
+          [value]="selectedTipoDocSubserieIds()"
+          (valueChange)="selectedTipoDocSubserieIds.set($event)"
+          emptyLabel="Sin tipos documentales disponibles." />
       </div>
     }
 

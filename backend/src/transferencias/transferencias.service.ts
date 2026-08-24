@@ -638,7 +638,7 @@ export class TransferenciasService {
           serie?.codigo ?? subserie?.codigo ?? '',
           serie?.serie ?? subserie?.subserie ?? '',
           e.nombre_ex,
-          serie ? String(serie.anios_consentracion) : '',
+          serie?.anios_consentracion != null ? String(serie.anios_consentracion) : '',
           valoresExp.has('Administrativo') ? 'X' : '',
           valoresExp.has('Legal') ? 'X' : '',
           valoresExp.has('Fiscal') || valoresExp.has('Contable') ? 'X' : '',
