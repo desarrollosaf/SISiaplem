@@ -36,5 +36,8 @@ export class BitacoraClasificacionModel extends Model {
   declare id_subserie: number | null;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
+  declare id_subsubserie: number | null;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
   declare id_seccion: number | null;
 }
