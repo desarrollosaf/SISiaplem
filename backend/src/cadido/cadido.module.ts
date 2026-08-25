@@ -9,6 +9,7 @@ import { SubfondoModel } from 'src/models/subfondo.model';
 import { TDependencia } from 'src/models/t-dependencia.model';
 import { TecnicaSeleccionModel } from 'src/models/tecnica-seleccion.model';
 import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.model';
+import { SubsubSerieModel } from 'src/models/subsub-serie.model';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.mo
       SubfondoModel,
       TecnicaSeleccionModel,
       BitacoraClasificacionModel,
+      SubsubSerieModel,
     ]),
     SequelizeModule.forFeature([TDependencia], 'saf'),
   ],
