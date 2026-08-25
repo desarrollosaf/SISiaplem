@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
-import { CadidoSevice, detalle, serieI, valoresI, DestinoI, FormSerie, resultado, BitacoraItem } from '../../../services/cadido.service';
+import { CadidoSevice, detalle, serieI, subseriesI, valoresI, DestinoI, FormSerie, resultado, BitacoraItem } from '../../../services/cadido.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
@@ -40,7 +40,13 @@ export class Detalle implements OnInit{
         const series = sec.series
           .map((ser) => {
             if (coincide(ser.codigo, ser.serie)) return ser;
-            const subSeries = ser.subSeries.filter((sub) => coincide(sub.codigo, sub.subserie));
+            const subSeries = ser.subSeries
+              .map((sub) => {
+                if (coincide(sub.codigo, sub.subserie)) return sub;
+                const subsubSeries = sub.subsubSeries.filter((sss) => coincide(sss.codigo, sss.subsubserie));
+                return subsubSeries.length ? { ...sub, subsubSeries } : null;
+              })
+              .filter((s): s is subseriesI => s !== null);
             return subSeries.length ? { ...ser, subSeries } : null;
           })
           .filter((s): s is serieI => s !== null);
@@ -67,6 +73,7 @@ export class Detalle implements OnInit{
     codigo: '',
     serie: '',
     subserie: null,
+    subsubserie: null,
     anio_tramite: 0,
     anios_consentracion: 0,
     total_anios: 0,
@@ -128,17 +135,19 @@ export class Detalle implements OnInit{
 
     this.cadidoserv.getserie(id, tipo).subscribe({
       next: (data: resultado) => {
+        const registro = data.series as any;
         this.formSerie = {
-          codigo: data.series.codigo,
-          serie: data.series.serie,
-          subserie: data.series.subserie,
-          anio_tramite: data.series.anio_tramite,
-          anios_consentracion: data.series.anios_consentracion,
-          total_anios: data.series.total_anios,
-          valoresSeleccionados : data.series.valores.map(v => v.id_valor),
-          destino: data.series.destino,
-          id_destino: data.series.id_destino,
-          id_tecnica: data.series.id_tecnica,
+          codigo: registro.codigo,
+          serie: tipo === 1 ? registro.serie : null,
+          subserie: tipo === 2 ? registro.subserie : null,
+          subsubserie: tipo === 3 ? registro.subsubserie : null,
+          anio_tramite: registro.anio_tramite,
+          anios_consentracion: registro.anios_consentracion,
+          total_anios: registro.total_anios,
+          valoresSeleccionados: (registro.valores ?? []).map((v: valoresI) => v.id_valor),
+          destino: registro.destino,
+          id_destino: registro.id_destino,
+          id_tecnica: registro.id_tecnica,
         };
         this.valoresArray = [
           { id: '', name: '--Seleccione una opción--' },
@@ -195,8 +204,8 @@ export class Detalle implements OnInit{
       });
     }
 
-    get mostrarSubserie(): boolean {
-      return !!this.formSerie.subserie;
+    get mostrarValoresPrimarios(): boolean {
+      return this.tipo !== 3;
     }
 
     verHistorial(id: number, tipo: number) {

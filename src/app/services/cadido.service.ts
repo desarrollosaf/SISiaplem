@@ -39,6 +39,7 @@ export interface FormSerie {
   codigo: string;
   serie: string;
   subserie: string | null;
+  subsubserie: string | null;
   anio_tramite: number;
   anios_consentracion: number;
   total_anios: number;
@@ -65,6 +66,20 @@ export interface subseriesI{
   valores: valoresI[],
   destino: DestinoI,
   id_destino: number
+  tecnica: TecnicaI | null,
+  id_tecnica: number | null,
+  subsubSeries: subsubseriesI[],
+}
+
+export interface subsubseriesI {
+  id: number,
+  codigo: string,
+  subsubserie: string,
+  anio_tramite: number | null,
+  anios_consentracion: number | null,
+  total_anios: number | null,
+  destino: DestinoI | null,
+  id_destino: number | null,
   tecnica: TecnicaI | null,
   id_tecnica: number | null,
 }

@@ -143,6 +143,32 @@
                         </a>
                       </div>
                     </div>
+
+                    @for (sss of sub.subsubSeries; track sss.id) {
+                      <div class="cad-row cad-row-subsubserie">
+                        <i class="bi bi-arrow-return-right cad-connector"></i>
+                        <span class="jq-badge jq-sss">SSS</span>
+                        <div class="cad-row-main">
+                          <div class="cad-row-title">
+                            <span class="jq-codigo jq-codigo-sss">{{ sss.codigo }}</span>
+                            <span class="cad-row-nombre cad-row-nombre-sss">{{ sss.subsubserie }}</span>
+                          </div>
+                          <div class="cad-row-meta">
+                            <span class="cad-plazo-pill">AT {{ sss.anio_tramite ?? '—' }} · AC {{ sss.anios_consentracion ?? '—' }} · Total <strong>{{ sss.total_anios ?? '—' }}</strong></span>
+                            <span class="cad-tag"><i class="bi bi-diagram-3-fill"></i>{{ sss.tecnica?.valor || 'Sin técnica' }}</span>
+                            <span class="cad-tag"><i class="bi bi-signpost-split-fill"></i>{{ sss.destino?.valor || 'Sin destino' }}</span>
+                          </div>
+                        </div>
+                        <div class="cad-row-actions">
+                          <a class="btn-icon btn-icon-edit" title="Editar" (click)="editSerie(sss.id, 3)">
+                            <i class="bi bi-pencil-fill"></i>
+                          </a>
+                          <a class="btn-icon btn-icon-view" title="Ver historial" (click)="verHistorial(sss.id, 3)">
+                            <i class="bi bi-clock-history"></i>
+                          </a>
+                        </div>
+                      </div>
+                    }
                   }
                 }
               </div>
@@ -177,30 +203,36 @@
                 <label class="field-label"><i class="bi bi-hash me-1"></i>Código</label>
                 <input type="text" class="field-input" [(ngModel)]="formSerie.codigo" name="codigo" disabled="true"/>
             </div>
-            @if(formSerie.serie){
+            @if(tipo === 1){
                 <div class="field-group">
                     <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Serie</label>
                     <input type="text" class="field-input" [(ngModel)]="formSerie.serie" name="serie" disabled="true"/>
                 </div>
-            }
-            @else{
+            } @else if (tipo === 2) {
                 <div class="field-group">
                     <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Subserie</label>
                     <input type="text" class="field-input" [(ngModel)]="formSerie.subserie" name="serie" disabled="true"/>
                 </div>
+            } @else {
+                <div class="field-group">
+                    <label class="field-label"><i class="bi bi-folder2-open me-1"></i>Subsubserie</label>
+                    <input type="text" class="field-input" [(ngModel)]="formSerie.subsubserie" name="serie" disabled="true"/>
+                </div>
             }
 
-            <div class="field-group">
-                <label class="field-label"><i class="bi bi-tags-fill me-1"></i>Valores primarios <span class="required-star">*</span></label>
-                <select class="form-select" multiple size="4" [(ngModel)]="formSerie.valoresSeleccionados"  name="valoresSeleccionados" >
-                    @for (item of valoresArray; track item.id) {
-                        <option [ngValue]="item.id">
-                        {{ item.name }}
-                        </option>
-                    }
-                </select>
-                <span class="field-help">Mantén Ctrl (o Cmd) presionado para seleccionar varias opciones.</span>
-            </div>
+            @if (mostrarValoresPrimarios) {
+              <div class="field-group">
+                  <label class="field-label"><i class="bi bi-tags-fill me-1"></i>Valores primarios <span class="required-star">*</span></label>
+                  <select class="form-select" multiple size="4" [(ngModel)]="formSerie.valoresSeleccionados"  name="valoresSeleccionados" >
+                      @for (item of valoresArray; track item.id) {
+                          <option [ngValue]="item.id">
+                          {{ item.name }}
+                          </option>
+                      }
+                  </select>
+                  <span class="field-help">Mantén Ctrl (o Cmd) presionado para seleccionar varias opciones.</span>
+              </div>
+            }
 
             <div class="plazos-grid">
                 <div class="field-group">

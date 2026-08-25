@@ -10,6 +10,7 @@ import { ValorDocumentalSerieSubserieModel } from 'src/models/valor_documental_s
 import { ValorDocumentalsModel } from 'src/models/valor_documentals.model';
 import { TecnicaSeleccionModel } from 'src/models/tecnica-seleccion.model';
 import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.model';
+import { SubsubSerieModel } from 'src/models/subsub-serie.model';
 
 @Injectable()
 export class CadidoService {
@@ -76,6 +77,21 @@ export class CadidoService {
                 {
                   model: TecnicaSeleccionModel,
                 },
+                {
+                  model: SubsubSerieModel,
+                  where: {
+                    status: 1,
+                  },
+                  required: false,
+                  include: [
+                    {
+                      model: DestinoFinalModel,
+                    },
+                    {
+                      model: TecnicaSeleccionModel,
+                    },
+                  ],
+                },
               ],
             },
             {
@@ -118,7 +134,7 @@ export class CadidoService {
           },
         ],
       });
-    } else {
+    } else if (tipo == 2) {
       serie = await SubSerieModel.findOne({
         where: {
           id,
@@ -127,6 +143,20 @@ export class CadidoService {
           {
             model: ValorDocumentalSerieSubserieModel,
           },
+          {
+            model: DestinoFinalModel,
+          },
+          {
+            model: TecnicaSeleccionModel,
+          },
+        ],
+      });
+    } else {
+      serie = await SubsubSerieModel.findOne({
+        where: {
+          id,
+        },
+        include: [
           {
             model: DestinoFinalModel,
           },
@@ -187,7 +217,7 @@ export class CadidoService {
           );
         }
       }
-    } else {
+    } else if (tipo == 2) {
       await SubSerieModel.update(data, { where: { id } });
 
       const subserie = await SubSerieModel.findByPk(id, {
@@ -214,6 +244,25 @@ export class CadidoService {
           );
         }
       }
+    } else {
+      // tipo == 3 (subsubserie): sin tabla de valores primarios propia.
+      await SubsubSerieModel.update(data, { where: { id } });
+
+      const subsubserie = await SubsubSerieModel.findByPk(id, {
+        attributes: ['idSubserie'],
+      });
+      if (subsubserie?.idSubserie) {
+        const subserie = await SubSerieModel.findByPk(subsubserie.idSubserie, {
+          attributes: ['idSerie'],
+        });
+        if (subserie) {
+          idSeccion = (
+            await SerieModel.findByPk(subserie.idSerie, {
+              attributes: ['idSeccion'],
+            })
+          )?.idSeccion ?? null;
+        }
+      }
     }
 
     await BitacoraClasificacionModel.create({
@@ -227,6 +276,7 @@ export class CadidoService {
       total_anios: data.total_anios,
       id_serie: tipo == 1 ? id : null,
       id_subserie: tipo == 2 ? id : null,
+      id_subsubserie: tipo == 3 ? id : null,
       id_seccion: idSeccion,
     });
 
@@ -234,8 +284,14 @@ export class CadidoService {
   }
 
   async getBitacora(tipo: number, id: number) {
+    const where =
+      tipo == 1
+        ? { id_serie: id }
+        : tipo == 2
+          ? { id_subserie: id }
+          : { id_subsubserie: id };
     return BitacoraClasificacionModel.findAll({
-      where: tipo == 1 ? { id_serie: id } : { id_subserie: id },
+      where,
       order: [
         ['fecha_movimiento', 'DESC'],
         ['id', 'DESC'],
