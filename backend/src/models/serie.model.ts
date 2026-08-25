@@ -27,6 +27,7 @@ export class SerieModel extends Model {
   declare status: number;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
+
   declare anio_tramite: number | null;
 
   @Column({ type: DataType.INTEGER, allowNull: true })

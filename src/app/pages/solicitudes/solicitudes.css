@@ -819,6 +819,23 @@
   background: #f8f9fc;
   border-top: 1px solid #f1f5f9;
 }
+
+.fs-badge-pendiente  { background: #FCF5A9; color: black; }
+.fs-badge-revision  { background: #FCDEA9; color: black; }
+.fs-badge-aprobado  { background: #B1FF7D; color: black; }
+.fs-badge-rechazado  { background: #FF917D; color: black; }
+
+.fs-badge {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+
 .jq-badge {
   display: inline-flex;
   align-items: center;

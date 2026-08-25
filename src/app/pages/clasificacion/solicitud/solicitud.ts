@@ -22,6 +22,7 @@ export class Solicitud {
   cargandoSerie = signal(false);
   serieContextId = signal<number | null>(null);
   formSolicitud: FormSolicitud ={ 
+    id: 0,
     tipo: null, 
     id_departamento: null, 
     tipoMov: null,
