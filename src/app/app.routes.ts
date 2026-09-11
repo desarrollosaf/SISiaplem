@@ -103,6 +103,8 @@ export const routes: Routes = [
       { path: 'admin/responsables/solicitudes', loadComponent: () => import('./pages/solicitudes/solicitudes').then(m => m.Solicitudes)},
       { path: 'admin/responsables/solicitudes/detalle/:id', loadComponent: () => import('./pages/solicitudes/detalle/detalle').then(m => m.Detalle)},
       /* ── Herramientas ── */
+      { path: 'tickets', loadComponent: () => import('./pages/tickets/tickets').then(m => m.TicketsComponent) },
+      { path: 'tickets/detalle/:id', loadComponent: () => import('./pages/tickets/detalle/detalle').then(m => m.TicketDetalleComponent) },
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },
     ]
