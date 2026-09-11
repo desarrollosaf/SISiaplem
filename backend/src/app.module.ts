@@ -20,6 +20,7 @@ import { ClasificacionModule } from './clasificacion/clasificacion.module';
 import { TransferenciasModule } from './transferencias/transferencias.module';
 import { ConsultasModule } from './consultas/consultas.module';
 import { ConcentracionModule } from './concentracion/concentracion.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -39,18 +40,22 @@ import { ConcentracionModule } from './concentracion/concentracion.module';
         logging: false,
       }),
     }),
-    SequelizeModule.forRoot({
+    SequelizeModule.forRootAsync({
       name: 'saf',
-      dialect: 'mysql',
-      host: '192.168.36.53',
-      port: 3306,
-      username: 'usr_documentacion',
-      password: 'U3hnCa03cKeK461iqNRy',
-      database: 'adminplem_saf',
-      models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
-      synchronize: false,
-      logging: false,
-      dialectOptions: { charset: 'utf8mb4' },
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        dialect: 'mysql',
+        host: config.get<string>('SAF_DB_HOST', '192.168.36.53'),
+        port: config.get<number>('SAF_DB_PORT', 3306),
+        username: config.get<string>('SAF_DB_USER', 'usr_documentacion'),
+        password: config.get<string>('SAF_DB_PASS', 'U3hnCa03cKeK461iqNRy'),
+        database: config.get<string>('SAF_DB_NAME', 'adminplem_saf'),
+        models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
+        synchronize: false,
+        logging: false,
+        dialectOptions: { charset: 'utf8mb4' },
+      }),
     }),
 
     AuthModule,
@@ -65,6 +70,7 @@ import { ConcentracionModule } from './concentracion/concentracion.module';
     TransferenciasModule,
     ConsultasModule,
     ConcentracionModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
