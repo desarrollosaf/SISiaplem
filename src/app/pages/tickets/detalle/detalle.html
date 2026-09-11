@@ -1,0 +1,227 @@
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+} @else if (ticket(); as t) {
+  <div class="archivo-header mb-3">
+    <div class="archivo-header-icon">
+      <i class="bi bi-ticket-perforated-fill"></i>
+    </div>
+    <div class="archivo-header-body">
+      <h4 class="archivo-title">{{ t.folio }}</h4>
+      <p class="archivo-subtitle">{{ tipoLabel[t.tipo_procedimiento] }} — {{ t.asunto }}</p>
+    </div>
+    <span class="tk-badge tk-header-badge" [class]="'tk-' + t.estado">{{ estadoLabel[t.estado] || t.estado }}</span>
+  </div>
+
+  <div class="tk-actions mb-3">
+    <button class="btn-accion btn-accion-asignar" (click)="abrirAsignar()"><i class="bi bi-person-check-fill me-1"></i>Asignar</button>
+    <button class="btn-accion btn-accion-estado" (click)="abrirEstado()"><i class="bi bi-arrow-repeat me-1"></i>Cambiar estado</button>
+    <button class="btn-accion btn-accion-cerrar" (click)="abrirCerrar()" [disabled]="yaCerrado"><i class="bi bi-check-circle-fill me-1"></i>{{ yaCerrado ? 'Cerrado' : 'Cerrar ticket' }}</button>
+  </div>
+
+  <div class="tk-grid">
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title"><i class="bi bi-card-list me-2" style="color:var(--primary)"></i>Datos generales</span>
+      </div>
+      <div class="detalle-card">
+        <div class="detalle-row"><span class="detalle-lbl">Categoría</span><span class="detalle-val">{{ t.categoria || '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Descripción</span><span class="detalle-val">{{ t.descripcion || '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Solicitante</span><span class="detalle-val">{{ t.nombre_solicitante || '—' }} ({{ t.rfc_solicitante || 's/rfc' }})</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Correo / Ext.</span><span class="detalle-val">{{ t.correo_solicitante || '—' }} @if(t.extension_solicitante) { | Ext. {{ t.extension_solicitante }} }</span></div>
+        @if (t.numero_oficio_turno) {
+          <div class="detalle-row"><span class="detalle-lbl">Oficio / Turno</span><span class="detalle-val">{{ t.numero_oficio_turno }}</span></div>
+        }
+        <div class="detalle-row"><span class="detalle-lbl">Asignado a</span><span class="detalle-val">{{ t.rfc_asignado || 'Sin asignar' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Fecha programada</span><span class="detalle-val">{{ t.fecha_programada ? (t.fecha_programada | date:'dd/MM/yyyy HH:mm') : '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Modalidad / Lugar</span><span class="detalle-val">{{ t.modalidad_lugar || '—' }}</span></div>
+        @if (t.estado === 'cerrado') {
+          <div class="detalle-row"><span class="detalle-lbl">Acta / Evidencia</span><span class="detalle-val">{{ t.ruta_acta || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Comentarios de cierre</span><span class="detalle-val">{{ t.comentarios_cierre || '—' }}</span></div>
+        }
+      </div>
+
+      @if (t.directorioDetalle; as d) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-person-badge-fill me-2" style="color:var(--primary)"></i>Servidor Público entrante/ratificado</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Asunto</span><span class="detalle-val">{{ d.subtipo === 'ratificacion' ? 'Ratificación' : 'Designación' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Nombre completo</span><span class="detalle-val">{{ d.nombre_completo_entrante || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Cargo / puesto</span><span class="detalle-val">{{ d.cargo_puesto || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Correo institucional</span><span class="detalle-val">{{ d.correo_institucional || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Teléfono / Ext.</span><span class="detalle-val">{{ d.telefono_extension || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Oficio de designación</span><span class="detalle-val">{{ d.ruta_oficio_designacion || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.bajaDetalle; as b) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-file-earmark-x-fill me-2" style="color:var(--primary)"></i>Baja Documental</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Dictamen de procedencia</span><span class="detalle-val">{{ b.dictamen_procedencia || 'Pendiente' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Programación de traslado</span><span class="detalle-val">{{ b.programacion_traslado || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.transferenciaDetalle; as tr) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-arrow-left-right me-2" style="color:var(--primary)"></i>Transferencia vinculada</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Solicitud de transferencia</span><span class="detalle-val">#{{ tr.id_solicitud_transferencia || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.prestamoDetalle; as p) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-box-arrow-in-right me-2" style="color:var(--primary)"></i>Préstamo / Consulta en Concentración</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Tipo de solicitud</span><span class="detalle-val">{{ p.tipo_solicitud === 'consulta' ? 'Consulta' : 'Préstamo' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Persona Habilitada</span><span class="detalle-val">{{ p.persona_habilitada || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Solicitud de consulta</span><span class="detalle-val">#{{ p.id_solicitud_consulta || '—' }}</span></div>
+        </div>
+      }
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title"><i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Historial de actividad</span>
+      </div>
+      @if (!t.historial || t.historial.length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-inboxes"></i>
+          <p>Sin movimientos registrados aún.</p>
+        </div>
+      } @else {
+        <div class="hist-list">
+          @for (h of t.historial; track h.id) {
+            <div class="hist-item">
+              <div class="hist-item-top">
+                <span class="hist-movimiento">{{ h.accion }}</span>
+                <span class="hist-fecha">{{ h.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="hist-item-body">
+                <span class="hist-usuario"><i class="bi bi-person-fill me-1"></i>{{ h.rfc_actor || 'Sistema' }} @if(h.rol_actor) { ({{ h.rol_actor }}) }</span>
+                @if (h.estado_resultante) { <span class="hist-plazos">Estado: {{ estadoLabel[h.estado_resultante] || h.estado_resultante }}</span> }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: ASIGNAR ===== -->
+  @if (asignarOpen()) { <div class="drawer-overlay" (click)="cerrarAsignar()"></div> }
+  <div class="drawer" [class.drawer-open]="asignarOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-person-check-fill"></i>Asignar Ticket</h5></div>
+      <button class="drawer-close" (click)="cerrarAsignar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label">RFC del servidor público asignado <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formAsignar.rfc_asignado" name="rfc_asignado" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fecha y hora de cita/revisión</label>
+        <input type="datetime-local" class="field-input" [(ngModel)]="formAsignar.fecha_programada" name="fecha_programada" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Modalidad / Lugar</label>
+        <input type="text" class="field-input" [(ngModel)]="formAsignar.modalidad_lugar" name="modalidad_lugar" />
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarAsignar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarAsignar()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: CAMBIAR ESTADO ===== -->
+  @if (estadoOpen()) { <div class="drawer-overlay" (click)="cerrarEstado()"></div> }
+  <div class="drawer" [class.drawer-open]="estadoOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-arrow-repeat"></i>Cambiar Estado</h5></div>
+      <button class="drawer-close" (click)="cerrarEstado()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label">Nuevo estado <span class="required-star">*</span></label>
+        <select class="field-input" [(ngModel)]="formEstado.estado" name="estado">
+          <option value="nuevo">Nuevo</option>
+          <option value="turnado">Turnado</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="programado">Programado</option>
+          <option value="resuelto">Resuelto</option>
+          <option value="rechazado">Rechazado</option>
+          @if (ticket()?.tipo_procedimiento === 'prestamo_consulta') {
+            <option value="disponible">Disponible para préstamo/consulta</option>
+            <option value="no_existente">No existente</option>
+          }
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentario</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formEstado.comentario" name="comentario" placeholder="Ej. Ticket turnado a UCGDAA"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarEstado()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarEstado()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: CERRAR ===== -->
+  @if (cerrarOpen()) { <div class="drawer-overlay" (click)="cerrarCerrar()"></div> }
+  <div class="drawer" [class.drawer-open]="cerrarOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-check-circle-fill"></i>Cerrar Ticket</h5></div>
+      <button class="drawer-close" (click)="cerrarCerrar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      @if (esBajaDocumental) {
+        <div class="field-group">
+          <label class="field-label">Dictamen de procedencia</label>
+          <select class="field-input" [(ngModel)]="formCerrar.dictamen_procedencia" name="dictamen_procedencia">
+            <option value="procedente">Procedente</option>
+            <option value="improcedente">Improcedente</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Programación de traslado</label>
+          <textarea class="field-input" rows="2" [(ngModel)]="formCerrar.programacion_traslado" name="programacion_traslado"></textarea>
+        </div>
+      }
+      <div class="field-group">
+        <label class="field-label">Acta / Evidencia (referencia)</label>
+        <input type="text" class="field-input" [(ngModel)]="formCerrar.ruta_acta" name="ruta_acta" placeholder="Folio o ruta del acta digitalizada" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentarios de cierre</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formCerrar.comentarios_cierre" name="comentarios_cierre"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarCerrar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarCierre()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Cerrar ticket }
+      </button>
+    </div>
+  </div>
+}

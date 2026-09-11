@@ -1,0 +1,239 @@
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-ticket-perforated-fill"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Mesa de Ayuda — Tickets</h4>
+    <p class="archivo-subtitle">Da seguimiento a las solicitudes de Directorio de Responsables, Asesoría Técnica, Baja Documental y Transferencia Primaria.</p>
+  </div>
+</div>
+
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+} @else {
+  <div class="content-card">
+    <div class="content-card-header">
+      <span class="content-card-title">
+        <i class="bi bi-list-ul me-2" style="color:var(--primary)"></i>Tickets
+      </span>
+      <div class="header-right">
+        <select class="field-input tk-filter" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+          <option value="">Todos los tipos</option>
+          <option value="directorio_responsables">Directorio de Responsables</option>
+          <option value="asesoria_tecnica">Asesoría Técnica</option>
+          <option value="baja_documental">Baja Documental</option>
+          <option value="transferencia_primaria">Transferencia Primaria</option>
+          <option value="prestamo_consulta">Préstamo y Consulta (Concentración)</option>
+        </select>
+        <select class="field-input tk-filter" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+          <option value="">Todos los estados</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="turnado">Turnado</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="programado">Programado</option>
+          <option value="resuelto">Resuelto</option>
+          <option value="cerrado">Cerrado</option>
+          <option value="rechazado">Rechazado</option>
+        </select>
+        <button class="btn-nuevo" (click)="abrirNuevo()">
+          <i class="bi bi-plus-lg me-1"></i>Nuevo Ticket
+        </button>
+      </div>
+    </div>
+
+    @if (ticketsFiltrados().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-inboxes"></i>
+        <p>No hay tickets registrados.</p>
+        <small>Crea uno nuevo con el botón "Nuevo Ticket".</small>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Tipo</th>
+              <th>Asunto</th>
+              <th>Solicitante</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Fecha</th>
+              <th class="text-center" style="width:8%">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of ticketsFiltrados(); track t.id) {
+              <tr>
+                <td><span class="codigo-badge">{{ t.folio }}</span></td>
+                <td>{{ tipoLabel[t.tipo_procedimiento] }}</td>
+                <td class="nombre-cell">{{ t.asunto }}</td>
+                <td class="dep-cell">{{ t.nombre_solicitante || t.rfc_solicitante || '—' }}</td>
+                <td class="text-center"><span class="tk-badge" [class]="'tk-' + t.estado">{{ estadoLabel[t.estado] || t.estado }}</span></td>
+                <td class="text-center">{{ t.created_at | date: 'dd/MM/yyyy' }}</td>
+                <td class="text-center">
+                  <a class="btn-icon btn-icon-view" title="Ver detalle" (click)="verDetalle(t)">
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- ===== DRAWER: NUEVO TICKET ===== -->
+  @if (drawerOpen()) { <div class="drawer-overlay" (click)="cerrarDrawer()"></div> }
+  <div class="drawer" [class.drawer-open]="drawerOpen()">
+    <div class="drawer-header">
+      <div>
+        <h5 class="drawer-title"><i class="bi bi-ticket-perforated-fill"></i>Nuevo Ticket</h5>
+        <p class="drawer-subtitle">El folio se genera automáticamente al guardar.</p>
+      </div>
+      <button class="drawer-close" (click)="cerrarDrawer()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-diagram-3-fill me-1"></i>Tipo de procedimiento <span class="required-star">*</span></label>
+        <select class="field-input" [(ngModel)]="formCrear.tipo_procedimiento" name="tipo_procedimiento">
+          <option value="directorio_responsables">Directorio de Responsables</option>
+          <option value="asesoria_tecnica">Asesoría Técnica</option>
+          <option value="baja_documental">Baja Documental</option>
+          <option value="transferencia_primaria">Transferencia Primaria</option>
+          <option value="prestamo_consulta">Préstamo y Consulta (Concentración)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-card-heading me-1"></i>Asunto <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formCrear.asunto" name="asunto" />
+      </div>
+
+      @if (formCrear.tipo_procedimiento === 'asesoria_tecnica' || formCrear.tipo_procedimiento === 'baja_documental') {
+        <div class="field-group">
+          <label class="field-label">Categoría</label>
+          <input type="text" class="field-input" [(ngModel)]="formCrear.categoria" name="categoria" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Descripción</label>
+          <textarea class="field-input" rows="3" [(ngModel)]="formCrear.descripcion" name="descripcion"></textarea>
+        </div>
+      }
+
+      @if (formCrear.tipo_procedimiento === 'directorio_responsables') {
+        <div class="field-group">
+          <label class="field-label">Número de Oficio / Turno de origen</label>
+          <input type="text" class="field-input" [(ngModel)]="formCrear.numero_oficio_turno" name="numero_oficio_turno" />
+        </div>
+      }
+
+      <div class="field-group">
+        <label class="field-label"><i class="bi bi-person-fill me-1"></i>Nombre del solicitante</label>
+        <input type="text" class="field-input" [(ngModel)]="formCrear.nombre_solicitante" name="nombre_solicitante" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">RFC del solicitante</label>
+        <input type="text" class="field-input" [(ngModel)]="formCrear.rfc_solicitante" name="rfc_solicitante" />
+      </div>
+      <div class="plazos-grid">
+        <div class="field-group">
+          <label class="field-label">Correo</label>
+          <input type="text" class="field-input" [(ngModel)]="formCrear.correo_solicitante" name="correo_solicitante" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Extensión</label>
+          <input type="text" class="field-input" [(ngModel)]="formCrear.extension_solicitante" name="extension_solicitante" />
+        </div>
+      </div>
+
+      @if (formCrear.tipo_procedimiento === 'directorio_responsables') {
+        <div class="tk-subform">
+          <div class="tk-subform-title"><i class="bi bi-person-badge-fill me-1"></i>Servidor Público entrante/ratificado</div>
+          <div class="field-group">
+            <label class="field-label">Asunto <span class="required-star">*</span></label>
+            <select class="field-input" [(ngModel)]="formCrear.subtipo" name="subtipo">
+              <option value="designacion">Designación</option>
+              <option value="ratificacion">Ratificación</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nombre completo</label>
+            <input type="text" class="field-input" [(ngModel)]="formCrear.nombre_completo_entrante" name="nombre_completo_entrante" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Cargo o puesto formal</label>
+            <input type="text" class="field-input" [(ngModel)]="formCrear.cargo_puesto" name="cargo_puesto" />
+          </div>
+          <div class="plazos-grid">
+            <div class="field-group">
+              <label class="field-label">Correo institucional</label>
+              <input type="text" class="field-input" [(ngModel)]="formCrear.correo_institucional" name="correo_institucional" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Teléfono / Extensión</label>
+              <input type="text" class="field-input" [(ngModel)]="formCrear.telefono_extension" name="telefono_extension" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Referencia del oficio de designación</label>
+            <input type="text" class="field-input" [(ngModel)]="formCrear.ruta_oficio_designacion" name="ruta_oficio_designacion" placeholder="Folio o ruta del oficio digitalizado" />
+          </div>
+        </div>
+      }
+
+      @if (formCrear.tipo_procedimiento === 'transferencia_primaria') {
+        <div class="tk-subform">
+          <div class="tk-subform-title"><i class="bi bi-arrow-left-right me-1"></i>Solicitud de transferencia vinculada</div>
+          <div class="field-group">
+            <label class="field-label">ID de la solicitud de transferencia</label>
+            <input type="number" class="field-input" [(ngModel)]="formCrear.id_solicitud_transferencia" name="id_solicitud_transferencia" />
+            <span class="field-help">Corresponde a la solicitud ya generada en "Transferencia Primaria".</span>
+          </div>
+        </div>
+      }
+
+      @if (formCrear.tipo_procedimiento === 'prestamo_consulta') {
+        <div class="tk-subform">
+          <div class="tk-subform-title"><i class="bi bi-box-arrow-in-right me-1"></i>Préstamo / Consulta en Archivo de Concentración</div>
+          <div class="field-group">
+            <label class="field-label">Tipo de solicitud <span class="required-star">*</span></label>
+            <select class="field-input" [(ngModel)]="formCrear.tipo_solicitud_prestamo" name="tipo_solicitud_prestamo">
+              <option value="prestamo">Préstamo</option>
+              <option value="consulta">Consulta</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Persona Habilitada (recibe/consulta)</label>
+            <input type="text" class="field-input" [(ngModel)]="formCrear.persona_habilitada" name="persona_habilitada" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">ID de la solicitud de consulta</label>
+            <input type="number" class="field-input" [(ngModel)]="formCrear.id_solicitud_consulta" name="id_solicitud_consulta" />
+            <span class="field-help">Corresponde a la solicitud ya generada en "Consultas y Préstamos" de Concentración.</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarDrawer()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardar()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… }
+        @else { <i class="bi bi-check-lg me-1"></i>Crear ticket }
+      </button>
+    </div>
+  </div>
+}
