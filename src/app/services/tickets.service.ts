@@ -11,6 +11,31 @@ export type TipoProcedimiento =
   | 'transferencia_primaria'
   | 'prestamo_consulta';
 
+export interface TicketResponsable {
+  id: number;
+  tipo_procedimiento: string | null;
+  rfc_responsable: string;
+  nombre_responsable: string | null;
+  activo: boolean;
+  created_at: string;
+}
+
+export interface ResponsablePayload {
+  tipo_procedimiento?: string | null;
+  rfc_responsable: string;
+  nombre_responsable?: string;
+}
+
+export interface AutorizarTitularPayload {
+  firmado: boolean;
+  rfc_titular: string;
+  password_firma?: string;
+  rfc_actor: string;
+  rol_actor?: string;
+  comentario?: string;
+  es_admin?: boolean;
+}
+
 export interface TicketHistorialItem {
   id: number;
   rfc_actor: string | null;
@@ -54,6 +79,7 @@ export interface Ticket {
   id_dependencia: number | null;
   id_unidad_administrativa: number | null;
   rfc_solicitante: string | null;
+  rfc_titular: string | null;
   nombre_solicitante: string | null;
   correo_solicitante: string | null;
   extension_solicitante: string | null;
@@ -129,11 +155,21 @@ export class TicketsService {
     return this.http.post<Ticket>(API, dto);
   }
 
-  listar(filtros: { tipo_procedimiento?: string; estado?: string; rfc_solicitante?: string } = {}) {
+  listar(
+    filtros: {
+      tipo_procedimiento?: string;
+      estado?: string;
+      rfc_solicitante?: string;
+      rfc_usuario?: string;
+      es_admin?: boolean;
+    } = {},
+  ) {
     const params: Record<string, string> = {};
     if (filtros.tipo_procedimiento) params['tipo_procedimiento'] = filtros.tipo_procedimiento;
     if (filtros.estado) params['estado'] = filtros.estado;
     if (filtros.rfc_solicitante) params['rfc_solicitante'] = filtros.rfc_solicitante;
+    if (filtros.rfc_usuario) params['rfc_usuario'] = filtros.rfc_usuario;
+    if (filtros.es_admin !== undefined) params['es_admin'] = String(filtros.es_admin);
     return this.http.get<Ticket[]>(API, { params });
   }
 
@@ -145,11 +181,31 @@ export class TicketsService {
     return this.http.patch<Ticket>(`${API}/${id}/asignar`, dto);
   }
 
+  autorizarTitular(id: number, dto: AutorizarTitularPayload) {
+    return this.http.patch<Ticket>(`${API}/${id}/autorizar-titular`, dto);
+  }
+
   cambiarEstado(id: number, dto: CambiarEstadoPayload) {
     return this.http.patch<Ticket>(`${API}/${id}/estado`, dto);
   }
 
   cerrar(id: number, dto: CerrarTicketPayload) {
     return this.http.patch<Ticket>(`${API}/${id}/cerrar`, dto);
+  }
+
+  listarResponsables() {
+    return this.http.get<TicketResponsable[]>(`${API}/responsables`);
+  }
+
+  crearResponsable(dto: ResponsablePayload) {
+    return this.http.post<TicketResponsable>(`${API}/responsables`, dto);
+  }
+
+  actualizarResponsable(id: number, dto: ResponsablePayload) {
+    return this.http.patch<TicketResponsable>(`${API}/responsables/${id}`, dto);
+  }
+
+  toggleResponsable(id: number) {
+    return this.http.patch<TicketResponsable>(`${API}/responsables/${id}/toggle`, {});
   }
 }

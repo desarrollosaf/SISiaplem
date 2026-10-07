@@ -94,6 +94,12 @@ export class GuiaController {
     return this.guiaService.getCerrados(rfc ?? '');
   }
 
+  // GET /api/guia/listos-para-transferir?rfc=XXXX
+  @Get('listos-para-transferir')
+  listosParaTransferir(@Query('rfc') rfc: string) {
+    return this.guiaService.getListosParaTransferir(rfc ?? '');
+  }
+
   // GET /api/guia/actividad-reciente?rfc=XXXX&limit=5
   @Get('actividad-reciente')
   actividadReciente(@Query('rfc') rfc: string, @Query('limit') limit?: string) {

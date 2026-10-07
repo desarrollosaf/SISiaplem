@@ -4,7 +4,7 @@
   </div>
   <div class="archivo-header-body">
     <h4 class="archivo-title">Mesa de Ayuda — Tickets</h4>
-    <p class="archivo-subtitle">Da seguimiento a las solicitudes de Directorio de Responsables, Asesoría Técnica, Baja Documental y Transferencia Primaria.</p>
+    <p class="archivo-subtitle">Da seguimiento a las solicitudes de Asesoría Técnica, Baja Documental, Transferencia Primaria y Préstamo/Consulta.</p>
   </div>
 </div>
 
@@ -30,7 +30,7 @@
       <div class="header-right">
         <select class="field-input tk-filter" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
           <option value="">Todos los tipos</option>
-          <option value="directorio_responsables">Directorio de Responsables</option>
+          @if (esAdmin) { <option value="directorio_responsables">Directorio de Responsables</option> }
           <option value="asesoria_tecnica">Asesoría Técnica</option>
           <option value="baja_documental">Baja Documental</option>
           <option value="transferencia_primaria">Transferencia Primaria</option>
@@ -46,6 +46,11 @@
           <option value="cerrado">Cerrado</option>
           <option value="rechazado">Rechazado</option>
         </select>
+        @if (esAdmin) {
+          <a class="btn-cancel" routerLink="/tickets/admin" title="Administrar responsables de atención">
+            <i class="bi bi-people-fill me-1"></i>Responsables
+          </a>
+        }
         <button class="btn-nuevo" (click)="abrirNuevo()">
           <i class="bi bi-plus-lg me-1"></i>Nuevo Ticket
         </button>
@@ -109,7 +114,7 @@
       <div class="field-group">
         <label class="field-label"><i class="bi bi-diagram-3-fill me-1"></i>Tipo de procedimiento <span class="required-star">*</span></label>
         <select class="field-input" [(ngModel)]="formCrear.tipo_procedimiento" name="tipo_procedimiento">
-          <option value="directorio_responsables">Directorio de Responsables</option>
+          @if (esAdmin) { <option value="directorio_responsables">Directorio de Responsables</option> }
           <option value="asesoria_tecnica">Asesoría Técnica</option>
           <option value="baja_documental">Baja Documental</option>
           <option value="transferencia_primaria">Transferencia Primaria</option>
@@ -142,21 +147,16 @@
 
       <div class="field-group">
         <label class="field-label"><i class="bi bi-person-fill me-1"></i>Nombre del solicitante</label>
-        <input type="text" class="field-input" [(ngModel)]="formCrear.nombre_solicitante" name="nombre_solicitante" />
+        <input type="text" class="field-input" [(ngModel)]="formCrear.nombre_solicitante" name="nombre_solicitante" disabled="true" />
+        <span class="field-help">Se llena automáticamente con los datos de tu sesión.</span>
       </div>
       <div class="field-group">
         <label class="field-label">RFC del solicitante</label>
-        <input type="text" class="field-input" [(ngModel)]="formCrear.rfc_solicitante" name="rfc_solicitante" />
+        <input type="text" class="field-input" [(ngModel)]="formCrear.rfc_solicitante" name="rfc_solicitante" disabled="true" />
       </div>
-      <div class="plazos-grid">
-        <div class="field-group">
-          <label class="field-label">Correo</label>
-          <input type="text" class="field-input" [(ngModel)]="formCrear.correo_solicitante" name="correo_solicitante" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">Extensión</label>
-          <input type="text" class="field-input" [(ngModel)]="formCrear.extension_solicitante" name="extension_solicitante" />
-        </div>
+      <div class="field-group">
+        <label class="field-label">Correo</label>
+        <input type="text" class="field-input" [(ngModel)]="formCrear.correo_solicitante" name="correo_solicitante" disabled="true" />
       </div>
 
       @if (formCrear.tipo_procedimiento === 'directorio_responsables') {

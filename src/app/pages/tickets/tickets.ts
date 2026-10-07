@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TicketsService, Ticket, TipoProcedimiento, CrearTicketPayload } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -23,11 +23,13 @@ const ESTADO_LABEL: Record<string, string> = {
   rechazado: 'Rechazado',
   no_existente: 'No existente',
   disponible: 'Disponible para préstamo/consulta',
+  pendiente_autorizacion: 'Pendiente de autorización',
+  autorizado: 'Autorizado',
 };
 
 @Component({
   selector: 'app-tickets',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './tickets.html',
   styleUrl: './tickets.css',
 })
@@ -45,7 +47,7 @@ export class TicketsComponent implements OnInit {
   drawerOpen = signal(false);
   guardando = signal(false);
 
-  formCrear: CrearTicketPayload = this.formVacio();
+  formCrear!: CrearTicketPayload;
 
   ticketsFiltrados = computed(() => {
     const tipo = this.filtroTipo();
@@ -56,12 +58,15 @@ export class TicketsComponent implements OnInit {
   });
 
   private get rfc() { return this.auth.userRfc(); }
+  get esAdmin() { return this.auth.hasRole('ADMIM'); }
 
   constructor(
     private ticketsSvc: TicketsService,
     private auth: AuthService,
     private router: Router,
-  ) {}
+  ) {
+    this.formCrear = this.formVacio();
+  }
 
   ngOnInit() {
     this.cargar();
@@ -69,7 +74,7 @@ export class TicketsComponent implements OnInit {
 
   cargar() {
     this.cargando.set(true);
-    this.ticketsSvc.listar().subscribe({
+    this.ticketsSvc.listar({ rfc_usuario: this.rfc, es_admin: this.esAdmin }).subscribe({
       next: (data) => {
         this.tickets.set(data);
         this.cargando.set(false);
@@ -83,14 +88,15 @@ export class TicketsComponent implements OnInit {
   }
 
   private formVacio(): CrearTicketPayload {
+    const user = this.auth.user();
     return {
-      tipo_procedimiento: 'directorio_responsables',
+      tipo_procedimiento: 'asesoria_tecnica',
       asunto: '',
       categoria: '',
       descripcion: '',
-      rfc_solicitante: '',
-      nombre_solicitante: '',
-      correo_solicitante: '',
+      rfc_solicitante: user?.rfc ?? '',
+      nombre_solicitante: user?.name ?? '',
+      correo_solicitante: user?.email ?? '',
       extension_solicitante: '',
       numero_oficio_turno: '',
       subtipo: 'designacion',

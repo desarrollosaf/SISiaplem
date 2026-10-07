@@ -21,11 +21,36 @@
     <span class="tk-badge tk-header-badge" [class]="'tk-' + t.estado">{{ estadoLabel[t.estado] || t.estado }}</span>
   </div>
 
-  <div class="tk-actions mb-3">
-    <button class="btn-accion btn-accion-asignar" (click)="abrirAsignar()"><i class="bi bi-person-check-fill me-1"></i>Asignar</button>
-    <button class="btn-accion btn-accion-estado" (click)="abrirEstado()"><i class="bi bi-arrow-repeat me-1"></i>Cambiar estado</button>
-    <button class="btn-accion btn-accion-cerrar" (click)="abrirCerrar()" [disabled]="yaCerrado"><i class="bi bi-check-circle-fill me-1"></i>{{ yaCerrado ? 'Cerrado' : 'Cerrar ticket' }}</button>
-  </div>
+  @if (pendienteAutorizacion) {
+    <div class="tk-autorizacion-banner mb-3">
+      <i class="bi bi-pen fs-5 me-2"></i>
+      <div class="tk-autorizacion-banner-body">
+        <strong>Pendiente de autorización del Titular{{ ticket()?.rfc_titular ? ' (' + ticket()?.rfc_titular + ')' : '' }}.</strong>
+        Este ticket no pasará al área de Archivo hasta que el Titular lo autorice mediante firma electrónica.
+      </div>
+      @if (puedeAutorizar) {
+        <button class="btn-accion btn-accion-autorizar" (click)="abrirAutorizar()">
+          <i class="bi bi-pen-fill me-1"></i>Autorizar (firma electrónica)
+        </button>
+      }
+    </div>
+  }
+
+  @if (esAdmin || puedeGestionar) {
+    <div class="tk-actions mb-3">
+      @if (esAdmin) {
+        <button class="btn-accion btn-accion-asignar" (click)="abrirAsignar()"><i class="bi bi-person-check-fill me-1"></i>{{ ticket()?.rfc_asignado ? 'Reasignar' : 'Asignar' }}</button>
+      }
+      @if (puedeGestionar) {
+        <button class="btn-accion btn-accion-estado" (click)="abrirEstado()"><i class="bi bi-arrow-repeat me-1"></i>Cambiar estado</button>
+        <button class="btn-accion btn-accion-cerrar" (click)="abrirCerrar()" [disabled]="yaCerrado || pendienteAutorizacion"><i class="bi bi-check-circle-fill me-1"></i>{{ yaCerrado ? 'Cerrado' : 'Cerrar ticket' }}</button>
+      }
+    </div>
+  } @else {
+    <div class="tk-readonly-note mb-3">
+      <i class="bi bi-eye me-2"></i>Estás viendo este ticket en modo de solo lectura — solo el administrador o la persona asignada pueden gestionarlo.
+    </div>
+  }
 
   <div class="tk-grid">
     <div class="content-card">
@@ -122,6 +147,42 @@
     </div>
   </div>
 
+  <!-- ===== DRAWER: AUTORIZAR (FIRMA ELECTRÓNICA) ===== -->
+  @if (autorizarOpen()) { <div class="drawer-overlay" (click)="cerrarAutorizar()"></div> }
+  <div class="drawer" [class.drawer-open]="autorizarOpen()">
+    <div class="drawer-header">
+      <div>
+        <h5 class="drawer-title"><i class="bi bi-pen-fill"></i>Autorizar Ticket</h5>
+        <p class="drawer-subtitle">Firma electrónica del Titular (simulada por ahora — la validación real está pendiente de integrar).</p>
+      </div>
+      <button class="drawer-close" (click)="cerrarAutorizar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label">RFC del Titular <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formAutorizar.rfc_titular" name="rfc_titular" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Contraseña de firma electrónica</label>
+        <input type="password" class="field-input" [(ngModel)]="formAutorizar.password_firma" name="password_firma" placeholder="Simulado: cualquier valor autoriza" autocomplete="off" />
+        <span class="field-help">Este campo quedará conectado a la API real de firma electrónica cuando esté disponible.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentario</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formAutorizar.comentario" name="comentario_autorizar" placeholder="Opcional"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarAutorizar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-rechazar" (click)="guardarAutorizar(false)" [disabled]="guardando()">
+        <i class="bi bi-x-lg me-1"></i>Rechazar
+      </button>
+      <button class="btn-save" (click)="guardarAutorizar(true)" [disabled]="guardando()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-pen-fill me-1"></i>Firmar y autorizar }
+      </button>
+    </div>
+  </div>
+
   <!-- ===== DRAWER: ASIGNAR ===== -->
   @if (asignarOpen()) { <div class="drawer-overlay" (click)="cerrarAsignar()"></div> }
   <div class="drawer" [class.drawer-open]="asignarOpen()">
@@ -130,10 +191,47 @@
       <button class="drawer-close" (click)="cerrarAsignar()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
-      <div class="field-group">
-        <label class="field-label">RFC del servidor público asignado <span class="required-star">*</span></label>
-        <input type="text" class="field-input" [(ngModel)]="formAsignar.rfc_asignado" name="rfc_asignado" />
+      <div class="field-group tk-rfc-wrap">
+        <label class="field-label">Servidor público asignado (usuario de SAF) <span class="required-star">*</span></label>
+        <input
+          type="text"
+          class="field-input"
+          [ngModel]="buscadorAsignar.query()"
+          (ngModelChange)="onAsignarInput($event)"
+          (focus)="buscadorAsignar.abrir()"
+          name="rfc_asignado_busqueda"
+          placeholder="Escribe RFC, nombre o correo…"
+          autocomplete="off"
+        />
+        <span class="field-help">Busca por RFC, nombre o correo entre los usuarios activos de SAF.</span>
+
+        @if (buscadorAsignar.open() && buscadorAsignar.query().trim().length >= 2) {
+          <div class="tk-rfc-panel">
+            @if (buscadorAsignar.buscando()) {
+              <div class="tk-rfc-empty">Buscando…</div>
+            } @else if (buscadorAsignar.resultados().length === 0) {
+              <div class="tk-rfc-empty">Sin resultados.</div>
+            } @else {
+              <div class="tk-rfc-list">
+                @for (u of buscadorAsignar.resultados(); track u.id) {
+                  <button type="button" class="tk-rfc-option" (click)="seleccionarAsignado(u)">
+                    <span class="tk-rfc-option-nombre">{{ u.name || '—' }}</span>
+                    <span class="tk-rfc-option-rfc">{{ u.rfc }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
       </div>
+
+      @if (formAsignar.rfc_asignado) {
+        <div class="tk-rfc-selected">
+          <i class="bi bi-check-circle-fill me-1"></i>
+          Seleccionado: <strong>{{ formAsignar.rfc_asignado }}</strong>
+        </div>
+      }
+
       <div class="field-group">
         <label class="field-label">Fecha y hora de cita/revisión</label>
         <input type="datetime-local" class="field-input" [(ngModel)]="formAsignar.fecha_programada" name="fecha_programada" />

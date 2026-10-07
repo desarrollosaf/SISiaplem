@@ -102,6 +102,8 @@
 .tk-resuelto { background: #dcfce7; color: #166534; }
 .tk-cerrado { background: #f1f5f9; color: #475569; }
 .tk-rechazado { background: #fee2e2; color: #b91c1c; }
+.tk-pendiente_autorizacion { background: #fae8ff; color: #a21caf; }
+.tk-autorizado { background: #dbeafe; color: #1d4ed8; }
 
 /* ── Acciones ── */
 .btn-icon {
