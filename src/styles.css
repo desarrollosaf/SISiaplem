@@ -325,6 +325,29 @@ body {
 .clock-time { font-size: 1.9rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .clock-date { font-size: 0.78rem; opacity: 0.78; margin-top: 0.2rem; text-transform: capitalize; }
 
+.transferencia-alert {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: linear-gradient(120deg, #fff7ed, #fff1e8);
+  border: 1.5px solid #fdba74; border-radius: 14px;
+  padding: 1.1rem 1.3rem;
+}
+.transferencia-alert-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(253,126,20,0.15); color: #c2410c;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.transferencia-alert-body { flex: 1; min-width: 0; }
+.transferencia-alert-title { font-size: 0.92rem; font-weight: 700; color: #9a3412; margin-bottom: 0.45rem; }
+.transferencia-alert-list { display: flex; flex-direction: column; gap: 0.3rem; }
+.transferencia-alert-item { font-size: 0.78rem; color: #431407; }
+.transferencia-alert-btn {
+  display: inline-flex; align-items: center; flex-shrink: 0; align-self: center;
+  background: #c2410c; color: #fff; border: none; border-radius: 8px;
+  padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; text-decoration: none;
+  transition: background .15s; white-space: nowrap;
+}
+.transferencia-alert-btn:hover { background: #9a3412; color: #fff; }
+
 .stat-card {
   background: var(--card-bg); border-radius: 12px;
   padding: 1.25rem 1.25rem 1rem; border: 1px solid var(--border-color); border-left: 4px solid;

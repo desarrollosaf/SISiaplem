@@ -8,6 +8,7 @@ import { TicketBajaDetalleModel } from 'src/models/ticket-baja-detalle.model';
 import { TicketTransferenciaDetalleModel } from 'src/models/ticket-transferencia-detalle.model';
 import { TicketPrestamoDetalleModel } from 'src/models/ticket-prestamo-detalle.model';
 import { TicketHistorialModel } from 'src/models/ticket-historial.model';
+import { TicketResponsableModel } from 'src/models/ticket-responsable.model';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TicketHistorialModel } from 'src/models/ticket-historial.model';
       TicketTransferenciaDetalleModel,
       TicketPrestamoDetalleModel,
       TicketHistorialModel,
+      TicketResponsableModel,
     ]),
   ],
   controllers: [TicketsController],

@@ -13,6 +13,34 @@
   </div>
 </div>
 
+<!-- ===== ALERTA: EXPEDIENTES LISTOS PARA TRANSFERENCIA PRIMARIA ===== -->
+@if (listosParaTransferir().length > 0) {
+  <div class="transferencia-alert mb-4">
+    <div class="transferencia-alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div class="transferencia-alert-body">
+      <div class="transferencia-alert-title">
+        {{ listosParaTransferir().length }} expediente{{ listosParaTransferir().length === 1 ? '' : 's' }} ya
+        {{ listosParaTransferir().length === 1 ? 'puede' : 'pueden' }} transferirse a Archivo de Concentración
+      </div>
+      <div class="transferencia-alert-list">
+        @for (e of listosParaTransferir(); track e.id) {
+          <div class="transferencia-alert-item">
+            <span class="fw-semibold">{{ e.nombre_ex }}</span>
+            <span class="text-muted">
+              — {{ e.serie_nombre || e.subserie_nombre || 'Sin clasificar' }}
+              · cerrado el {{ e.fecha_cierre_exp | date:'dd/MM/yyyy' }}
+              · cumplió el plazo de archivo de trámite ({{ e.plazo_valor }} {{ e.plazo_unidad === 'dias' ? 'día(s)' : 'año(s)' }}) el {{ e.fecha_limite | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+    <a routerLink="/tramite/transferencias" class="transferencia-alert-btn">
+      <i class="bi bi-arrow-right-circle me-1"></i>Ir a Transferencia Primaria
+    </a>
+  </div>
+}
+
 <!-- ===== STATS CARDS ===== -->
 <div class="row g-3 mb-4">
 

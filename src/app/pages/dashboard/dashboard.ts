@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AvisosService, Aviso } from '../../services/avisos.service';
 import { AuthService } from '../../services/auth.service';
-import { GuiaService, ActividadReciente } from '../../services/guia.service';
+import { GuiaService, ActividadReciente, ExpedienteListoTransferir } from '../../services/guia.service';
 import { ConsultasService, SolicitudPorVencer } from '../../services/consultas.service';
 
 @Component({
@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   avisosRecientes = signal<Aviso[]>([]);
   actividadReciente = signal<ActividadReciente[]>([]);
   porVencer = signal<SolicitudPorVencer[]>([]);
+  listosParaTransferir = signal<ExpedienteListoTransferir[]>([]);
 
   // La actividad reciente es de Archivo de Trámite: no aplica para RAC/RAH (solo Concentración/Histórico)
   mostrarActividad = computed(() => {
@@ -40,6 +41,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const rfc = this.auth.userRfc();
     if (rfc && this.mostrarActividad()) {
       this.guiaSvc.getActividadReciente(rfc, 6).subscribe({ next: (data) => this.actividadReciente.set(data) });
+      this.guiaSvc.getListosParaTransferir(rfc).subscribe({ next: (data) => this.listosParaTransferir.set(data) });
     }
 
     if (this.auth.hasRole('RAC')) {

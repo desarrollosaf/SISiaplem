@@ -202,6 +202,83 @@ export class GuiaService {
     return this.getExpedientesPorEstado(rfc, false);
   }
 
+  // TEMPORAL (fase de pruebas): el plazo de "Archivo trámite (años)" del CADIDO
+  // se interpreta como DÍAS en vez de años, para poder probar la alerta sin
+  // esperar años reales. Volver a 'anios' cuando termine la etapa de pruebas.
+  private readonly UNIDAD_PLAZO_TRANSFERENCIA: 'dias' | 'anios' = 'dias';
+
+  private calcularFechaLimite(fechaCierre: string, plazo: number): Date {
+    const fecha = new Date(`${fechaCierre}T00:00:00`);
+    if (this.UNIDAD_PLAZO_TRANSFERENCIA === 'dias') {
+      fecha.setDate(fecha.getDate() + plazo);
+    } else {
+      fecha.setFullYear(fecha.getFullYear() + plazo);
+    }
+    return fecha;
+  }
+
+  // Expedientes cerrados cuyo plazo de archivo de trámite (CADIDO) ya se
+  // cumplió y por lo tanto ya pueden transferirse a Archivo de Concentración.
+  // Se usa para la alerta en la pantalla de inicio del RAT.
+  async getListosParaTransferir(rfc: string) {
+    const deptIds = await this.getDeptIds(rfc);
+    if (!deptIds.length) return [];
+
+    const serieIds = (
+      await this.serieModel.findAll({
+        where: { departamento_id: { [Op.in]: deptIds } },
+        attributes: ['id'],
+      })
+    ).map((s) => s.id);
+    const subserieIds = (
+      await this.subSerieModel.findAll({
+        where: { id_Departamento: { [Op.in]: deptIds } },
+        attributes: ['id'],
+      })
+    ).map((s) => s.id);
+
+    const expedientes = await this.expedienteModel.findAll({
+      where: {
+        [Op.or]: [
+          { id_serie: { [Op.in]: serieIds } },
+          { id_subserie: { [Op.in]: subserieIds } },
+        ],
+        status: true,
+        fecha_cierre_exp: { [Op.ne]: null },
+        id_solicitud_transferencia: null,
+      },
+      include: [{ model: SerieModel }, { model: SubSerieModel }],
+    });
+
+    const hoy = new Date();
+    const listos = expedientes
+      .map((e) => {
+        const plazo = e.serie?.anio_tramite ?? e.subSerie?.anio_tramite ?? null;
+        if (plazo == null || !e.fecha_cierre_exp) return null;
+
+        const fechaLimite = this.calcularFechaLimite(e.fecha_cierre_exp, plazo);
+        if (fechaLimite > hoy) return null;
+
+        return {
+          id: e.id,
+          nombre_ex: e.nombre_ex,
+          anio: e.anio,
+          fecha_cierre_exp: e.fecha_cierre_exp,
+          serie_codigo: e.serie?.codigo ?? null,
+          serie_nombre: e.serie?.serie ?? null,
+          subserie_codigo: e.subSerie?.codigo ?? null,
+          subserie_nombre: e.subSerie?.subserie ?? null,
+          plazo_valor: plazo,
+          plazo_unidad: this.UNIDAD_PLAZO_TRANSFERENCIA,
+          fecha_limite: fechaLimite.toISOString().slice(0, 10),
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
+
+    listos.sort((a, b) => a.fecha_limite.localeCompare(b.fecha_limite));
+    return listos;
+  }
+
   // GuiaController.actividadReciente() — últimos archivos (documentos) registrados en expedientes del usuario
   async getActividadReciente(rfc: string, limit = 5) {
     const deptIds = await this.getDeptIds(rfc);
