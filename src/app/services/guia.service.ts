@@ -34,6 +34,20 @@ export interface Expediente {
   subserie_nombre?: string;
 }
 
+export interface ExpedienteListoTransferir {
+  id: number;
+  nombre_ex: string;
+  anio: string;
+  fecha_cierre_exp: string;
+  serie_codigo: string | null;
+  serie_nombre: string | null;
+  subserie_codigo: string | null;
+  subserie_nombre: string | null;
+  plazo_valor: number;
+  plazo_unidad: 'dias' | 'anios';
+  fecha_limite: string;
+}
+
 export interface ActividadReciente {
   id: string;
   codigo: string;
@@ -161,6 +175,10 @@ export class GuiaService {
 
   getCerrados(rfc: string) {
     return this.http.get<Expediente[]>(`${API}/cerrados`, { params: { rfc } });
+  }
+
+  getListosParaTransferir(rfc: string) {
+    return this.http.get<ExpedienteListoTransferir[]>(`${API}/listos-para-transferir`, { params: { rfc } });
   }
 
   getActividadReciente(rfc: string, limit = 5) {

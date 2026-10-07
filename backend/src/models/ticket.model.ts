@@ -34,6 +34,12 @@ export class TicketModel extends Model {
   @Column({ type: DataType.STRING(13), allowNull: true })
   declare rfc_solicitante: string | null;
 
+  // RFC del Titular que debe autorizar este ticket (resuelto desde el
+  // catálogo ticket_titulares al crearlo). Permite validar en el backend
+  // que solo esa persona (o un ADMIM) pueda firmar la autorización.
+  @Column({ type: DataType.STRING(13), allowNull: true })
+  declare rfc_titular: string | null;
+
   @Column({ type: DataType.STRING(255), allowNull: true })
   declare nombre_solicitante: string | null;
 

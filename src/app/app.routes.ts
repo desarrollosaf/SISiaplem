@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 const PH = (title: string, section: string) => ({ title, section });
 
@@ -104,6 +105,7 @@ export const routes: Routes = [
       { path: 'admin/responsables/solicitudes/detalle/:id', loadComponent: () => import('./pages/solicitudes/detalle/detalle').then(m => m.Detalle)},
       /* ── Herramientas ── */
       { path: 'tickets', loadComponent: () => import('./pages/tickets/tickets').then(m => m.TicketsComponent) },
+      { path: 'tickets/admin', canActivate: [adminGuard], loadComponent: () => import('./pages/tickets/admin/admin').then(m => m.TicketsAdminComponent) },
       { path: 'tickets/detalle/:id', loadComponent: () => import('./pages/tickets/detalle/detalle').then(m => m.TicketDetalleComponent) },
       { path: 'reportes', loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Reportes y Estadísticas', 'Herramientas') },
       { path: 'ayuda',    loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent), data: PH('Ayuda y Soporte', 'Herramientas') },
