@@ -499,6 +499,7 @@
             @if (resultado() != null) {
               <div class="libro-acordeon">
                 @for (tipo of  tiposDocumento; track tipo) {
+                  @if (resultado()![tipo]?.length > 0) {
                   <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
                     <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
                       <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
@@ -521,12 +522,12 @@
                               </a>
                             </div>
                           </div>
-
                         }
                       </div>
                     }
                   </div>
                 }
+              }
               </div>
             }
           </div>
