@@ -15,6 +15,7 @@ export class MainLayoutComponent {
   buscar = signal('');
   resultado = signal<respuestaBusqueda | null>(null);
   tabActivo = signal<'digital' | 'fisico'>('digital');
+  modalDocumentosAbierto = signal(false);
 
   tiposDocumento: ('digital' | 'fisico')[] = [
   'digital',
@@ -59,12 +60,15 @@ export class MainLayoutComponent {
 
     this.guia.buscarDocumentos(q).subscribe({
     next: (data: respuestaBusqueda) => {
+      this.modalDocumentosAbierto.set(true);
       this.resultado.set(data);
     },
     error: (error) => {
       console.error('Error al buscar documentos:', error);
     },
   });
+
+  
 
 
     // const lista = this.resultado() ?? [];
@@ -78,4 +82,8 @@ export class MainLayoutComponent {
     //   : lista;
     // return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   }
+
+  cerrarModalDocumentos() {
+  this.modalDocumentosAbierto.set(false);
+}
 }

@@ -194,7 +194,7 @@
             }
           }
         } @else {
-      
+     
         <div style="display: flex; justify-content: flex-end;">
            <button class="ws-btn ws-btn-primary" (click)="abrirDrawerAdd()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16">
@@ -216,14 +216,15 @@
               <p>Sin resultados para "{{ busca() }}".</p>
             </div>
           } @else {
+          
             @for (f of fisicosFiltrados(); track f.id) {
               <div class="ws-file-row">
                 <i class="bi ws-file-icon" [ngClass]="iconoArchivo(f.path)"></i>
                 <div class="ws-file-info">
-                  <span class="ws-file-name">{{ f.titulo_doc }}</span>
+                  <span class="ws-file-name">{{ f.path }}</span>
                   <span class="ws-file-meta">
-                    <span class="ws-chip ws-chip-reg">Físico</span>
-                    @if (f.folio) { <span class="ws-folio">{{ f.folio }}</span> }
+                    <span class="ws-chip ws-chip-reg">{{f.tipo.tipo_doc}}</span>
+                    @if (f.folio) { <span class="ws-folio">Folio: {{ f.folio }}</span> }
                   </span>
                 </div>
                 <button class="ws-download" title="Descargar" (click)="descargarRegistroDocFisico(f.id)">
@@ -343,43 +344,20 @@
 
     <div class="field-row">
       <div class="field-group" style="width:180px">
-        <label class="field-label">Referencia del documento <span class="required-star">*</span></label>
-        <input type="text" class="field-input" formControlName="referencia_documento" name="referencia_documento"/>
-      </div>
-      <div class="field-group" style="width:180px">
-        <label class="field-label">Fecha límite de atención <span class="required-star">*</span></label>
-        <input type="date" class="field-input" formControlName="fecha_limite_atencion" name="fecha_limite_atencion"/>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field-group" style="width:180px">
-        <label class="field-label">Tipo de atención <span class="required-star">*</span></label>
-        <select class="field-select" formControlName="tipo_atencion" name="tipo_atencion">
-            <option [ngValue]="0" disabled>— Seleccione — </option>
-            <option [ngValue]="1" >Ordinario</option>
-            <option [ngValue]="2" >Urgente</option>
+        <label class="field-label">Tipo de documento <span class="required-star">*</span></label>
+        <select class="field-select" class="field-input" formControlName="tipo_documento" name="tipo_documento">
+          <option [ngValue]="0" disabled>— Seleccione — </option>
+          @for (tipo of tipoDocumento(); track tipo.id) {
+            <option [value]="tipo.id">
+              {{ tipo.tipo_doc }}
+            </option>
+          }
         </select>
-      
-      </div>
-      <div class="field-group" style="width:180px">
-        <label class="field-label">No. Fojas <span class="required-star">*</span></label>
-        <input type="text" class="field-input" formControlName="fojas" name="fojas"/>
       </div>
     </div>
 
     <div class="field-group">
-      <label class="field-label">Remitente <span class="required-star">*</span></label>
-      <input type="text" class="field-input" formControlName="remitente_rfc" name="remitente_rfc"/>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label">Indicación <span class="required-star">*</span></label>
-      <input type="text" class="field-input" formControlName ="titulo_doc" name="titulo_doc" />
-    </div>
-
-    <div class="field-group">
-      <label class="field-label">Descripción <span class="required-star">*</span></label>
+      <label class="field-label">Descripción </label>
       <input type="text" class="field-input"  formControlName="descripcion_doc" name="descripcion_doc" />
     </div>
 
@@ -391,8 +369,8 @@
   </form>
   <div class="drawer-footer">
     <button class="btn-cancel" (click)="cerrarDrawerAdd()" [disabled]="guardando()">Cancelar</button>
-    <button class="btn-save" (click)="guardarAdd()">
-      @if (guardando()) { <span class="spinner"></span> Guardando… }
+    <button class="btn-save" (click)="guardarAdd()" [disabled]="!formularioAddValido || guardandoAdd()">
+      @if (guardandoAdd()) { <span class="spinner"></span> Guardando… }
       @else { <i class="bi bi-check-lg me-1"></i>Guardar }
     </button>
   </div>

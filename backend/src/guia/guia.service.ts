@@ -13,12 +13,15 @@ import { RegistroDocsModel } from '../models/registro-docs.model';
 import { RegistroFisicoModel } from '../models/registro-fisico.model';
 import { DocumentosEnvioModel } from '../models/documentos-envio.model';
 import { TipoDocModel } from '../models/tipo-doc.model';
+import { TipoDocSerie } from '../models/tipo_doc_serie';
 import { TipoExpedienteTratamientoModel } from '../models/tipo-expediente-tratamiento.model';
 import { SolicitudTransferenciaModel } from '../models/solicitud-transferencia.model';
 import { SUsuario } from '../models/s-usuario.model';
 import { TDepartamento } from '../models/t-departamento.model';
 import { TDependencia } from '../models/t-dependencia.model';
 import { HEADER_LOGO_BASE64, capitalizar } from '../common/pdf-utils';
+import { TipoDocs } from 'src/models/tipo_docs';
+import { TipoDocSerieModel } from 'src/models/tipo-doc-serie.model';
 
 pdfMake.setFonts({
   Roboto: {
@@ -408,6 +411,54 @@ export class GuiaService {
     });
   }
 
+  
+  async getTipoDocumental(id: number) {
+    console.log('llega a servicio');
+    const exp = await this.expedienteModel.findByPk(id);
+
+    console.log('lexp ', exp);
+    if (!exp) {
+      return [];
+    }
+    let tipos: any[] = [];
+    let tiposD: any[] = [];
+
+    if(exp?.id_serie != null){
+       tipos = await TipoDocSerieModel.findAll({
+        attributes:[ 'id_tipo_doc' ],
+        where:{
+          id_serie: exp?.id_serie
+        },
+        raw: true
+      })
+    }else if (exp?.id_subserie != null) {
+        tipos = await TipoDocSerieModel.findAll({
+          attributes: ['id_tipo_doc'],
+        where: {
+          id_subserie: exp.id_subserie
+        },
+        raw: true
+      });
+    }
+
+    const ids = tipos.map(tipo => tipo.id_tipo_doc);
+
+    if (!ids.length) {
+      return [];
+    }
+
+    tiposD =  await TipoDocModel.findAll({
+      where: { 
+        id: {
+          [Op.in]: ids
+        }
+      },
+      order: [['tipo_doc', 'ASC']],
+    });
+
+    return tiposD
+  }
+
   // Catálogo de servidores públicos activos (picker de "responsable de expediente")
   async getServidoresPublicos() {
     return this.sUsuarioModel.findAll({
@@ -445,6 +496,7 @@ export class GuiaService {
     const [fisicos, digitalesRows, registrosDocs] = await Promise.all([
       this.registroFisicoModel.findAll({
         where: { expediente_id: id, status: true },
+        include: [{ model: TipoDocModel, as: 'tipo' }],
         order: [['folio', 'ASC']],
       }),
       this.registroModel.findAll({
@@ -524,12 +576,7 @@ export class GuiaService {
       folio?: string | null;
       fecha_recepcion?: string | null;
       fecha_documento?: string | null;
-      referencia_documento?: string | null;
-      fecha_limite_atencion?: string | null;
-      tipo_atencion: number | null;
-      fojas?: string | null;
-      remitente_rfc?: string | null; 
-      titulo_doc?: string | null;
+      tipo_documento?: number | null;
       descripcion_doc?: string | null;
       path?: string | null;
       serie_id?: number | null;
@@ -1519,6 +1566,11 @@ export class GuiaService {
               [Op.like]: `%${texto}%`,
             },
           },
+          {
+            path_doc: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
         ],
       },
     });
@@ -1532,24 +1584,29 @@ export class GuiaService {
             },
           },
           {
-            titulo_doc: {
+            path: {
               [Op.like]: `%${texto}%`,
             },
           },
           {
-            referencia_documento: {
+            descripcion_doc: {
               [Op.like]: `%${texto}%`,
             },
           },
         ],
       },
+      include:[
+        {
+          model:TipoDocModel
+        }
+      ]
     });
 
    const documentos = {
       digital: digital,
       fisico: fisico
     }
-console.log('********** documentos', documentos);
+
   return documentos;
   }
 
