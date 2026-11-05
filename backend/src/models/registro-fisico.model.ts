@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { TipoDocModel } from './tipo-doc.model';
 
 @Table({
   tableName: 'registro_fisicos',
@@ -36,6 +37,10 @@ export class RegistroFisicoModel extends Model {
 
   @Column({ type: DataType.BIGINT.UNSIGNED, allowNull: true })
   declare expediente_id: number;
+  
+  @ForeignKey(() => TipoDocModel)
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare tipo_documento: number;
 
   @Column({ type: DataType.STRING, allowNull: true })
   declare titulo_doc: string;
@@ -57,4 +62,8 @@ export class RegistroFisicoModel extends Model {
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   declare status: boolean;
+  
+  @BelongsTo((tipo_documento) => TipoDocModel)
+  declare tipo: TipoDocModel;
+
 }

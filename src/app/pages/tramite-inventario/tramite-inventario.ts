@@ -79,6 +79,7 @@ export class TramiteInventarioComponent implements OnInit {
   }
 
   ngOnInit() {
+    
     this.guia.getInventario(this.auth.userRfc()).subscribe({
       next: (data) => {
         this.series.set(data);
