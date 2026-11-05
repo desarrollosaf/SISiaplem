@@ -46,10 +46,10 @@ import { TicketsModule } from './tickets/tickets.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         dialect: 'mysql',
-        host: config.get<string>('SAF_DB_HOST', '192.168.36.53'),
+        host: config.get<string>('SAF_DB_HOST', 'localhost'),
         port: config.get<number>('SAF_DB_PORT', 3306),
-        username: config.get<string>('SAF_DB_USER', 'usr_documentacion'),
-        password: config.get<string>('SAF_DB_PASS', 'U3hnCa03cKeK461iqNRy'),
+        username: config.get<string>('SAF_DB_USER', 'root'),
+        password: config.get<string>('SAF_DB_PASS', ''),
         database: config.get<string>('SAF_DB_NAME', 'adminplem_saf'),
         models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
         synchronize: false,

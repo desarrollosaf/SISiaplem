@@ -1,14 +1,15 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico } from '../../services/guia.service';
+import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, addDoc } from '../../services/guia.service';
 import { SearchableSelectComponent, SearchableOption } from '../../components/searchable-select/searchable-select';
+import { sign } from 'crypto';
 
 @Component({
   selector: 'app-tramite-expediente-detalle',
-  imports: [RouterLink, FormsModule, NgClass, SearchableSelectComponent],
+  imports: [RouterLink, FormsModule, NgClass, SearchableSelectComponent, ReactiveFormsModule],
   templateUrl: './tramite-expediente-detalle.html',
   styleUrl: './tramite-expediente-detalle.css',
 })
@@ -17,11 +18,16 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   cargando = signal(true);
   error = signal('');
   documentoError = signal('');
+  add = signal<addDoc | null>(null);
 
   tiposTratamiento = signal<TipoTratamiento[]>([]);
   servidoresPublicos = signal<ServidorPublico[]>([]);
   drawerOpen = signal(false);
+  drawerOpenAdd = signal(false);
   guardando = signal(false);
+  guardandoAdd = signal(false);
+  detalleAdd = signal<addDoc | null>(null);
+  archivoSeleccionado: File | null = null;
 
   servidoresOptions = computed<SearchableOption[]>(() =>
     this.servidoresPublicos().map((sp) => ({ value: sp.N_Usuario, label: sp.Nombre, sublabel: sp.N_Usuario })),
@@ -86,12 +92,28 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   editResponsable: string | null = null;
 
   private id = 0;
+  formularioAdd: FormGroup; 
 
   constructor(
     private route: ActivatedRoute,
     private guia: GuiaService,
     private http: HttpClient,
-  ) {}
+    private fb: FormBuilder
+  ) {
+    this.formularioAdd = this.fb.group({
+      folio: [''],
+      fecha_recepcion: [''],
+      fecha_documento: [''],
+      referencia_documento: [''],
+      fecha_limite_atencion: [''],
+      tipo_atencion: 0,
+      fojas: [''],
+      remitente_rfc: [''],
+      titulo_doc: [''],
+      descripcion_doc: [''],
+      path: ''
+    });
+  }
 
   ngOnInit() {
     this.id = +(this.route.snapshot.paramMap.get('id') ?? 0);
@@ -194,9 +216,15 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
       },
     });
   }
+  
+  
 
   descargarRegistroDoc(id: number) {
     this.descargarDocumento(this.guia.getDocumentoUrl(id));
+  }
+
+  descargarRegistroDocFisico(id: number) {
+    this.descargarDocumento(this.guia.getDocumentoUrlFisico(id));
   }
 
   descargarDocumentoEnvio(id: number) {
@@ -205,5 +233,59 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
 
   verIndice(tipo: 'fisico' | 'electronico') {
     window.open(this.guia.getIndiceUrl(this.id, tipo), '_blank');
+  }
+
+  abrirDrawerAdd() {
+    const d = this.detalle();
+    if (!d) return;
+    this.drawerOpenAdd.set(true);
+  }
+
+   cerrarDrawerAdd() {
+    this.drawerOpenAdd.set(false);
+  }
+
+  seleccionarArchivo(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.archivoSeleccionado = input.files[0];
+      console.log(this.archivoSeleccionado);
+    }
+  }
+
+   guardarAdd() {
+    this.guardandoAdd.set(true);
+    const datos = this.formularioAdd.getRawValue();
+    const formData = new FormData();
+
+    Object.entries(datos).forEach(([key, value]) => {
+    if (key !== 'path' && value !== null && value !== undefined) {
+      formData.append(key, String(value));
+    }
+  });
+
+   // Agregar el documento
+  if (this.archivoSeleccionado) {
+    formData.append(
+      'path',
+      this.archivoSeleccionado,
+      this.archivoSeleccionado.name
+    );
+  }
+
+    this.guia.addDocExpediente(this.id, formData).subscribe({
+      next: (data) => {
+        this.detalleAdd.set(data);
+        this.guardandoAdd.set(false);
+        this.drawerOpenAdd.set(false);
+        this.formularioAdd.reset();
+        this.cargar();
+      },
+      error: (e) => { 
+        this.guardandoAdd.set(false);
+       
+        console.error(e);
+      },
+    });
   }
 }

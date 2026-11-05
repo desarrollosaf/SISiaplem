@@ -10,6 +10,7 @@ import { RoleModel } from '../models/role.model';
 import { ModelHasPermission } from '../models/model-has-permission.model';
 import { PermissionModel } from '../models/permission.model';
 
+
 export const MODEL_TYPE = 'App\\Models\\UsersSaf';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class AuthService {
     @InjectModel(RoleModel) private roleModel: typeof RoleModel,
     @InjectModel(ModelHasPermission) private mhpModel: typeof ModelHasPermission,
     @InjectModel(PermissionModel) private permissionModel: typeof PermissionModel,
+    
     private jwt: JwtService,
   ) {}
 
