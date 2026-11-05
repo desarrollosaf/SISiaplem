@@ -75,6 +75,8 @@ constructor(
       order:[['created_at', 'DESC']],
     })
 
+    console.log('solicitud  ', solicitud);
+
     solicitud.map((d) => ({
       id: d.id,
       solicitante: d.rfc_solicita,
@@ -198,13 +200,12 @@ constructor(
     return subseries;
   }
 
-  async saveSolicitud(form: [], rfc: string){
+  async saveSolicitud(form, rfc: string){
     const datos = {
       ...form,
       rfc_solicita: rfc,
     }
 
-  console.log('datos  ', datos);
   const solicitud = await SolicitudClasificacionModel.create(datos);
 
   return solicitud;

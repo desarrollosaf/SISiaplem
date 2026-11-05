@@ -9,9 +9,24 @@ import {
   Body,
   ParseIntPipe,
   Res,
+  Req,
+  UseGuards,
+  Request,
+  UploadedFile,
+  UseInterceptors,
+  NotFoundException
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { GuiaService } from './guia.service';
+import { use } from 'passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage, memoryStorage  } from 'multer';
+import { extname, join } from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
+import { SUsuario } from 'src/models/s-usuario.model';
+import { TDepartamento } from 'src/models/t-departamento.model';
+
 
 @Controller('guia')
 export class GuiaController {
@@ -164,6 +179,50 @@ export class GuiaController {
     return this.guiaService.transferirExpediente(id, dto);
   }
 
+//guardar expediente fisico
+@Put('addDocFisico/:id')
+@UseGuards(JwtAuthGuard)
+@UseInterceptors(
+  FileInterceptor('path', {
+    storage: memoryStorage(),
+  }),
+)
+  async addDocFisico(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+    @UploadedFile() archivo: Express.Multer.File,
+    @Body()
+    data: {
+      folio?: string | null;
+      fecha_recepcion?: string | null;
+      fecha_documento?: string | null;
+      referencia_documento?: string | null;
+      fecha_limite_atencion?: string | null;
+      tipo_atencion: number | null;
+      fojas?: string | null;
+      remitente_rfc?: string | null; 
+      titulo_doc?: string | null;
+      descripcion_doc?: string | null;
+      path?: string | null;
+    },
+  ) {
+    const rfc = req.user.rfc;
+      // Obtener clave del departamento
+    const clave = await this.obtenerClaveDepartamento(rfc);
+    // Crear carpeta dinámica
+    const carpeta = `./documentacion/oficios/${clave}/`;
+
+    mkdirSync(carpeta, { recursive: true });
+
+    // Generar nombre del archivo
+    const nombre = `${Date.now()}${extname(archivo.originalname)}`;
+    // Guardar archivo
+    const rutaArchivo = join(carpeta, nombre);
+    writeFileSync(rutaArchivo, archivo.buffer);
+
+    return this.guiaService.addDocFisico(id, { ...data, path: rutaArchivo}, rfc, { ...archivo, path: rutaArchivo,},);
+  }
+
   // GET /api/guia/documento/:id — GuiaController.getDoc()
   @Get('documento/:id')
   async getDocumento(
@@ -171,6 +230,17 @@ export class GuiaController {
     @Res() res: Response,
   ) {
     const ruta = await this.guiaService.getRutaDocumento(id);
+    res.sendFile(ruta);
+  }
+
+  
+  // GET /api/guia/documento/:id — GuiaController.getDoc()
+  @Get('documentoFisico/:id')
+  async getDocumentoFisico(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const ruta = await this.guiaService.getRutaDocumentoFisico(id);
     res.sendFile(ruta);
   }
 
@@ -220,5 +290,32 @@ export class GuiaController {
       'Content-Disposition': 'inline; filename="Index.pdf"',
     });
     res.send(buffer);
+  }
+
+  
+  private async obtenerClaveDepartamento(rfc: string): Promise<string> {
+  const usuario = await SUsuario.findOne({
+    where: {
+      N_Usuario: rfc,
+    },
+    include: [
+      {
+        model: TDepartamento,
+      },
+    ],
+  });
+
+  if (!usuario){
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  return String(usuario.departamentoM?.c_presup);
+  }
+
+  @Get('buscarDocumentos')
+    buscarDocumentos(
+      @Query('q') q: string,
+    ) {
+      return this.guiaService.buscarDocumentos(q);
   }
 }

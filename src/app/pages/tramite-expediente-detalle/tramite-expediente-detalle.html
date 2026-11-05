@@ -194,6 +194,17 @@
             }
           }
         } @else {
+      
+        <div style="display: flex; justify-content: flex-end;">
+           <button class="ws-btn ws-btn-primary" (click)="abrirDrawerAdd()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16">
+              <path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5"/>
+              <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"/>
+            </svg>Agregar registro
+          </button>
+        </div>
+       
+       
           @if (d.fisicos.length === 0) {
             <div class="ws-empty">
               <i class="bi bi-archive"></i>
@@ -207,7 +218,7 @@
           } @else {
             @for (f of fisicosFiltrados(); track f.id) {
               <div class="ws-file-row">
-                <i class="bi bi-file-earmark-richtext-fill ws-file-icon icon-default"></i>
+                <i class="bi ws-file-icon" [ngClass]="iconoArchivo(f.path)"></i>
                 <div class="ws-file-info">
                   <span class="ws-file-name">{{ f.titulo_doc }}</span>
                   <span class="ws-file-meta">
@@ -215,6 +226,9 @@
                     @if (f.folio) { <span class="ws-folio">{{ f.folio }}</span> }
                   </span>
                 </div>
+                <button class="ws-download" title="Descargar" (click)="descargarRegistroDocFisico(f.id)">
+                  <i class="bi bi-download"></i>
+                </button>
               </div>
             }
           }
@@ -290,6 +304,96 @@
     <button class="btn-save" (click)="guardarTransferencia()" [disabled]="!formularioValido || guardando()">
       @if (guardando()) { <span class="spinner"></span> Guardando… }
       @else { <i class="bi bi-check-lg me-1"></i>Guardar Cambios }
+    </button>
+  </div>
+</div>
+
+
+
+
+<!-- ===== OVERLAY + DRAWER: Agregar ===== -->
+@if (drawerOpenAdd()) {
+  <div class="drawer-overlay" (click)="cerrarDrawerAdd()"></div>
+}
+<div class="drawer" [class.drawer-open]="drawerOpenAdd()">
+  <div class="drawer-header-band">
+    <div class="drawer-header-icon"><i class="bi bi-pencil-fill"></i></div>
+    <div class="drawer-header-text">
+      <h5 class="drawer-title">Agregar registro</h5>
+      <p class="drawer-subtitle">Agrega un registro fisico al expediente.</p>
+    </div>
+    <button class="drawer-close" (click)="cerrarDrawerAdd()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <form [formGroup]="formularioAdd" >
+  <div class="drawer-body">
+    <div class="field-group">
+      <label class="field-label"><i class="bi bi-folder2 me-1"></i>Folio <span class="required-star">*</span></label>
+      <input type="text" class="field-input" formControlName ="folio" name="folio" />
+    </div>
+    <div class="field-row">
+      <div class="field-group" style="width:180px">
+        <label class="field-label">Fecha de recepción <span class="required-star">*</span></label>
+        <input type="date" class="field-input" formControlName="fecha_recepcion" name="fecha_recepcion"/>
+      </div>
+      <div class="field-group" style="width:180px">
+        <label class="field-label">Fecha de documento <span class="required-star">*</span></label>
+        <input type="date" class="field-input" formControlName="fecha_documento" name="fecha_documento"/>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group" style="width:180px">
+        <label class="field-label">Referencia del documento <span class="required-star">*</span></label>
+        <input type="text" class="field-input" formControlName="referencia_documento" name="referencia_documento"/>
+      </div>
+      <div class="field-group" style="width:180px">
+        <label class="field-label">Fecha límite de atención <span class="required-star">*</span></label>
+        <input type="date" class="field-input" formControlName="fecha_limite_atencion" name="fecha_limite_atencion"/>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group" style="width:180px">
+        <label class="field-label">Tipo de atención <span class="required-star">*</span></label>
+        <select class="field-select" formControlName="tipo_atencion" name="tipo_atencion">
+            <option [ngValue]="0" disabled>— Seleccione — </option>
+            <option [ngValue]="1" >Ordinario</option>
+            <option [ngValue]="2" >Urgente</option>
+        </select>
+      
+      </div>
+      <div class="field-group" style="width:180px">
+        <label class="field-label">No. Fojas <span class="required-star">*</span></label>
+        <input type="text" class="field-input" formControlName="fojas" name="fojas"/>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Remitente <span class="required-star">*</span></label>
+      <input type="text" class="field-input" formControlName="remitente_rfc" name="remitente_rfc" />
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Indicación <span class="required-star">*</span></label>
+      <input type="text" class="field-input" formControlName ="titulo_doc" name="titulo_doc" />
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Descripción <span class="required-star">*</span></label>
+      <input type="text" class="field-input"  formControlName="descripcion_doc" name="descripcion_doc" />
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Documento <span class="required-star">*</span></label>
+      <input type="file" class="field-input" name="path" (change)="seleccionarArchivo($event)"/>
+    </div>
+  </div>
+  </form>
+  <div class="drawer-footer">
+    <button class="btn-cancel" (click)="cerrarDrawerAdd()" [disabled]="guardando()">Cancelar</button>
+    <button class="btn-save" (click)="guardarAdd()">
+      @if (guardando()) { <span class="spinner"></span> Guardando… }
+      @else { <i class="bi bi-check-lg me-1"></i>Guardar }
     </button>
   </div>
 </div>
