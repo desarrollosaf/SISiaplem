@@ -1546,7 +1546,7 @@ export class GuiaService {
   }
 
   
-  async buscarDocumentos(q: string) {
+  async buscarDocumentos(q: string, rfc:string) {
   const texto = q?.trim();
 
   if (!texto) {
@@ -1572,6 +1572,7 @@ export class GuiaService {
             },
           },
         ],
+        rfc_registro: rfc
       },
     });
 
@@ -1594,6 +1595,7 @@ export class GuiaService {
             },
           },
         ],
+        user_registro_rfc: rfc,
       },
       include:[
         {

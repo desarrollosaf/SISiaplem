@@ -313,9 +313,16 @@ export class GuiaController {
   }
 
   @Get('buscarDocumentos')
+  @UseGuards(JwtAuthGuard)
     buscarDocumentos(
+      @Request() req: any,
       @Query('q') q: string,
     ) {
-      return this.guiaService.buscarDocumentos(q);
+      const rfc = req.user.rfc;
+      return this.guiaService.buscarDocumentos(q, rfc);
   }
 }
+
+
+
+
