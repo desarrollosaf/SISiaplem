@@ -28,6 +28,12 @@ export interface Documento{
   folio: string | null;
   titulo_doc: string | null;
   referencia_documento: string | null;
+  expediente_id: number  | null;
+  path: string | null;
+  tipo: {
+    id: number;
+    tipo_doc: string;
+  }
 }
 
 export interface respuestaBusqueda{

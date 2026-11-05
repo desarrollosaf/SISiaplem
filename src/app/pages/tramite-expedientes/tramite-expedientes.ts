@@ -160,7 +160,6 @@ export class TramiteExpedientesComponent implements OnInit {
   }
 
   guardarExpediente() {
-    if (!this.formularioValido) return;
     this.guardando = true;
     const dto = {
       ...(this.tipo === 'serie' ? { id_serie: this.idParam } : { id_subserie: this.idParam }),

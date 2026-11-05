@@ -64,6 +64,11 @@ export interface TipoTratamiento {
   status: boolean;
 }
 
+export interface TipoDocumental{
+  id: number;
+  tipo_doc: string;
+}
+
 export interface ServidorPublico {
   N_Usuario: string;
   Nombre: string;
@@ -75,6 +80,10 @@ export interface DocumentoFisico {
   titulo_doc: string;
   status: boolean;
   path: string;
+  tipo: {
+    id: number;
+    tipo_doc: string;
+  }
 }
 
 export interface TipoDoc {
@@ -95,6 +104,7 @@ export interface DocumentoDigital {
   titulo_doc: string;
   path: string | null;
   status: boolean;
+  tipo: TipoDoc[],
   docs: DocumentoEnvio[];
 }
 
@@ -211,6 +221,10 @@ export class GuiaService {
 
   getTiposTratamiento() {
     return this.http.get<TipoTratamiento[]>(`${API}/tipos-tratamiento`);
+  }
+
+  getTipoDocumental(id: number) {
+    return this.http.get<TipoDocumental[]>(`${API}/tipo-documental/${id}`);
   }
 
   getServidoresPublicos() {

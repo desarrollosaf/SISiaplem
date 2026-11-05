@@ -152,6 +152,11 @@ export class GuiaController {
     return this.guiaService.getTiposTratamiento();
   }
 
+  @Get('tipo-documental/:id')
+  tipoDocumental(@Param('id', ParseIntPipe) id: number) {
+    return this.guiaService.getTipoDocumental(id);
+  }
+
   // GET /api/guia/servidores-publicos
   @Get('servidores-publicos')
   servidoresPublicos() {
@@ -196,12 +201,7 @@ export class GuiaController {
       folio?: string | null;
       fecha_recepcion?: string | null;
       fecha_documento?: string | null;
-      referencia_documento?: string | null;
-      fecha_limite_atencion?: string | null;
-      tipo_atencion: number | null;
-      fojas?: string | null;
-      remitente_rfc?: string | null; 
-      titulo_doc?: string | null;
+      tipo_documento?: number | null;
       descripcion_doc?: string | null;
       path?: string | null;
     },

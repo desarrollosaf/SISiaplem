@@ -1,9 +1,9 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, addDoc } from '../../services/guia.service';
+import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, addDoc, TipoDocumental } from '../../services/guia.service';
 import { SearchableSelectComponent, SearchableOption } from '../../components/searchable-select/searchable-select';
 import { sign } from 'crypto';
 
@@ -21,6 +21,7 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   add = signal<addDoc | null>(null);
 
   tiposTratamiento = signal<TipoTratamiento[]>([]);
+  tipoDocumento = signal<TipoDocumental[]>([]);
   servidoresPublicos = signal<ServidorPublico[]>([]);
   drawerOpen = signal(false);
   drawerOpenAdd = signal(false);
@@ -101,17 +102,12 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.formularioAdd = this.fb.group({
-      folio: [''],
-      fecha_recepcion: [''],
-      fecha_documento: [''],
-      referencia_documento: [''],
-      fecha_limite_atencion: [''],
-      tipo_atencion: 0,
-      fojas: [''],
-      remitente_rfc: [''],
-      titulo_doc: [''],
+      folio: ['', Validators.required],
+      fecha_recepcion: ['', Validators.required],
+      fecha_documento: ['', Validators.required],
+      tipo_documento: [null, Validators.required],
       descripcion_doc: [''],
-      path: ''
+      path: ['', Validators.required]
     });
   }
 
@@ -120,6 +116,16 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     this.cargar();
     this.guia.getTiposTratamiento().subscribe({ next: (data) => this.tiposTratamiento.set(data), error: (e) => console.error(e) });
     this.guia.getServidoresPublicos().subscribe({ next: (data) => this.servidoresPublicos.set(data), error: (e) => console.error(e) });
+    this.guia.getTipoDocumental(this.id).subscribe({ 
+      next: (data) =>
+        {
+          this.tipoDocumento.set(data);
+          if (data.length > 0) {
+            this.formularioAdd.get('tipo_documento')?.setValue(0);
+          }
+        }, 
+      error: (e) => console.error(e) 
+    });
   }
 
   private cargar() {
@@ -186,6 +192,8 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     return true;
   }
 
+
+
   guardarTransferencia() {
     if (!this.formularioValido) return;
     this.guardando.set(true);
@@ -249,11 +257,26 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.archivoSeleccionado = input.files[0];
+
+      this.formularioAdd.get('path')?.setValue(  this.archivoSeleccionado);
+      this.formularioAdd.get('path')?.updateValueAndValidity();
+
       console.log(this.archivoSeleccionado);
     }
   }
 
+  get formularioAddValido(): boolean {
+      return this.formularioAdd?.valid ?? false;
+  }
+
    guardarAdd() {
+    if (this.formularioAdd.invalid) {
+      this.formularioAdd.markAllAsTouched();
+
+      console.log('Formulario inválido');
+      return;
+  }
+
     this.guardandoAdd.set(true);
     const datos = this.formularioAdd.getRawValue();
     const formData = new FormData();

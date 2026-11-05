@@ -412,7 +412,7 @@
       <!-- Search -->
       <div class="topbar-search-wrap d-none d-lg-block">
         <i class="bi bi-search topbar-search-icon"></i>
-        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos..." [value]="buscar()"  (input)="buscar.set($any($event.target).value); buscarExp()">
+        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos..." [value]="buscar()"  (input)="buscar.set($any($event.target).value)" (keydown.enter)="buscarExp()">
       </div>
 
       <!-- Right actions -->
@@ -481,38 +481,60 @@
 
     <!-- PAGE CONTENT -->
     <main class="app-content">
-       @if (resultado() != null) {
-        <div class="libro-acordeon">
-          @for (tipo of  tiposDocumento; track tipo) {
-            <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
-              <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
-                <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
-                <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
-                  <span class="libro-item-title">  {{ tipo === 'digital' ? 'Documentos digitales' : 'Documentos físicos' }} </span>
-              </button>
+      @if (modalDocumentosAbierto()) {
+      <div class="modal-overlay" (click)="cerrarModalDocumentos()">
+        <div class="modal-documentos" (click)="$event.stopPropagation()">
+          <div class="modal-documentos-header">
+            <h4>Resultados de búsqueda</h4>
+            <button
+              type="button"
+              class="btn-close-modal"
+              (click)="cerrarModalDocumentos()">
+              <i class="bi bi-x-lg"></i>
+            </button>
 
-              @if (tipo === tabActivo()) {
-                <div class="libro-item-body">
-                  @for (item of resultado()![tipo]; track item.id) {
-                    <div class="serie-tile">
-                      <div class="serie-tile-main">
-                        <span class="serie-tile-codigo">{{ item.folio }}</span>
-                        <span class="serie-tile-nombre">{{ item.titulo_doc }}</span>
-                      </div>
-                      <div class="serie-tile-side">
-                        <a [routerLink]="['/tramite/expedientes/serie', item.id]" class="serie-tile-btn" title="Ver expedientes">
-                          <i class="bi bi-arrow-right"></i>
-                        </a>
-                      </div>
-                    </div>
+          </div>
 
-                  }
-                </div>
-              }
-            </div>
-          }
+          <div class="modal-documentos-body">
+            @if (resultado() != null) {
+              <div class="libro-acordeon">
+                @for (tipo of  tiposDocumento; track tipo) {
+                  <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
+                    <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
+                      <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
+                      <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
+                        <span class="libro-item-title">  {{ tipo === 'digital' ? 'Documentos digitales' : 'Documentos físicos' }} </span>
+                    </button>
+
+                    @if (tipo === tabActivo()) {
+                      <div class="libro-item-body">
+                        @for (item of resultado()![tipo]; track item.id) {
+                          <div class="serie-tile">
+                            <div class="serie-tile-main">
+                              <span class="serie-tile-codigo">{{ item.path }}</span>
+                              @if (item.folio) {<span class="serie-tile-nombre" >Folio: {{ item.folio }}</span> }
+                              @if (item.titulo_doc) {<span class="serie-tile-nombre" > {{ item.titulo_doc }}</span> }
+                            </div>
+                            <div class="serie-tile-side">
+                              <a [routerLink]="['/tramite/expediente/', item.expediente_id]" (click)="cerrarModalDocumentos()" class="serie-tile-btn" title="Ver expedientes">
+                                <i class="bi bi-arrow-right"></i>
+                              </a>
+                            </div>
+                          </div>
+
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
         </div>
-       }
+      </div>
+    
+      }
+      
       <router-outlet />
     </main>
 
