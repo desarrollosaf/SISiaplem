@@ -22,6 +22,21 @@ export interface LoginResponse {
   user: AuthUser;
 }
 
+
+export interface Documento{
+  id: number;
+  folio: string | null;
+  titulo_doc: string | null;
+  referencia_documento: string | null;
+}
+
+export interface respuestaBusqueda{
+  digital: Documento[], 
+  fisico: Documento[]
+}
+
+
+
 export interface UserWithRoles extends AuthUser {
   cambio_contrasena: number;
 }

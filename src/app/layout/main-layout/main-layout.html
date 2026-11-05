@@ -412,7 +412,7 @@
       <!-- Search -->
       <div class="topbar-search-wrap d-none d-lg-block">
         <i class="bi bi-search topbar-search-icon"></i>
-        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos...">
+        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos..." [value]="buscar()"  (input)="buscar.set($any($event.target).value); buscarExp()">
       </div>
 
       <!-- Right actions -->
@@ -481,6 +481,46 @@
 
     <!-- PAGE CONTENT -->
     <main class="app-content">
+       @if (resultado() != null) {
+        <div class="libro-acordeon">
+          @for (tipo of  tiposDocumento; track tipo) {
+            <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
+              <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
+                <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
+                <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
+                  <span class="libro-item-title">  {{ tipo === 'digital' ? 'Documentos digitales' : 'Documentos físicos' }} </span>
+              </button>
+
+              @if (tipo === tabActivo()) {
+                <div class="libro-item-body">
+                  @for (item of resultado()![tipo]; track item.id) {
+                    <div class="serie-tile">
+                      <div class="serie-tile-main">
+                        <span class="serie-tile-codigo">{{ item.folio }}</span>
+                        <span class="serie-tile-nombre">{{ item.titulo_doc }}</span>
+                      </div>
+                      <div class="serie-tile-side">
+                        <a [routerLink]="['/tramite/expedientes/serie', item.id]" class="serie-tile-btn" title="Ver expedientes">
+                          <i class="bi bi-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
+
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+      @else{
+      <div class="content-card">
+        <div class="empty-state">
+          <i class="bi bi-search"></i>
+          <p>Sin resultados de busqueda.</p>
+        </div>
+      </div>
+      }
       <router-outlet />
     </main>
 

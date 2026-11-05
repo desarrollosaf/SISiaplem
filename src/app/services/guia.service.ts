@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { respuestaBusqueda } from './auth.service';
 
 const API = `${environment.endpoint}api/guia`;
 
@@ -73,6 +74,7 @@ export interface DocumentoFisico {
   folio: string;
   titulo_doc: string;
   status: boolean;
+  path: string;
 }
 
 export interface TipoDoc {
@@ -145,6 +147,20 @@ export interface TransferirExpedienteDto {
   rfc_usuario_expediente?: string | null;
 }
 
+export interface addDoc {
+  folio?: string;
+  fecha_recepcion?: Date;
+  fecha_documento?: Date;
+  referencia_documento?: string;
+  fecha_limite_atencion?: Date;
+  tipo_atencion?: number;
+  titulo_doc?: string;
+  descripcion_doc?: string;
+  remitente_rfc?: string;
+  fojas?: number;
+  path?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GuiaService {
   private http = inject(HttpClient);
@@ -209,8 +225,16 @@ export class GuiaService {
     return this.http.put<ExpedienteDetalle>(`${API}/expedientes/${id}`, data);
   }
 
+    addDocExpediente(id: number, data: any) {
+    return this.http.put<addDoc>(`${API}/addDocFisico/${id}`, data);
+  }
+
   getDocumentoUrl(id: number): string {
     return `${API}/documento/${id}`;
+  }
+
+  getDocumentoUrlFisico(id: number): string {
+    return `${API}/documentoFisico/${id}`;
   }
 
   getDocumentoRegistroUrl(id: number): string {
@@ -235,5 +259,15 @@ export class GuiaService {
 
   getRelacionBajaUrl(rfc: string): string {
     return `${API}/relacion-baja/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  buscarDocumentos(texto: string) {
+    return this.http.get<respuestaBusqueda>(`${API}/buscarDocumentos`,
+      {
+        params: {
+          q: texto,
+        },
+      },
+    );
   }
 }

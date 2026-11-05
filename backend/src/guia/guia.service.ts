@@ -517,12 +517,61 @@ export class GuiaService {
     return this.getExpedienteDetalle(id);
   }
 
+
+  async addDocFisico(
+    id: number,
+    data: {
+      folio?: string | null;
+      fecha_recepcion?: string | null;
+      fecha_documento?: string | null;
+      referencia_documento?: string | null;
+      fecha_limite_atencion?: string | null;
+      tipo_atencion: number | null;
+      fojas?: string | null;
+      remitente_rfc?: string | null; 
+      titulo_doc?: string | null;
+      descripcion_doc?: string | null;
+      path?: string | null;
+      serie_id?: number | null;
+      subserie_id?: number | null;
+    }, 
+    rfc: string, 
+    archivo: Express.Multer.File,
+  ){
+
+    
+    
+    const expediente = await this.expedienteModel.findByPk(id);
+    if (!expediente) throw new NotFoundException('Expediente no encontrado');
+
+    if(expediente.id_serie != null){
+      data.serie_id = expediente.id_serie;
+    }else{
+      data.subserie_id = expediente.id_subserie;
+    }
+
+    const registro = await this.registroFisicoModel.create({
+      ...data, 
+      expediente_id: id,
+      user_registro_rfc: rfc,
+      path: archivo ? archivo.path : null,
+    });
+
+    return registro;
+  }
   // GuiaController.getDoc() — descarga de documento de registro_docs
   async getRutaDocumento(id: number): Promise<string> {
     const doc = await this.registroDocsModel.findByPk(id);
     if (!doc || !doc.get('path_doc'))
       throw new NotFoundException('Documento no encontrado');
     return this.resolverRutaArchivo(doc.get('path_doc') as string);
+  }
+
+   async getRutaDocumentoFisico(id: number): Promise<string> {
+    const doc = await this.registroFisicoModel.findByPk(id);
+    if (!doc || !doc.get('path'))
+      throw new NotFoundException('Documento no encontrado');
+    return this.resolverRutaArchivo(doc.get('path') as string);
   }
 
   // GuiaController.getDocR() — descarga de documento de registro (digital)
@@ -1448,4 +1497,62 @@ export class GuiaService {
       serie_nombre: subserie.serie?.serie ?? null,
     };
   }
+
+  
+  async buscarDocumentos(q: string) {
+  const texto = q?.trim();
+
+  if (!texto) {
+    return [];
+  }
+
+  const digital = await this.registroDocsModel.findAll({
+      where: {
+        [Op.or]: [
+          {
+            folio: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
+          {
+            titulo_doc: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
+        ],
+      },
+    });
+
+    const fisico = await this.registroFisicoModel.findAll({
+      where: {
+        [Op.or]: [
+          {
+            folio: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
+          {
+            titulo_doc: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
+          {
+            referencia_documento: {
+              [Op.like]: `%${texto}%`,
+            },
+          },
+        ],
+      },
+    });
+
+   const documentos = {
+      digital: digital,
+      fisico: fisico
+    }
+console.log('********** documentos', documentos);
+  return documentos;
+  }
+
+  
+
 }
