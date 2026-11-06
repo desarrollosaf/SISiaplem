@@ -1546,70 +1546,137 @@ export class GuiaService {
   }
 
   
-  async buscarDocumentos(q: string, rfc:string) {
-  const texto = q?.trim();
+  // GuiaController.buscarDocumentos() — busca en todo lo que hay dentro de los expedientes
+  // a los que el usuario tiene acceso (abiertos o cerrados), sin importar quién lo registró
+  async buscarDocumentos(q: string, rfc: string) {
+    const texto = q?.trim();
+    if (!texto) return { digital: [], fisico: [] };
 
-  if (!texto) {
-    return [];
-  }
+    const deptIds = await this.getDeptIds(rfc);
+    if (!deptIds.length) return { digital: [], fisico: [] };
 
-  const digital = await this.registroDocsModel.findAll({
+    const serieIds = (
+      await this.serieModel.findAll({
+        where: { departamento_id: { [Op.in]: deptIds } },
+        attributes: ['id'],
+      })
+    ).map((s) => s.id);
+    const subserieIds = (
+      await this.subSerieModel.findAll({
+        where: { id_Departamento: { [Op.in]: deptIds } },
+        attributes: ['id'],
+      })
+    ).map((s) => s.id);
+
+    const expedientes = await this.expedienteModel.findAll({
       where: {
         [Op.or]: [
-          {
-            folio: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
-          {
-            titulo_doc: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
-          {
-            path_doc: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
+          { id_serie: { [Op.in]: serieIds } },
+          { id_subserie: { [Op.in]: subserieIds } },
         ],
-        rfc_registro: rfc
+        status: true,
       },
+      attributes: ['id', 'nombre_ex', 'anio', 'fecha_cierre_exp'],
     });
+    if (!expedientes.length) return { digital: [], fisico: [] };
 
-    const fisico = await this.registroFisicoModel.findAll({
-      where: {
-        [Op.or]: [
-          {
-            folio: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
-          {
-            path: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
-          {
-            descripcion_doc: {
-              [Op.like]: `%${texto}%`,
-            },
-          },
-        ],
-        user_registro_rfc: rfc,
-      },
-      include:[
-        {
-          model:TipoDocModel
-        }
-      ]
-    });
+    const expedienteMap = new Map(expedientes.map((e) => [e.id, e]));
+    const enMisExpedientes = {
+      expediente_id: { [Op.in]: expedientes.map((e) => e.id) },
+      status: true,
+    };
+    const like = { [Op.like]: `%${texto}%` };
 
-   const documentos = {
-      digital: digital,
-      fisico: fisico
-    }
+    // Los documentos anidados de un registro digital solo tienen su ruta como texto buscable
+    const registroIdsPorArchivo = (
+      await this.documentosEnvioModel.findAll({
+        where: { path: like, status_doc: true },
+        attributes: ['registro_id'],
+      })
+    ).map((d) => d.registro_id);
 
-  return documentos;
+    const [docs, registros, fisicos] = await Promise.all([
+      this.registroDocsModel.findAll({
+        where: {
+          ...enMisExpedientes,
+          [Op.or]: [
+            { folio: like },
+            { titulo_doc: like },
+            { path_doc: like },
+            { '$tipo.tipo_doc$': like },
+          ],
+        },
+        include: [{ model: TipoDocModel }],
+        order: [['folio', 'ASC']],
+      }),
+      this.registroModel.findAll({
+        where: {
+          ...enMisExpedientes,
+          [Op.or]: [
+            { folio: like },
+            { titulo_doc: like },
+            { descripcion_doc: like },
+            { path: like },
+            { id: { [Op.in]: registroIdsPorArchivo } },
+          ],
+        },
+        order: [['folio', 'ASC']],
+      }),
+      this.registroFisicoModel.findAll({
+        where: {
+          ...enMisExpedientes,
+          [Op.or]: [
+            { folio: like },
+            { titulo_doc: like },
+            { descripcion_doc: like },
+            { referencia_documento: like },
+            { path: like },
+            { '$tipo.tipo_doc$': like },
+          ],
+        },
+        include: [{ model: TipoDocModel }],
+        order: [['folio', 'ASC']],
+      }),
+    ]);
+
+    const conExpediente = (expedienteId: number) => {
+      const exp = expedienteMap.get(expedienteId);
+      return {
+        expediente_id: expedienteId,
+        expediente_nombre: exp?.nombre_ex ?? null,
+        expediente_anio: exp?.anio ?? null,
+        expediente_cerrado: !!exp?.fecha_cierre_exp,
+      };
+    };
+
+    return {
+      digital: [
+        ...docs.map((d) => ({
+          clave: `docs-${d.id}`,
+          folio: d.folio,
+          titulo: d.titulo_doc || null,
+          tipo: d.tipo?.tipo_doc ?? null,
+          archivo: d.path_doc,
+          ...conExpediente(d.expediente_id),
+        })),
+        ...registros.map((r) => ({
+          clave: `reg-${r.id}`,
+          folio: r.folio,
+          titulo: r.titulo_doc || r.descripcion_doc || null,
+          tipo: null,
+          archivo: r.path,
+          ...conExpediente(r.expediente_id),
+        })),
+      ],
+      fisico: fisicos.map((f) => ({
+        clave: `fis-${f.id}`,
+        folio: f.folio,
+        titulo: f.titulo_doc || f.descripcion_doc || null,
+        tipo: f.tipo?.tipo_doc ?? null,
+        archivo: f.path,
+        ...conExpediente(f.expediente_id),
+      })),
+    };
   }
 
   

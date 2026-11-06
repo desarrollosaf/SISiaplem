@@ -1,12 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService, respuestaBusqueda } from '../../services/auth.service';
+import { AuthService, Documento, respuestaBusqueda } from '../../services/auth.service';
 import { GuiaService } from '../../services/guia.service';
 @Component({
   selector: 'app-main-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './main-layout.html',
-  styleUrl: './main-layout.css'
+  styleUrl: './main-layout.css',
+  host: { '(document:keydown.escape)': 'cerrarModalDocumentos()' },
 })
 export class MainLayoutComponent {
   auth = inject(AuthService);
@@ -17,10 +18,15 @@ export class MainLayoutComponent {
   tabActivo = signal<'digital' | 'fisico'>('digital');
   modalDocumentosAbierto = signal(false);
 
-  tiposDocumento: ('digital' | 'fisico')[] = [
-  'digital',
-  'fisico',
-];
+  textoBuscado = signal('');
+  errorBusqueda = signal(false);
+
+  totalResultados = computed(() => {
+    const r = this.resultado();
+    return r ? r.digital.length + r.fisico.length : 0;
+  });
+
+  resultadosTab = computed(() => this.resultado()?.[this.tabActivo()] ?? []);
 
   seleccionarTab(tipo: 'digital' | 'fisico') {
     this.tabActivo.set(tipo);
@@ -50,7 +56,7 @@ export class MainLayoutComponent {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase() || 'U';
   }
 
-  buscarExp(){
+  buscarExp() {
     const q = this.buscar().trim();
 
     if (!q) {
@@ -59,31 +65,28 @@ export class MainLayoutComponent {
     }
 
     this.guia.buscarDocumentos(q).subscribe({
-    next: (data: respuestaBusqueda) => {
-      this.modalDocumentosAbierto.set(true);
-      this.resultado.set(data);
-    },
-    error: (error) => {
-      console.error('Error al buscar documentos:', error);
-    },
-  });
+      next: (data: respuestaBusqueda) => {
+        this.resultado.set(data);
+        this.textoBuscado.set(q);
+        this.errorBusqueda.set(false);
+        this.tabActivo.set(data.digital.length > 0 || data.fisico.length === 0 ? 'digital' : 'fisico');
+        this.modalDocumentosAbierto.set(true);
+      },
+      error: (error) => {
+        console.error('Error al buscar documentos:', error);
+        this.resultado.set(null);
+        this.textoBuscado.set(q);
+        this.errorBusqueda.set(true);
+        this.modalDocumentosAbierto.set(true);
+      },
+    });
+  }
 
-  
-
-
-    // const lista = this.resultado() ?? [];
-
-    // const filtrados = q
-    //   ? lista.filter((f) =>
-    //       String(f.folio ?? '').toLowerCase().includes(q) ||
-    //       String(f.titulo_doc ?? '').toLowerCase().includes(q) ||
-    //       String(f.referencia_documento ?? '').toLowerCase().includes(q)
-    //     )
-    //   : lista;
-    // return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
+  tituloResultado(item: Documento): string {
+    return item.titulo || item.tipo || item.archivo?.split('/').pop() || 'Documento';
   }
 
   cerrarModalDocumentos() {
-  this.modalDocumentosAbierto.set(false);
-}
+    this.modalDocumentosAbierto.set(false);
+  }
 }
