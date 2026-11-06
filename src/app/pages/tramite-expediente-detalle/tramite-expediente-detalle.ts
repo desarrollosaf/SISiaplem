@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, Injector, OnInit, afterNextRender, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -37,6 +37,8 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   tab = signal<'digital' | 'fisico'>('digital');
   busca = signal('');
   expandidos = signal<Set<number>>(new Set());
+  resaltado = signal<string | null>(null);
+  private injector = inject(Injector);
 
   totalDigital = computed(() => (this.detalle()?.digitales.length ?? 0) + (this.detalle()?.registrosDocs.length ?? 0));
   totalFisico = computed(() => this.detalle()?.fisicos.length ?? 0);
@@ -115,6 +117,12 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     this.guia.getTiposTratamiento().subscribe({ next: (data) => this.tiposTratamiento.set(data), error: (e) => console.error(e) });
     this.guia.getServidoresPublicos().subscribe({ next: (data) => this.servidoresPublicos.set(data), error: (e) => console.error(e) });
 
+    // Documento elegido en la búsqueda global (?resaltar=docs-1 | reg-1 | fis-1)
+    this.route.queryParamMap.subscribe((params) => {
+      this.resaltado.set(params.get('resaltar'));
+      this.mostrarResaltado();
+    });
+
     // Angular reutiliza el componente al pasar de un expediente a otro (p. ej. desde la búsqueda global)
     this.route.paramMap.subscribe((params) => {
       this.id = +(params.get('id') ?? 0);
@@ -140,6 +148,7 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
         this.detalle.set(data);
         this.cargando.set(false);
         this.tab.set(data.digitales.length + data.registrosDocs.length > 0 ? 'digital' : 'fisico');
+        this.mostrarResaltado();
       },
       error: (e) => {
         this.error.set('No se pudo cargar el expediente. Verifica que el backend esté corriendo.');
@@ -147,6 +156,24 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
         console.error(e);
       },
     });
+  }
+
+  // Abre la pestaña (y el grupo, si aplica) del documento resaltado y lo lleva a la vista
+  private mostrarResaltado() {
+    const clave = this.resaltado();
+    if (!clave || !this.detalle()) return;
+
+    const [origen, id] = clave.split('-');
+    this.busca.set('');
+    this.tab.set(origen === 'fis' ? 'fisico' : 'digital');
+    if (origen === 'reg') {
+      this.expandidos.update((set) => new Set(set).add(+id));
+    }
+
+    afterNextRender(
+      () => document.getElementById(`doc-${clave}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+      { injector: this.injector },
+    );
   }
 
   cambiarTab(t: 'digital' | 'fisico') {

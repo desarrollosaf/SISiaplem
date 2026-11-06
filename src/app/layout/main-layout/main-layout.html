@@ -535,7 +535,7 @@
               </div>
             } @else {
               @for (item of resultadosTab(); track item.clave) {
-                <a class="busq-fila" [routerLink]="['/tramite/expediente', item.expediente_id]" (click)="cerrarModalDocumentos()">
+                <a class="busq-fila" [routerLink]="['/tramite/expediente', item.expediente_id]" [queryParams]="{ resaltar: item.clave }" (click)="cerrarModalDocumentos()">
                   <span class="busq-fila-icono">
                     <i class="bi" [class.bi-file-earmark-text]="tabActivo() === 'digital'" [class.bi-archive]="tabActivo() === 'fisico'"></i>
                   </span>
