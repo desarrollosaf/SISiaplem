@@ -482,60 +482,86 @@
     <!-- PAGE CONTENT -->
     <main class="app-content">
       @if (modalDocumentosAbierto()) {
-      <div class="modal-overlay" (click)="cerrarModalDocumentos()">
-        <div class="modal-documentos" (click)="$event.stopPropagation()">
-          <div class="modal-documentos-header">
-            <h4>Resultados de búsqueda</h4>
-            <button
-              type="button"
-              class="btn-close-modal"
-              (click)="cerrarModalDocumentos()">
+      <div class="busq-overlay" (click)="cerrarModalDocumentos()">
+        <div class="busq-modal" role="dialog" aria-modal="true" aria-labelledby="busq-titulo" (click)="$event.stopPropagation()">
+          <div class="busq-header">
+            <span class="busq-header-icon"><i class="bi bi-search"></i></span>
+            <div class="busq-header-text">
+              <h4 id="busq-titulo">Resultados de búsqueda</h4>
+              <p>
+                @if (!errorBusqueda()) {
+                  {{ totalResultados() }} {{ totalResultados() === 1 ? 'resultado' : 'resultados' }} para
+                }
+                <strong>{{ textoBuscado() }}</strong>
+              </p>
+            </div>
+            <button type="button" class="busq-cerrar" aria-label="Cerrar" (click)="cerrarModalDocumentos()">
               <i class="bi bi-x-lg"></i>
             </button>
-
           </div>
 
-          <div class="modal-documentos-body">
-            @if (resultado() != null) {
-              <div class="libro-acordeon">
-                @for (tipo of  tiposDocumento; track tipo) {
-                  @if (resultado()![tipo]?.length > 0) {
-                  <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
-                    <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
-                      <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
-                      <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
-                        <span class="libro-item-title">  {{ tipo === 'digital' ? 'Documentos digitales' : 'Documentos físicos' }} </span>
-                    </button>
+          @if (totalResultados() > 0) {
+            <div class="busq-tabs" role="tablist">
+              <button type="button" role="tab" class="busq-tab" [class.busq-tab-activo]="tabActivo() === 'digital'"
+                [attr.aria-selected]="tabActivo() === 'digital'" (click)="seleccionarTab('digital')">
+                <i class="bi bi-file-earmark-text"></i> Digital
+                <span class="busq-tab-num">{{ resultado()!.digital.length }}</span>
+              </button>
+              <button type="button" role="tab" class="busq-tab" [class.busq-tab-activo]="tabActivo() === 'fisico'"
+                [attr.aria-selected]="tabActivo() === 'fisico'" (click)="seleccionarTab('fisico')">
+                <i class="bi bi-archive"></i> Físico
+                <span class="busq-tab-num">{{ resultado()!.fisico.length }}</span>
+              </button>
+            </div>
+          }
 
-                    @if (tipo === tabActivo()) {
-                      <div class="libro-item-body">
-                        @for (item of resultado()![tipo]; track item.id) {
-                          <div class="serie-tile">
-                            <div class="serie-tile-main">
-                              <span class="serie-tile-codigo">{{ item.path }}</span>
-                              @if (item.folio) {<span class="serie-tile-nombre" >Folio: {{ item.folio }}</span> }
-                              @if (item.titulo_doc) {<span class="serie-tile-nombre" > {{ item.titulo_doc }}</span> }
-                            </div>
-                            <div class="serie-tile-side">
-                              <a [routerLink]="['/tramite/expediente/', item.expediente_id]" (click)="cerrarModalDocumentos()" class="serie-tile-btn" title="Ver expedientes">
-                                <i class="bi bi-arrow-right"></i>
-                              </a>
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              }
+          <div class="busq-body">
+            @if (errorBusqueda()) {
+              <div class="busq-vacio">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>No se pudo realizar la búsqueda</p>
+                <small>Inténtalo de nuevo en unos momentos.</small>
               </div>
+            } @else if (totalResultados() === 0) {
+              <div class="busq-vacio">
+                <i class="bi bi-search"></i>
+                <p>Sin resultados</p>
+                <small>No hay documentos en tus expedientes que coincidan con esta búsqueda.</small>
+              </div>
+            } @else if (resultadosTab().length === 0) {
+              <div class="busq-vacio">
+                <i class="bi bi-inboxes"></i>
+                <p>Sin resultados en esta pestaña</p>
+              </div>
+            } @else {
+              @for (item of resultadosTab(); track item.clave) {
+                <a class="busq-fila" [routerLink]="['/tramite/expediente', item.expediente_id]" (click)="cerrarModalDocumentos()">
+                  <span class="busq-fila-icono">
+                    <i class="bi" [class.bi-file-earmark-text]="tabActivo() === 'digital'" [class.bi-archive]="tabActivo() === 'fisico'"></i>
+                  </span>
+                  <span class="busq-fila-main">
+                    <span class="busq-fila-titulo">{{ tituloResultado(item) }}</span>
+                    <span class="busq-fila-meta">
+                      @if (item.titulo && item.tipo) { <span class="busq-chip">{{ item.tipo }}</span> }
+                      @if (item.folio) { <span class="busq-folio">Folio: {{ item.folio }}</span> }
+                    </span>
+                    <span class="busq-fila-exp">
+                      <i class="bi bi-folder2"></i>
+                      <span class="busq-fila-exp-nombre">{{ item.expediente_nombre || 'Expediente' }}</span>
+                      @if (item.expediente_cerrado) {
+                        <span class="busq-cerrado"><i class="bi bi-lock-fill"></i> Cerrado</span>
+                      }
+                    </span>
+                  </span>
+                  <i class="bi bi-chevron-right busq-fila-flecha"></i>
+                </a>
+              }
             }
           </div>
         </div>
       </div>
-    
       }
-      
+
       <router-outlet />
     </main>
 
