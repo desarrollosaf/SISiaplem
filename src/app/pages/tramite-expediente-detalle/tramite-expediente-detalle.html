@@ -135,7 +135,7 @@
           } @else {
             <!-- Cada Registro digital es su propia carpeta, con sus documentos_envios anidados -->
             @for (reg of digitalesFiltrados(); track reg.id) {
-              <div class="ws-group">
+              <div class="ws-group" [id]="'doc-reg-' + reg.id" [class.ws-resaltado]="resaltado() === 'reg-' + reg.id">
                 <button class="ws-group-header" (click)="toggleGrupo(reg.id)">
                   <i class="bi" [class.bi-chevron-right]="!estaExpandido(reg.id)" [class.bi-chevron-down]="estaExpandido(reg.id)"></i>
                   <i class="bi bi-folder-fill ws-group-icon"></i>
@@ -173,7 +173,7 @@
               <div class="ws-section-divider"><span>Documentos</span></div>
             }
             @for (rd of registrosDocsFiltrados(); track rd.id) {
-              <div class="ws-file-row">
+              <div class="ws-file-row" [id]="'doc-docs-' + rd.id" [class.ws-resaltado]="resaltado() === 'docs-' + rd.id">
                 <i class="bi ws-file-icon" [ngClass]="iconoArchivo(rd.path_doc)"></i>
                 <div class="ws-file-info">
                   <span class="ws-file-name">{{ rd.path_doc }}</span>
@@ -218,7 +218,7 @@
           } @else {
           
             @for (f of fisicosFiltrados(); track f.id) {
-              <div class="ws-file-row">
+              <div class="ws-file-row" [id]="'doc-fis-' + f.id" [class.ws-resaltado]="resaltado() === 'fis-' + f.id">
                 <i class="bi ws-file-icon" [ngClass]="iconoArchivo(f.path)"></i>
                 <div class="ws-file-info">
                   <span class="ws-file-name">{{ f.path }}</span>
