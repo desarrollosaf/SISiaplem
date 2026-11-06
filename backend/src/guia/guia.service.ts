@@ -22,6 +22,7 @@ import { TDependencia } from '../models/t-dependencia.model';
 import { HEADER_LOGO_BASE64, capitalizar } from '../common/pdf-utils';
 import { TipoDocs } from 'src/models/tipo_docs';
 import { TipoDocSerieModel } from 'src/models/tipo-doc-serie.model';
+import moment from 'moment';
 
 pdfMake.setFonts({
   Roboto: {
@@ -1587,10 +1588,25 @@ export class GuiaService {
     };
     const like = { [Op.like]: `%${texto}%` };
 
+    const fecha = moment(texto,['YYYY-MM-DD', 'DD/MM/YYYY'],true);
+
+    const condicionFecha = fecha.isValid()
+    ? {
+        [Op.and]: [
+          {
+            [Op.gte]: fecha.clone().startOf('day').toDate()
+          },
+          {
+            [Op.lt]: fecha.clone().add(1, 'day').startOf('day').toDate()
+          }
+        ]
+      }
+    : null;
+
     // Los documentos anidados de un registro digital solo tienen su ruta como texto buscable
     const registroIdsPorArchivo = (
       await this.documentosEnvioModel.findAll({
-        where: { path: like, status_doc: true },
+        where: { path: like, created_at: like, status_doc: true },
         attributes: ['registro_id'],
       })
     ).map((d) => d.registro_id);
@@ -1604,6 +1620,9 @@ export class GuiaService {
             { titulo_doc: like },
             { path_doc: like },
             { '$tipo.tipo_doc$': like },
+            ...(condicionFecha
+            ? [{ created_at: condicionFecha }]
+            : [])
           ],
         },
         include: [{ model: TipoDocModel }],
@@ -1618,6 +1637,9 @@ export class GuiaService {
             { descripcion_doc: like },
             { path: like },
             { id: { [Op.in]: registroIdsPorArchivo } },
+            ...(condicionFecha
+            ? [{ created_at: condicionFecha }]
+            : [])
           ],
         },
         order: [['folio', 'ASC']],
@@ -1632,6 +1654,9 @@ export class GuiaService {
             { referencia_documento: like },
             { path: like },
             { '$tipo.tipo_doc$': like },
+            ...(condicionFecha
+            ? [{ created_at: condicionFecha }]
+            : [])
           ],
         },
         include: [{ model: TipoDocModel }],

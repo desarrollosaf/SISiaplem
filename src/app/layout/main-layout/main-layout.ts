@@ -66,6 +66,7 @@ export class MainLayoutComponent {
 
     this.guia.buscarDocumentos(q).subscribe({
       next: (data: respuestaBusqueda) => {
+        this.buscar.set('');
         this.resultado.set(data);
         this.textoBuscado.set(q);
         this.errorBusqueda.set(false);
