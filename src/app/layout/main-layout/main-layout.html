@@ -412,7 +412,7 @@
       <!-- Search -->
       <div class="topbar-search-wrap d-none d-lg-block">
         <i class="bi bi-search topbar-search-icon"></i>
-        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos..." [value]="buscar()"  (input)="buscar.set($any($event.target).value)" (keydown.enter)="buscarExp()">
+        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos, AAAA-mm-dd" [value]="buscar()"  (input)="buscar.set($any($event.target).value)" (keydown.enter)="buscarExp()">
       </div>
 
       <!-- Right actions -->
