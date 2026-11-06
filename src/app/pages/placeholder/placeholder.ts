@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb mb-0 small">
             <li class="breadcrumb-item">
-              <a routerLink="/dashboard/home" style="color:var(--primary); text-decoration:none">Inicio</a>
+              <a routerLink="/home" style="color:var(--primary); text-decoration:none">Inicio</a>
             </li>
             <li class="breadcrumb-item text-muted">{{ route.snapshot.data['section'] }}</li>
             <li class="breadcrumb-item active text-muted">{{ route.snapshot.data['title'] }}</li>
@@ -29,7 +29,7 @@ import { RouterLink } from '@angular/router';
           El módulo <strong>{{ route.snapshot.data['title'] }}</strong> del
           <strong>{{ route.snapshot.data['section'] }}</strong> estará disponible próximamente.
         </p>
-        <a routerLink="/dashboard/home" class="btn btn-primary btn-sm px-4">
+        <a routerLink="/home" class="btn btn-primary btn-sm px-4">
           <i class="bi bi-house me-2"></i>Volver al Inicio
         </a>
       </div>

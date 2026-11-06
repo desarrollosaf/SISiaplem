@@ -43,7 +43,7 @@
     @if (subfondos().length === 0) {
       <div class="empty-state">
         <i class="bi bi-folder2"></i>
-        <p>No tienes CADIDO registrado.</p>
+        <p>No tienes CADIDO registrado. </p>
         <small>Contacta al administrador.</small>
       </div>
     } @else {
@@ -67,7 +67,7 @@
                 <td class="serie-nombre">{{ item.subfondo }}</td>
                 <td class="serie-nombrer"> {{item.nombre_completo}} </td>
                 <td class="text-center">
-                  <a (click)="abrirDetalle(item)"
+                <a (click)="abrirDetalle(item)"
                     class="btn-icon"
                     title="Ver CADIDO"
                   >

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { respuestaBusqueda } from './auth.service';
 
 const API = `${environment.endpoint}api/guia`;
 
@@ -16,6 +17,8 @@ export interface Serie {
   codigo: string;
   serie: string;
   total_expedientes: number;
+  departamento_id: number | null;
+  departamento_nombre: string | null;
   subseries: Subserie[];
 }
 
@@ -32,10 +35,38 @@ export interface Expediente {
   subserie_nombre?: string;
 }
 
+export interface ExpedienteListoTransferir {
+  id: number;
+  nombre_ex: string;
+  anio: string;
+  fecha_cierre_exp: string;
+  serie_codigo: string | null;
+  serie_nombre: string | null;
+  subserie_codigo: string | null;
+  subserie_nombre: string | null;
+  plazo_valor: number;
+  plazo_unidad: 'dias' | 'anios';
+  fecha_limite: string;
+}
+
+export interface ActividadReciente {
+  id: string;
+  codigo: string;
+  nombre_ex: string;
+  area: string;
+  estado: string;
+  fecha: string;
+}
+
 export interface TipoTratamiento {
   id: number;
   tipo: string;
   status: boolean;
+}
+
+export interface TipoDocumental{
+  id: number;
+  tipo_doc: string;
 }
 
 export interface ServidorPublico {
@@ -48,6 +79,23 @@ export interface DocumentoFisico {
   folio: string;
   titulo_doc: string;
   status: boolean;
+  path: string;
+  tipo: {
+    id: number;
+    tipo_doc: string;
+  }
+}
+
+export interface TipoDoc {
+  id: number;
+  tipo_doc: string;
+}
+
+export interface DocumentoEnvio {
+  id: number;
+  path: string | null;
+  status_doc: boolean;
+  tipo: TipoDoc | null;
 }
 
 export interface DocumentoDigital {
@@ -56,6 +104,8 @@ export interface DocumentoDigital {
   titulo_doc: string;
   path: string | null;
   status: boolean;
+  tipo: TipoDoc[],
+  docs: DocumentoEnvio[];
 }
 
 export interface RegistroDoc {
@@ -64,6 +114,7 @@ export interface RegistroDoc {
   titulo_doc: string | null;
   path_doc: string | null;
   status: boolean;
+  tipo: TipoDoc | null;
 }
 
 export interface ExpedienteDetalle {
@@ -72,6 +123,7 @@ export interface ExpedienteDetalle {
     nombre_ex: string;
     anio: string;
     fecha_cierre_exp: string | null;
+    fecha_transferencia: string | null;
     status: number;
     id_serie: number | null;
     id_subserie: number | null;
@@ -103,6 +155,20 @@ export interface TransferirExpedienteDto {
   anio?: string;
   id_tipo_expediente?: number | null;
   rfc_usuario_expediente?: string | null;
+}
+
+export interface addDoc {
+  folio?: string;
+  fecha_recepcion?: Date;
+  fecha_documento?: Date;
+  referencia_documento?: string;
+  fecha_limite_atencion?: Date;
+  tipo_atencion?: number;
+  titulo_doc?: string;
+  descripcion_doc?: string;
+  remitente_rfc?: string;
+  fojas?: number;
+  path?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -137,6 +203,14 @@ export class GuiaService {
     return this.http.get<Expediente[]>(`${API}/cerrados`, { params: { rfc } });
   }
 
+  getListosParaTransferir(rfc: string) {
+    return this.http.get<ExpedienteListoTransferir[]>(`${API}/listos-para-transferir`, { params: { rfc } });
+  }
+
+  getActividadReciente(rfc: string, limit = 5) {
+    return this.http.get<ActividadReciente[]>(`${API}/actividad-reciente`, { params: { rfc, limit } });
+  }
+
   crearExpediente(data: CrearExpedienteDto) {
     return this.http.post<Expediente>(`${API}/expedientes`, data);
   }
@@ -147,6 +221,10 @@ export class GuiaService {
 
   getTiposTratamiento() {
     return this.http.get<TipoTratamiento[]>(`${API}/tipos-tratamiento`);
+  }
+
+  getTipoDocumental(id: number) {
+    return this.http.get<TipoDocumental[]>(`${API}/tipo-documental/${id}`);
   }
 
   getServidoresPublicos() {
@@ -161,15 +239,49 @@ export class GuiaService {
     return this.http.put<ExpedienteDetalle>(`${API}/expedientes/${id}`, data);
   }
 
+    addDocExpediente(id: number, data: any) {
+    return this.http.put<addDoc>(`${API}/addDocFisico/${id}`, data);
+  }
+
   getDocumentoUrl(id: number): string {
     return `${API}/documento/${id}`;
+  }
+
+  getDocumentoUrlFisico(id: number): string {
+    return `${API}/documentoFisico/${id}`;
   }
 
   getDocumentoRegistroUrl(id: number): string {
     return `${API}/documento-registro/${id}`;
   }
 
+  getDocumentoEnvioUrl(id: number): string {
+    return `${API}/documento-envio/${id}`;
+  }
+
   getIndiceUrl(id: number, tipo: 'fisico' | 'electronico'): string {
     return `${API}/expedientes/${id}/indice/${tipo}`;
+  }
+
+  getGuiaSimpleUrl(rfc: string): string {
+    return `${API}/guia-simple/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  getInventarioGeneralUrl(rfc: string): string {
+    return `${API}/inventario-general/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  getRelacionBajaUrl(rfc: string): string {
+    return `${API}/relacion-baja/pdf?rfc=${encodeURIComponent(rfc)}`;
+  }
+
+  buscarDocumentos(texto: string) {
+    return this.http.get<respuestaBusqueda>(`${API}/buscarDocumentos`,
+      {
+        params: {
+          q: texto,
+        },
+      },
+    );
   }
 }

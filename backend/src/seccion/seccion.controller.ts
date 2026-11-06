@@ -36,18 +36,22 @@ export class SeccionController {
     return this.seccionService.getDirecciones(subfondoId);
   }
 
-  // GET /api/seccion/area-administrativa/:idDireccion
+  // GET /api/seccion/area-administrativa/:idDireccion?subfondoId=X
   @Get('area-administrativa/:idDireccion')
   getAreaAdministrativa(
     @Param('idDireccion', ParseIntPipe) idDireccion: number,
+    @Query('subfondoId') subfondoId?: string,
   ) {
-    return this.seccionService.getAreaAdministrativa(idDireccion);
+    return this.seccionService.getAreaAdministrativa(idDireccion, subfondoId ? Number(subfondoId) : undefined);
   }
 
-  // GET /api/seccion/departamento-info/:id  → { id_Direccion } para pre-cargar cascada
+  // GET /api/seccion/departamento-info/:id?subfondoId=X  → { id_Direccion } para pre-cargar cascada
   @Get('departamento-info/:id')
-  getDepartamentoInfo(@Param('id', ParseIntPipe) id: number) {
-    return this.seccionService.getDepartamentoInfo(id);
+  getDepartamentoInfo(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('subfondoId') subfondoId?: string,
+  ) {
+    return this.seccionService.getDepartamentoInfo(id, subfondoId ? Number(subfondoId) : undefined);
   }
 
   // GET /api/seccion/area-names?ids=1,2,3

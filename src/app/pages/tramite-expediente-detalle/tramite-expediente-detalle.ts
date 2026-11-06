@@ -1,19 +1,15 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, RegistroDoc } from '../../services/guia.service';
+import { GuiaService, ExpedienteDetalle, TipoTratamiento, ServidorPublico, addDoc, TipoDocumental } from '../../services/guia.service';
 import { SearchableSelectComponent, SearchableOption } from '../../components/searchable-select/searchable-select';
-
-interface GrupoDocs {
-  folio: string;
-  items: RegistroDoc[];
-}
+import { sign } from 'crypto';
 
 @Component({
   selector: 'app-tramite-expediente-detalle',
-  imports: [RouterLink, FormsModule, NgClass, SearchableSelectComponent],
+  imports: [RouterLink, FormsModule, NgClass, SearchableSelectComponent, ReactiveFormsModule],
   templateUrl: './tramite-expediente-detalle.html',
   styleUrl: './tramite-expediente-detalle.css',
 })
@@ -22,11 +18,17 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   cargando = signal(true);
   error = signal('');
   documentoError = signal('');
+  add = signal<addDoc | null>(null);
 
   tiposTratamiento = signal<TipoTratamiento[]>([]);
+  tipoDocumento = signal<TipoDocumental[]>([]);
   servidoresPublicos = signal<ServidorPublico[]>([]);
   drawerOpen = signal(false);
+  drawerOpenAdd = signal(false);
   guardando = signal(false);
+  guardandoAdd = signal(false);
+  detalleAdd = signal<addDoc | null>(null);
+  archivoSeleccionado: File | null = null;
 
   servidoresOptions = computed<SearchableOption[]>(() =>
     this.servidoresPublicos().map((sp) => ({ value: sp.N_Usuario, label: sp.Nombre, sublabel: sp.N_Usuario })),
@@ -34,45 +36,54 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
 
   tab = signal<'digital' | 'fisico'>('digital');
   busca = signal('');
-  expandidos = signal<Set<string>>(new Set());
+  expandidos = signal<Set<number>>(new Set());
 
   totalDigital = computed(() => (this.detalle()?.digitales.length ?? 0) + (this.detalle()?.registrosDocs.length ?? 0));
   totalFisico = computed(() => this.detalle()?.fisicos.length ?? 0);
 
+  // Orden natural/numérico por folio (ej. 48001/2/2026 antes que 48001/13/2026)
+  private compararFolio(a: string | null, b: string | null): number {
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    const partesA = a.match(/\d+|\D+/g) ?? [a];
+    const partesB = b.match(/\d+|\D+/g) ?? [b];
+    const len = Math.max(partesA.length, partesB.length);
+    for (let i = 0; i < len; i++) {
+      const va = partesA[i] ?? '';
+      const vb = partesB[i] ?? '';
+      const na = Number(va);
+      const nb = Number(vb);
+      if (va !== '' && vb !== '' && !isNaN(na) && !isNaN(nb)) {
+        if (na !== nb) return na - nb;
+      } else if (va !== vb) {
+        return va < vb ? -1 : 1;
+      }
+    }
+    return 0;
+  }
+
   fisicosFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.fisicos ?? [];
-    if (!q) return lista;
-    return lista.filter((f) => f.folio?.toLowerCase().includes(q) || f.titulo_doc?.toLowerCase().includes(q));
+    const filtrados = q ? lista.filter((f) => f.folio?.toLowerCase().includes(q) || f.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
+  // Cada Registro digital es su propia carpeta expandible (con sus documentos_envios anidados)
   digitalesFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.digitales ?? [];
-    if (!q) return lista;
-    return lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q));
+    const filtrados = q ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
-  gruposDocs = computed<GrupoDocs[]>(() => {
+  // registro_docs se muestra plano, sin agrupar (igual que el sistema anterior)
+  registrosDocsFiltrados = computed(() => {
     const q = this.busca().trim().toLowerCase();
     const lista = this.detalle()?.registrosDocs ?? [];
-    const filtrados = q
-      ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q))
-      : lista;
-
-    const mapa = new Map<string, RegistroDoc[]>();
-    for (const doc of filtrados) {
-      const clave = doc.folio || 'Sin folio';
-      if (!mapa.has(clave)) mapa.set(clave, []);
-      mapa.get(clave)!.push(doc);
-    }
-    const grupos = Array.from(mapa.entries()).map(([folio, items]) => ({ folio, items }));
-    grupos.sort((a, b) => {
-      if (a.folio === 'Sin folio') return 1;
-      if (b.folio === 'Sin folio') return -1;
-      return a.folio.localeCompare(b.folio);
-    });
-    return grupos;
+    const filtrados = q ? lista.filter((d) => d.folio?.toLowerCase().includes(q) || d.titulo_doc?.toLowerCase().includes(q)) : lista;
+    return [...filtrados].sort((a, b) => this.compararFolio(a.folio, b.folio));
   });
 
   editNombre = '';
@@ -82,18 +93,39 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   editResponsable: string | null = null;
 
   private id = 0;
+  formularioAdd: FormGroup; 
 
   constructor(
     private route: ActivatedRoute,
     private guia: GuiaService,
     private http: HttpClient,
-  ) {}
+    private fb: FormBuilder
+  ) {
+    this.formularioAdd = this.fb.group({
+      folio: ['', Validators.required],
+      fecha_recepcion: ['', Validators.required],
+      fecha_documento: ['', Validators.required],
+      tipo_documento: [null, Validators.required],
+      descripcion_doc: [''],
+      path: ['', Validators.required]
+    });
+  }
 
   ngOnInit() {
     this.id = +(this.route.snapshot.paramMap.get('id') ?? 0);
     this.cargar();
     this.guia.getTiposTratamiento().subscribe({ next: (data) => this.tiposTratamiento.set(data), error: (e) => console.error(e) });
     this.guia.getServidoresPublicos().subscribe({ next: (data) => this.servidoresPublicos.set(data), error: (e) => console.error(e) });
+    this.guia.getTipoDocumental(this.id).subscribe({ 
+      next: (data) =>
+        {
+          this.tipoDocumento.set(data);
+          if (data.length > 0) {
+            this.formularioAdd.get('tipo_documento')?.setValue(0);
+          }
+        }, 
+      error: (e) => console.error(e) 
+    });
   }
 
   private cargar() {
@@ -117,17 +149,17 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     this.busca.set('');
   }
 
-  toggleGrupo(folio: string) {
+  toggleGrupo(registroId: number) {
     this.expandidos.update((set) => {
       const nuevo = new Set(set);
-      if (nuevo.has(folio)) nuevo.delete(folio);
-      else nuevo.add(folio);
+      if (nuevo.has(registroId)) nuevo.delete(registroId);
+      else nuevo.add(registroId);
       return nuevo;
     });
   }
 
-  estaExpandido(folio: string): boolean {
-    return this.expandidos().has(folio);
+  estaExpandido(registroId: number): boolean {
+    return this.expandidos().has(registroId);
   }
 
   iconoArchivo(nombre: string | null): string {
@@ -160,6 +192,8 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     return true;
   }
 
+
+
   guardarTransferencia() {
     if (!this.formularioValido) return;
     this.guardando.set(true);
@@ -190,16 +224,91 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
       },
     });
   }
-
-  descargarRegistro(id: number) {
-    this.descargarDocumento(this.guia.getDocumentoRegistroUrl(id));
-  }
+  
+  
 
   descargarRegistroDoc(id: number) {
     this.descargarDocumento(this.guia.getDocumentoUrl(id));
   }
 
+  descargarRegistroDocFisico(id: number) {
+    this.descargarDocumento(this.guia.getDocumentoUrlFisico(id));
+  }
+
+  descargarDocumentoEnvio(id: number) {
+    this.descargarDocumento(this.guia.getDocumentoEnvioUrl(id));
+  }
+
   verIndice(tipo: 'fisico' | 'electronico') {
     window.open(this.guia.getIndiceUrl(this.id, tipo), '_blank');
+  }
+
+  abrirDrawerAdd() {
+    const d = this.detalle();
+    if (!d) return;
+    this.drawerOpenAdd.set(true);
+  }
+
+   cerrarDrawerAdd() {
+    this.drawerOpenAdd.set(false);
+  }
+
+  seleccionarArchivo(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.archivoSeleccionado = input.files[0];
+
+      this.formularioAdd.get('path')?.setValue(  this.archivoSeleccionado);
+      this.formularioAdd.get('path')?.updateValueAndValidity();
+
+      console.log(this.archivoSeleccionado);
+    }
+  }
+
+  get formularioAddValido(): boolean {
+      return this.formularioAdd?.valid ?? false;
+  }
+
+   guardarAdd() {
+    if (this.formularioAdd.invalid) {
+      this.formularioAdd.markAllAsTouched();
+
+      console.log('Formulario inválido');
+      return;
+  }
+
+    this.guardandoAdd.set(true);
+    const datos = this.formularioAdd.getRawValue();
+    const formData = new FormData();
+
+    Object.entries(datos).forEach(([key, value]) => {
+    if (key !== 'path' && value !== null && value !== undefined) {
+      formData.append(key, String(value));
+    }
+  });
+
+   // Agregar el documento
+  if (this.archivoSeleccionado) {
+    formData.append(
+      'path',
+      this.archivoSeleccionado,
+      this.archivoSeleccionado.name
+    );
+  }
+
+    this.guia.addDocExpediente(this.id, formData).subscribe({
+      next: (data) => {
+        this.detalleAdd.set(data);
+        this.guardandoAdd.set(false);
+        this.drawerOpenAdd.set(false);
+        this.formularioAdd.reset();
+        this.cargar();
+      },
+      error: (e) => { 
+        this.guardandoAdd.set(false);
+       
+        console.error(e);
+      },
+    });
   }
 }

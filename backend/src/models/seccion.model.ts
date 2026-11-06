@@ -1,6 +1,7 @@
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { SubfondoModel } from './subfondo.model';
 import { SerieModel } from './serie.model';
+import { DestinoFinalModel } from './destino_final.model';
 
 @Table({ tableName: 'secciones', timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' })
 export class SeccionModel extends Model {

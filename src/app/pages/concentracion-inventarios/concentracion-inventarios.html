@@ -1,0 +1,46 @@
+<!-- ===== ENCABEZADO ARCHIVO DE CONCENTRACIÓN ===== -->
+<div class="archivo-header mb-3">
+  <div class="archivo-header-icon">
+    <i class="bi bi-archive"></i>
+  </div>
+  <div class="archivo-header-body">
+    <h4 class="archivo-title">Elaboración de inventarios</h4>
+    <p class="archivo-subtitle">Genera los formatos institucionales del Archivo de Concentración.</p>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="reportes-grid">
+    <button type="button" class="reporte-card" (click)="descargarInventarioGeneral()">
+      <i class="bi bi-file-earmark-pdf"></i>
+      <div>
+        <span class="reporte-titulo">Inventario general de Archivo de Concentración</span>
+        <span class="reporte-desc">Anexo 11/0777 43031-F07-26</span>
+      </div>
+    </button>
+
+    <button type="button" class="reporte-card" (click)="descargarTransferenciaSecundaria()">
+      <i class="bi bi-file-earmark-pdf"></i>
+      <div>
+        <span class="reporte-titulo">Inventario de transferencia secundaria</span>
+        <span class="reporte-desc">Anexo 18/0781 43031-F11-26</span>
+      </div>
+    </button>
+
+    <button type="button" class="reporte-card" (click)="descargarBajaDocumental()">
+      <i class="bi bi-file-earmark-pdf"></i>
+      <div>
+        <span class="reporte-titulo">Inventario de baja documental en Archivo de Concentración</span>
+        <span class="reporte-desc">Anexo 14/0780 43031-F10-26</span>
+      </div>
+    </button>
+
+    <button type="button" class="reporte-card" (click)="descargarCalendarioCaducidades()">
+      <i class="bi bi-file-earmark-pdf"></i>
+      <div>
+        <span class="reporte-titulo">Calendario de caducidades</span>
+        <span class="reporte-desc">Anexo 13/0779 40031-F09-26</span>
+      </div>
+    </button>
+  </div>
+</div>

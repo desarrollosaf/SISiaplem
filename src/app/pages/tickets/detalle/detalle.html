@@ -1,0 +1,325 @@
+@if (cargando()) {
+  <div class="content-card">
+    <div class="skeleton-loader">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>{{ error() }}</span>
+  </div>
+} @else if (ticket(); as t) {
+  <div class="archivo-header mb-3">
+    <div class="archivo-header-icon">
+      <i class="bi bi-ticket-perforated-fill"></i>
+    </div>
+    <div class="archivo-header-body">
+      <h4 class="archivo-title">{{ t.folio }}</h4>
+      <p class="archivo-subtitle">{{ tipoLabel[t.tipo_procedimiento] }} — {{ t.asunto }}</p>
+    </div>
+    <span class="tk-badge tk-header-badge" [class]="'tk-' + t.estado">{{ estadoLabel[t.estado] || t.estado }}</span>
+  </div>
+
+  @if (pendienteAutorizacion) {
+    <div class="tk-autorizacion-banner mb-3">
+      <i class="bi bi-pen fs-5 me-2"></i>
+      <div class="tk-autorizacion-banner-body">
+        <strong>Pendiente de autorización del Titular{{ ticket()?.rfc_titular ? ' (' + ticket()?.rfc_titular + ')' : '' }}.</strong>
+        Este ticket no pasará al área de Archivo hasta que el Titular lo autorice mediante firma electrónica.
+      </div>
+      @if (puedeAutorizar) {
+        <button class="btn-accion btn-accion-autorizar" (click)="abrirAutorizar()">
+          <i class="bi bi-pen-fill me-1"></i>Autorizar (firma electrónica)
+        </button>
+      }
+    </div>
+  }
+
+  @if (esAdmin || puedeGestionar) {
+    <div class="tk-actions mb-3">
+      @if (esAdmin) {
+        <button class="btn-accion btn-accion-asignar" (click)="abrirAsignar()"><i class="bi bi-person-check-fill me-1"></i>{{ ticket()?.rfc_asignado ? 'Reasignar' : 'Asignar' }}</button>
+      }
+      @if (puedeGestionar) {
+        <button class="btn-accion btn-accion-estado" (click)="abrirEstado()"><i class="bi bi-arrow-repeat me-1"></i>Cambiar estado</button>
+        <button class="btn-accion btn-accion-cerrar" (click)="abrirCerrar()" [disabled]="yaCerrado || pendienteAutorizacion"><i class="bi bi-check-circle-fill me-1"></i>{{ yaCerrado ? 'Cerrado' : 'Cerrar ticket' }}</button>
+      }
+    </div>
+  } @else {
+    <div class="tk-readonly-note mb-3">
+      <i class="bi bi-eye me-2"></i>Estás viendo este ticket en modo de solo lectura — solo el administrador o la persona asignada pueden gestionarlo.
+    </div>
+  }
+
+  <div class="tk-grid">
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title"><i class="bi bi-card-list me-2" style="color:var(--primary)"></i>Datos generales</span>
+      </div>
+      <div class="detalle-card">
+        <div class="detalle-row"><span class="detalle-lbl">Categoría</span><span class="detalle-val">{{ t.categoria || '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Descripción</span><span class="detalle-val">{{ t.descripcion || '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Solicitante</span><span class="detalle-val">{{ t.nombre_solicitante || '—' }} ({{ t.rfc_solicitante || 's/rfc' }})</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Correo / Ext.</span><span class="detalle-val">{{ t.correo_solicitante || '—' }} @if(t.extension_solicitante) { | Ext. {{ t.extension_solicitante }} }</span></div>
+        @if (t.numero_oficio_turno) {
+          <div class="detalle-row"><span class="detalle-lbl">Oficio / Turno</span><span class="detalle-val">{{ t.numero_oficio_turno }}</span></div>
+        }
+        <div class="detalle-row"><span class="detalle-lbl">Asignado a</span><span class="detalle-val">{{ t.rfc_asignado || 'Sin asignar' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Fecha programada</span><span class="detalle-val">{{ t.fecha_programada ? (t.fecha_programada | date:'dd/MM/yyyy HH:mm') : '—' }}</span></div>
+        <div class="detalle-row"><span class="detalle-lbl">Modalidad / Lugar</span><span class="detalle-val">{{ t.modalidad_lugar || '—' }}</span></div>
+        @if (t.estado === 'cerrado') {
+          <div class="detalle-row"><span class="detalle-lbl">Acta / Evidencia</span><span class="detalle-val">{{ t.ruta_acta || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Comentarios de cierre</span><span class="detalle-val">{{ t.comentarios_cierre || '—' }}</span></div>
+        }
+      </div>
+
+      @if (t.directorioDetalle; as d) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-person-badge-fill me-2" style="color:var(--primary)"></i>Servidor Público entrante/ratificado</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Asunto</span><span class="detalle-val">{{ d.subtipo === 'ratificacion' ? 'Ratificación' : 'Designación' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Nombre completo</span><span class="detalle-val">{{ d.nombre_completo_entrante || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Cargo / puesto</span><span class="detalle-val">{{ d.cargo_puesto || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Correo institucional</span><span class="detalle-val">{{ d.correo_institucional || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Teléfono / Ext.</span><span class="detalle-val">{{ d.telefono_extension || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Oficio de designación</span><span class="detalle-val">{{ d.ruta_oficio_designacion || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.bajaDetalle; as b) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-file-earmark-x-fill me-2" style="color:var(--primary)"></i>Baja Documental</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Dictamen de procedencia</span><span class="detalle-val">{{ b.dictamen_procedencia || 'Pendiente' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Programación de traslado</span><span class="detalle-val">{{ b.programacion_traslado || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.transferenciaDetalle; as tr) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-arrow-left-right me-2" style="color:var(--primary)"></i>Transferencia vinculada</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Solicitud de transferencia</span><span class="detalle-val">#{{ tr.id_solicitud_transferencia || '—' }}</span></div>
+        </div>
+      }
+
+      @if (t.prestamoDetalle; as p) {
+        <div class="content-card-header tk-sub-header">
+          <span class="content-card-title"><i class="bi bi-box-arrow-in-right me-2" style="color:var(--primary)"></i>Préstamo / Consulta en Concentración</span>
+        </div>
+        <div class="detalle-card">
+          <div class="detalle-row"><span class="detalle-lbl">Tipo de solicitud</span><span class="detalle-val">{{ p.tipo_solicitud === 'consulta' ? 'Consulta' : 'Préstamo' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Persona Habilitada</span><span class="detalle-val">{{ p.persona_habilitada || '—' }}</span></div>
+          <div class="detalle-row"><span class="detalle-lbl">Solicitud de consulta</span><span class="detalle-val">#{{ p.id_solicitud_consulta || '—' }}</span></div>
+        </div>
+      }
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header">
+        <span class="content-card-title"><i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Historial de actividad</span>
+      </div>
+      @if (!t.historial || t.historial.length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-inboxes"></i>
+          <p>Sin movimientos registrados aún.</p>
+        </div>
+      } @else {
+        <div class="hist-list">
+          @for (h of t.historial; track h.id) {
+            <div class="hist-item">
+              <div class="hist-item-top">
+                <span class="hist-movimiento">{{ h.accion }}</span>
+                <span class="hist-fecha">{{ h.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="hist-item-body">
+                <span class="hist-usuario"><i class="bi bi-person-fill me-1"></i>{{ h.rfc_actor || 'Sistema' }} @if(h.rol_actor) { ({{ h.rol_actor }}) }</span>
+                @if (h.estado_resultante) { <span class="hist-plazos">Estado: {{ estadoLabel[h.estado_resultante] || h.estado_resultante }}</span> }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: AUTORIZAR (FIRMA ELECTRÓNICA) ===== -->
+  @if (autorizarOpen()) { <div class="drawer-overlay" (click)="cerrarAutorizar()"></div> }
+  <div class="drawer" [class.drawer-open]="autorizarOpen()">
+    <div class="drawer-header">
+      <div>
+        <h5 class="drawer-title"><i class="bi bi-pen-fill"></i>Autorizar Ticket</h5>
+        <p class="drawer-subtitle">Firma electrónica del Titular (simulada por ahora — la validación real está pendiente de integrar).</p>
+      </div>
+      <button class="drawer-close" (click)="cerrarAutorizar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label">RFC del Titular <span class="required-star">*</span></label>
+        <input type="text" class="field-input" [(ngModel)]="formAutorizar.rfc_titular" name="rfc_titular" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Contraseña de firma electrónica</label>
+        <input type="password" class="field-input" [(ngModel)]="formAutorizar.password_firma" name="password_firma" placeholder="Simulado: cualquier valor autoriza" autocomplete="off" />
+        <span class="field-help">Este campo quedará conectado a la API real de firma electrónica cuando esté disponible.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentario</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formAutorizar.comentario" name="comentario_autorizar" placeholder="Opcional"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarAutorizar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-rechazar" (click)="guardarAutorizar(false)" [disabled]="guardando()">
+        <i class="bi bi-x-lg me-1"></i>Rechazar
+      </button>
+      <button class="btn-save" (click)="guardarAutorizar(true)" [disabled]="guardando()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-pen-fill me-1"></i>Firmar y autorizar }
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: ASIGNAR ===== -->
+  @if (asignarOpen()) { <div class="drawer-overlay" (click)="cerrarAsignar()"></div> }
+  <div class="drawer" [class.drawer-open]="asignarOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-person-check-fill"></i>Asignar Ticket</h5></div>
+      <button class="drawer-close" (click)="cerrarAsignar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group tk-rfc-wrap">
+        <label class="field-label">Servidor público asignado (usuario de SAF) <span class="required-star">*</span></label>
+        <input
+          type="text"
+          class="field-input"
+          [ngModel]="buscadorAsignar.query()"
+          (ngModelChange)="onAsignarInput($event)"
+          (focus)="buscadorAsignar.abrir()"
+          name="rfc_asignado_busqueda"
+          placeholder="Escribe RFC, nombre o correo…"
+          autocomplete="off"
+        />
+        <span class="field-help">Busca por RFC, nombre o correo entre los usuarios activos de SAF.</span>
+
+        @if (buscadorAsignar.open() && buscadorAsignar.query().trim().length >= 2) {
+          <div class="tk-rfc-panel">
+            @if (buscadorAsignar.buscando()) {
+              <div class="tk-rfc-empty">Buscando…</div>
+            } @else if (buscadorAsignar.resultados().length === 0) {
+              <div class="tk-rfc-empty">Sin resultados.</div>
+            } @else {
+              <div class="tk-rfc-list">
+                @for (u of buscadorAsignar.resultados(); track u.id) {
+                  <button type="button" class="tk-rfc-option" (click)="seleccionarAsignado(u)">
+                    <span class="tk-rfc-option-nombre">{{ u.name || '—' }}</span>
+                    <span class="tk-rfc-option-rfc">{{ u.rfc }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (formAsignar.rfc_asignado) {
+        <div class="tk-rfc-selected">
+          <i class="bi bi-check-circle-fill me-1"></i>
+          Seleccionado: <strong>{{ formAsignar.rfc_asignado }}</strong>
+        </div>
+      }
+
+      <div class="field-group">
+        <label class="field-label">Fecha y hora de cita/revisión</label>
+        <input type="datetime-local" class="field-input" [(ngModel)]="formAsignar.fecha_programada" name="fecha_programada" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Modalidad / Lugar</label>
+        <input type="text" class="field-input" [(ngModel)]="formAsignar.modalidad_lugar" name="modalidad_lugar" />
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarAsignar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarAsignar()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: CAMBIAR ESTADO ===== -->
+  @if (estadoOpen()) { <div class="drawer-overlay" (click)="cerrarEstado()"></div> }
+  <div class="drawer" [class.drawer-open]="estadoOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-arrow-repeat"></i>Cambiar Estado</h5></div>
+      <button class="drawer-close" (click)="cerrarEstado()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="field-group">
+        <label class="field-label">Nuevo estado <span class="required-star">*</span></label>
+        <select class="field-input" [(ngModel)]="formEstado.estado" name="estado">
+          <option value="nuevo">Nuevo</option>
+          <option value="turnado">Turnado</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="programado">Programado</option>
+          <option value="resuelto">Resuelto</option>
+          <option value="rechazado">Rechazado</option>
+          @if (ticket()?.tipo_procedimiento === 'prestamo_consulta') {
+            <option value="disponible">Disponible para préstamo/consulta</option>
+            <option value="no_existente">No existente</option>
+          }
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentario</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formEstado.comentario" name="comentario" placeholder="Ej. Ticket turnado a UCGDAA"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarEstado()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarEstado()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Guardar }
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DRAWER: CERRAR ===== -->
+  @if (cerrarOpen()) { <div class="drawer-overlay" (click)="cerrarCerrar()"></div> }
+  <div class="drawer" [class.drawer-open]="cerrarOpen()">
+    <div class="drawer-header">
+      <div><h5 class="drawer-title"><i class="bi bi-check-circle-fill"></i>Cerrar Ticket</h5></div>
+      <button class="drawer-close" (click)="cerrarCerrar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+      @if (esBajaDocumental) {
+        <div class="field-group">
+          <label class="field-label">Dictamen de procedencia</label>
+          <select class="field-input" [(ngModel)]="formCerrar.dictamen_procedencia" name="dictamen_procedencia">
+            <option value="procedente">Procedente</option>
+            <option value="improcedente">Improcedente</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Programación de traslado</label>
+          <textarea class="field-input" rows="2" [(ngModel)]="formCerrar.programacion_traslado" name="programacion_traslado"></textarea>
+        </div>
+      }
+      <div class="field-group">
+        <label class="field-label">Acta / Evidencia (referencia)</label>
+        <input type="text" class="field-input" [(ngModel)]="formCerrar.ruta_acta" name="ruta_acta" placeholder="Folio o ruta del acta digitalizada" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Comentarios de cierre</label>
+        <textarea class="field-input" rows="3" [(ngModel)]="formCerrar.comentarios_cierre" name="comentarios_cierre"></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-cancel" (click)="cerrarCerrar()" [disabled]="guardando()">Cancelar</button>
+      <button class="btn-save" (click)="guardarCierre()">
+        @if (guardando()) { <span class="spinner"></span> Guardando… } @else { <i class="bi bi-check-lg me-1"></i>Cerrar ticket }
+      </button>
+    </div>
+  </div>
+}

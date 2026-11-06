@@ -16,7 +16,11 @@ import { TDependencia } from './models/t-dependencia.model';
 import { TDireccion } from './models/t-direccion.model';
 import { CadidoModule } from './cadido/cadido.module';
 import { AvisosModule } from './avisos/avisos.module';
-
+import { ClasificacionModule } from './clasificacion/clasificacion.module';
+import { TransferenciasModule } from './transferencias/transferencias.module';
+import { ConsultasModule } from './consultas/consultas.module';
+import { ConcentracionModule } from './concentracion/concentracion.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -36,19 +40,24 @@ import { AvisosModule } from './avisos/avisos.module';
         logging: false,
       }),
     }),
-    SequelizeModule.forRoot({
+    SequelizeModule.forRootAsync({
       name: 'saf',
-      dialect: 'mysql',
-      host: 'host.docker.internal',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'saf',
-      models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
-      synchronize: false,
-      logging: false,
-      dialectOptions: { charset: 'utf8mb4' },
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        dialect: 'mysql',
+        host: config.get<string>('SAF_DB_HOST', 'localhost'),
+        port: config.get<number>('SAF_DB_PORT', 3306),
+        username: config.get<string>('SAF_DB_USER', 'root'),
+        password: config.get<string>('SAF_DB_PASS', ''),
+        database: config.get<string>('SAF_DB_NAME', 'adminplem_saf'),
+        models: [UsersSafs, SUsuario, TDepartamento, TDependencia, TDireccion],
+        synchronize: false,
+        logging: false,
+        dialectOptions: { charset: 'utf8mb4' },
+      }),
     }),
+
     AuthModule,
     GuiaModule,
     SubfondoModule,
@@ -57,6 +66,11 @@ import { AvisosModule } from './avisos/avisos.module';
     ResponsablesModule,
     CadidoModule,
     AvisosModule,
+    ClasificacionModule,
+    TransferenciasModule,
+    ConsultasModule,
+    ConcentracionModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

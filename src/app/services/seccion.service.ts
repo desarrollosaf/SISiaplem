@@ -108,12 +108,14 @@ export class SeccionService {
     return this.http.get<DireccionItem[]>(`${API}/direcciones/${subfondoId}`);
   }
 
-  getAreaAdministrativa(idDireccion: number) {
-    return this.http.get<AreaAdministrativaItem[]>(`${API}/area-administrativa/${idDireccion}`);
+  getAreaAdministrativa(idDireccion: number, subfondoId?: number) {
+    const params: Record<string, number> = subfondoId ? { subfondoId } : {};
+    return this.http.get<AreaAdministrativaItem[]>(`${API}/area-administrativa/${idDireccion}`, { params });
   }
 
-  getDepartamentoInfo(id: number) {
-    return this.http.get<{ id_Direccion: number; label: string } | null>(`${API}/departamento-info/${id}`);
+  getDepartamentoInfo(id: number, subfondoId?: number) {
+    const params: Record<string, number> = subfondoId ? { subfondoId } : {};
+    return this.http.get<{ id_Direccion: number; label: string } | null>(`${API}/departamento-info/${id}`, { params });
   }
 
   getAreaNames(ids: number[]) {

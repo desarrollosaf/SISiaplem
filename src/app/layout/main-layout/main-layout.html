@@ -4,7 +4,7 @@
   <aside class="app-sidebar">
 
     <!-- Brand -->
-    <a class="sidebar-brand" routerLink="/dashboard">
+    <a class="sidebar-brand" routerLink="/home">
       <div class="sidebar-brand-icon">
         <i class="bi bi-archive-fill"></i>
       </div>
@@ -27,7 +27,7 @@
     <nav class="sidebar-nav">
 
       <!-- Inicio -->
-      <a routerLink="/dashboard/home" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/home" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-house-fill nav-icon"></i>
         <span class="nav-label">Inicio</span>
       </a>
@@ -43,30 +43,89 @@
         </button>
         <ul class="nav-submenu" [class.submenu-open]="isOpen('tramite')">
           <li>
-            <a routerLink="/dashboard/tramite/inventario" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Guía de Archivos
             </a>
           </li>
           <li>
-            <a routerLink="/dashboard/tramite/expedientes" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/expedientes" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Expedientes Abiertos
             </a>
           </li>
           <li>
-            <a routerLink="/dashboard/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
+            <a routerLink="/tramite/expedientes-cerrados" routerLinkActive="active" class="submenu-link">
               <i class="bi bi-dot"></i>Expedientes Cerrados
             </a>
           </li>
         </ul>
 
-        <a routerLink="/dashboard/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
-          <i class="bi bi-search nav-icon"></i>
-          <span class="nav-label">Consultas y Préstamos</span>
+        <button class="nav-link-item" (click)="toggleMenu('inventarios')">
+          <i class="bi bi-list-check"></i>
+          <span class="nav-label">Elaboración de inventarios</span>
+          <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('inventarios')"></i>
+        </button>
+        <ul class="nav-submenu" [class.submenu-open]="isOpen('inventarios')">
+          <li>
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de archivo de trámite
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tramite/transferencias" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de transferencia
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tramite/inventario" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Inventario de baja documental
+            </a>
+          </li>
+        </ul>
+
+         <button class="nav-link-item" (click)="toggleMenu('clasificacion')">
+          <i class="bi bi-diagram-3"></i>
+          <span class="nav-label">Clasificación archivistica</span>
+          <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('clasificacion')"></i>
+        </button>
+        <ul class="nav-submenu" [class.submenu-open]="isOpen('clasificacion')">
+          <li>
+            <a routerLink="/clasificacion/consulta" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Consultar series/subseries
+            </a>
+          </li>
+          <li>
+            <a routerLink="/clasificacion/solicitud" routerLinkActive="active" class="submenu-link">
+              <i class="bi bi-dot"></i>Solicitar adición/cancelación
+            </a>
+          </li>
+        </ul>
+
+         <a routerLink="/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
+         <i class="bi bi-truck"></i>
+          <span class="nav-label">Solicitud transferencia primaria</span>
         </a>
 
-        <a routerLink="/dashboard/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
-          <i class="bi bi-arrow-right-circle nav-icon"></i>
-          <span class="nav-label">Transferencia Primaria</span>
+         <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-headset"></i>
+          <span class="nav-label">Solicitud asesoría técnica</span>
+        </a>
+
+         <a routerLink="/tramite/prestamos" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-file-text"></i>
+          <span class="nav-label">Generar guía simple</span>
+        </a>
+
+
+        <div class="nav-section-label">Archivo de Concentración</div>
+        <a routerLink="/tramite/consulta-expedientes" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-search nav-icon"></i>
+          <span class="nav-label">Solicitar consulta de expedientes</span>
+        </a>
+
+        <div class="nav-section-label">Archivo histórico</div>
+        <a routerLink="/tramite/transferencias" routerLinkActive="active" class="nav-link-item">
+          <i class="bi bi-search nav-icon"></i>
+          <span class="nav-label">Solicitar consulta de expedientes</span>
         </a>
       }
 
@@ -74,24 +133,52 @@
       @if (auth.hasRole('RAC')) {
       <div class="nav-section-label">Archivo de Concentración</div>
 
-      <a routerLink="/dashboard/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/expedientes" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-inbox-fill nav-icon"></i>
         <span class="nav-label">Expedientes Recibidos</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/prestamos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/prestamos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-hand-index-thumb nav-icon"></i>
         <span class="nav-label">Préstamos</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/baja" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/concentracion/baja" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-trash3 nav-icon"></i>
         <span class="nav-label">Baja Documental</span>
       </a>
 
-      <a routerLink="/dashboard/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
+      <button class="nav-link-item" (click)="toggleMenu('concentracionInventarios')">
+        <i class="bi bi-list-check"></i>
+        <span class="nav-label">Elaboración de inventarios</span>
+        <i class="bi bi-chevron-right nav-arrow" [class.open]="isOpen('concentracionInventarios')"></i>
+      </button>
+      <ul class="nav-submenu" [class.submenu-open]="isOpen('concentracionInventarios')">
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Inventario general de Archivo de Concentración
+          </a>
+        </li>
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Inventario de transferencia secundaria
+          </a>
+        </li>
+        <li>
+          <a routerLink="/concentracion/inventarios" routerLinkActive="active" class="submenu-link">
+            <i class="bi bi-dot"></i>Calendario de caducidades
+          </a>
+        </li>
+      </ul>
+
+      <a routerLink="/concentracion/transferencias" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-send nav-icon"></i>
-        <span class="nav-label">Transfer. al Histórico</span>
+        <span class="nav-label">Transferencia Primaria</span>
+      </a>
+
+      <a routerLink="/concentracion/consultas" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-search nav-icon"></i>
+        <span class="nav-label">Solicitudes de Consulta</span>
       </a>
       }
 
@@ -99,22 +186,22 @@
       @if (auth.hasRole('RAH')) {
       <div class="nav-section-label">Archivo Histórico</div>
 
-      <a routerLink="/dashboard/historico/fondos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/fondos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-collection nav-icon"></i>
         <span class="nav-label">Fondo Documental</span>
       </a>
 
-      <a routerLink="/dashboard/historico/consulta" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/consulta" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-eye nav-icon"></i>
         <span class="nav-label">Consulta Pública</span>
       </a>
 
-      <a routerLink="/dashboard/historico/digitalizacion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/digitalizacion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-camera nav-icon"></i>
         <span class="nav-label">Digitalización</span>
       </a>
 
-      <a routerLink="/dashboard/historico/conservacion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/historico/conservacion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-shield-check nav-icon"></i>
         <span class="nav-label">Conservación</span>
       </a>
@@ -136,7 +223,7 @@
       </button>
       <ul class="nav-submenu" [class.submenu-open]="isOpen('instrumentos')">
         <li>
-          <a routerLink="/dashboard/admin/instrumentos/cgca" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/admin/instrumentos/cgca" routerLinkActive="active" class="submenu-link">
 
              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open" viewBox="0 0 16 16">
                 <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z"/>
@@ -145,7 +232,7 @@
         </li>
 
          <li>
-          <a routerLink="/dashboard/control/cadido" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/control/cadido" routerLinkActive="active" class="submenu-link">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open" viewBox="0 0 16 16">
                   <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z"/>
               </svg> CADIDO
@@ -197,7 +284,7 @@
       </button>
       <ul class="nav-submenu" [class.submenu-open]="isOpen('responsables')">
         <li>
-          <a routerLink="/dashboard/admin/responsables/directorio" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/admin/responsables/directorio" routerLinkActive="active" class="submenu-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8"/>
                 <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
@@ -207,7 +294,7 @@
         </li>
 
         <li> 
-          <a routerLink="/admin/intrumentos/CGCA" routerLinkActive="active" class="submenu-link">
+          <a routerLink="/admin/responsables/solicitudes" routerLinkActive="active" class="submenu-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-slash-minus" viewBox="0 0 16 16">
                 <path d="m1.854 14.854 13-13a.5.5 0 0 0-.708-.708l-13 13a.5.5 0 0 0 .708.708M4 1a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2A.5.5 0 0 1 4 1m5 11a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 9 12"/>
             </svg> Solicitudes adición / cancelación
@@ -258,12 +345,17 @@
         </li>
       </ul>
 
-      <a routerLink="/dashboard/admin/avisos" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/admin/avisos" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-megaphone nav-icon"></i>
         <span class="nav-label">Avisos</span>
       </a>
 
-      <a routerLink="/dashboard/admin/configuracion" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/admin/usuarios" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-people nav-icon"></i>
+        <span class="nav-label">Usuarios y Roles</span>
+      </a>
+
+      <a routerLink="/admin/configuracion" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-sliders nav-icon"></i>
         <span class="nav-label">Configuración</span>
       </a>
@@ -272,12 +364,17 @@
       <!-- ── HERRAMIENTAS ── -->
       <div class="nav-section-label">Herramientas</div>
 
-      <a routerLink="/dashboard/reportes" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/tickets" routerLinkActive="active" class="nav-link-item">
+        <i class="bi bi-ticket-perforated-fill nav-icon"></i>
+        <span class="nav-label">Tickets</span>
+      </a>
+
+      <a routerLink="/reportes" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-bar-chart-fill nav-icon"></i>
         <span class="nav-label">Reportes y Estadísticas</span>
       </a>
 
-      <a routerLink="/dashboard/ayuda" routerLinkActive="active" class="nav-link-item">
+      <a routerLink="/ayuda" routerLinkActive="active" class="nav-link-item">
         <i class="bi bi-question-circle nav-icon"></i>
         <span class="nav-label">Ayuda y Soporte</span>
       </a>
@@ -315,7 +412,7 @@
       <!-- Search -->
       <div class="topbar-search-wrap d-none d-lg-block">
         <i class="bi bi-search topbar-search-icon"></i>
-        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos...">
+        <input type="text" class="topbar-search" placeholder="Buscar expedientes, documentos..." [value]="buscar()"  (input)="buscar.set($any($event.target).value)" (keydown.enter)="buscarExp()">
       </div>
 
       <!-- Right actions -->
@@ -384,6 +481,61 @@
 
     <!-- PAGE CONTENT -->
     <main class="app-content">
+      @if (modalDocumentosAbierto()) {
+      <div class="modal-overlay" (click)="cerrarModalDocumentos()">
+        <div class="modal-documentos" (click)="$event.stopPropagation()">
+          <div class="modal-documentos-header">
+            <h4>Resultados de búsqueda</h4>
+            <button
+              type="button"
+              class="btn-close-modal"
+              (click)="cerrarModalDocumentos()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+          <div class="modal-documentos-body">
+            @if (resultado() != null) {
+              <div class="libro-acordeon">
+                @for (tipo of  tiposDocumento; track tipo) {
+                  @if (resultado()![tipo]?.length > 0) {
+                  <div class="libro-item" [class.libro-item-open]="tipo === tabActivo()">
+                    <button type="button" class="libro-item-header" (click)="seleccionarTab(tipo)">
+                      <span class="libro-item-chevron"><i class="bi bi-chevron-right"></i></span>
+                      <span class="libro-item-icon"><i class="bi bi-building-fill"></i></span>
+                        <span class="libro-item-title">  {{ tipo === 'digital' ? 'Documentos digitales' : 'Documentos físicos' }} </span>
+                    </button>
+
+                    @if (tipo === tabActivo()) {
+                      <div class="libro-item-body">
+                        @for (item of resultado()![tipo]; track item.id) {
+                          <div class="serie-tile">
+                            <div class="serie-tile-main">
+                              <span class="serie-tile-codigo">{{ item.path }}</span>
+                              @if (item.folio) {<span class="serie-tile-nombre" >Folio: {{ item.folio }}</span> }
+                              @if (item.titulo_doc) {<span class="serie-tile-nombre" > {{ item.titulo_doc }}</span> }
+                            </div>
+                            <div class="serie-tile-side">
+                              <a [routerLink]="['/tramite/expediente/', item.expediente_id]" (click)="cerrarModalDocumentos()" class="serie-tile-btn" title="Ver expedientes">
+                                <i class="bi bi-arrow-right"></i>
+                              </a>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    
+      }
+      
       <router-outlet />
     </main>
 

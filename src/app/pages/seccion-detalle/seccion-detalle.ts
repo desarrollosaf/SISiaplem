@@ -13,6 +13,7 @@ import {
   TipoDocumentalItem,
 } from '../../services/seccion.service';
 import { SubfondoService, SubfondoItem } from '../../services/subfondo.service';
+import { MultiSelectComponent, MultiSelectOption } from '../../components/multi-select/multi-select';
 
 type DrawerMode =
   | 'seccion-edit'
@@ -31,7 +32,7 @@ interface ConfirmAction {
 
 @Component({
   selector: 'app-seccion-detalle',
-  imports: [FormsModule],
+  imports: [FormsModule, MultiSelectComponent],
   templateUrl: './seccion-detalle.html',
   styleUrl: './seccion-detalle.css',
 })
@@ -48,6 +49,9 @@ export class SeccionDetalleComponent implements OnInit {
   direccionesOpciones = signal<DireccionItem[]>([]);
   cargandoDirecciones = signal(false);
   tipoDocumentales = signal<TipoDocumentalItem[]>([]);
+  tipoDocumentalOpciones = computed<MultiSelectOption[]>(() =>
+    this.tipoDocumentales().map(td => ({ value: td.id, label: td.tipo_doc })),
+  );
 
   // Cascade serie: dirección → área administrativa
   areasAdministrativas = signal<AreaAdministrativaItem[]>([]);
@@ -69,6 +73,9 @@ export class SeccionDetalleComponent implements OnInit {
   serieContextId = signal<number | null>(null);
 
   isOsfem = computed(() => this.subfondo()?.id_Dependencia === 3);
+  // En Secciones Comunes, series/subseries/subsubseries no eligen su propia dirección/área:
+  // heredan siempre las direcciones de la sección a la que pertenecen.
+  esComun = computed(() => this.seccion()?.id_tipo_seccion === 2);
 
   formSerie = { codigo: '', serie: '', departamento_id: null as number | null };
   formSubserie = { codigo: '', subserie: '', id_Departamento: null as number | null };
@@ -154,7 +161,7 @@ export class SeccionDetalleComponent implements OnInit {
   }
 
   volver() {
-    this.router.navigate(['/dashboard/admin/instrumentos/cgca/subfondo', this.subfondoId]);
+    this.router.navigate(['/admin/instrumentos/cgca/subfondo', this.subfondoId]);
   }
 
   nombreTipo(id: number): string {
@@ -171,6 +178,16 @@ export class SeccionDetalleComponent implements OnInit {
       this.areasAdministrativasSubsub().find(a => a.id === id)?.label ??
       '—'
     );
+  }
+
+  // Dirección a mostrar para una serie/subserie/subsubserie: en Secciones Comunes siempre
+  // son las de la sección (aunque cambien), en Sustantivas es la propia del registro.
+  dirLabelParaMostrar(departamentoId: number | null | undefined): string | null {
+    if (this.esComun()) {
+      const ids = this.seccion()?.direccion_ids ?? [];
+      return ids.length ? ids.map(id => this.nombreDir(id)).join(', ') : null;
+    }
+    return departamentoId ? this.nombreDir(departamentoId) : null;
   }
 
   nombreTipoDoc(id: number | null): string {
@@ -196,29 +213,6 @@ export class SeccionDetalleComponent implements OnInit {
     this.selectedDirIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
   }
 
-  // ── Tipo Documental (serie) ───────────────────────────────────────────────
-
-  isTipoDocSerieSelected(id: number): boolean { return this.selectedTipoDocSerieIds().includes(id); }
-  toggleTipoDocSerie(id: number) {
-    const ids = this.selectedTipoDocSerieIds();
-    this.selectedTipoDocSerieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
-
-  // ── Tipo Documental (subserie) ────────────────────────────────────────────
-
-  isTipoDocSubserieSelected(id: number): boolean { return this.selectedTipoDocSubserieIds().includes(id); }
-  toggleTipoDocSubserie(id: number) {
-    const ids = this.selectedTipoDocSubserieIds();
-    this.selectedTipoDocSubserieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
-
-  // ── Tipo Documental (subsubserie) ─────────────────────────────────────────
-
-  isTipoDocSubsubserieSelected(id: number): boolean { return this.selectedTipoDocSubsubserieIds().includes(id); }
-  toggleTipoDocSubsubserie(id: number) {
-    const ids = this.selectedTipoDocSubsubserieIds();
-    this.selectedTipoDocSubsubserieIds.set(ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
 
   // ── Cascading: Dirección → Área Administrativa ───────────────────────────
 
@@ -228,7 +222,7 @@ export class SeccionDetalleComponent implements OnInit {
     this.areasAdministrativas.set([]);
     if (!id) return;
     this.cargandoAreas.set(true);
-    this.svc.getAreaAdministrativa(id).subscribe({
+    this.svc.getAreaAdministrativa(id, this.subfondoId).subscribe({
       next: areas => { this.areasAdministrativas.set(areas); this.cargandoAreas.set(false); },
       error: () => this.cargandoAreas.set(false),
     });
@@ -240,7 +234,7 @@ export class SeccionDetalleComponent implements OnInit {
     this.areasAdministrativasSub.set([]);
     if (!id) return;
     this.cargandoAreasSub.set(true);
-    this.svc.getAreaAdministrativa(id).subscribe({
+    this.svc.getAreaAdministrativa(id, this.subfondoId).subscribe({
       next: areas => { this.areasAdministrativasSub.set(areas); this.cargandoAreasSub.set(false); },
       error: () => this.cargandoAreasSub.set(false),
     });
@@ -252,7 +246,7 @@ export class SeccionDetalleComponent implements OnInit {
     this.areasAdministrativasSubsub.set([]);
     if (!id) return;
     this.cargandoAreasSubsub.set(true);
-    this.svc.getAreaAdministrativa(id).subscribe({
+    this.svc.getAreaAdministrativa(id, this.subfondoId).subscribe({
       next: areas => { this.areasAdministrativasSubsub.set(areas); this.cargandoAreasSubsub.set(false); },
       error: () => this.cargandoAreasSubsub.set(false),
     });
@@ -266,12 +260,12 @@ export class SeccionDetalleComponent implements OnInit {
     setAreas: (a: AreaAdministrativaItem[]) => void,
   ) {
     if (!departamentoId) { setDir(null); setAreas([]); return; }
-    this.svc.getDepartamentoInfo(departamentoId).subscribe({
+    this.svc.getDepartamentoInfo(departamentoId, this.subfondoId).subscribe({
       next: info => {
         if (!info) { setDir(null); setAreas([]); return; }
         setDir(info.id_Direccion);
         setCargando(true);
-        this.svc.getAreaAdministrativa(info.id_Direccion).subscribe({
+        this.svc.getAreaAdministrativa(info.id_Direccion, this.subfondoId).subscribe({
           next: areas => { setAreas(areas); setCargando(false); },
           error: () => setCargando(false),
         });
@@ -307,12 +301,14 @@ export class SeccionDetalleComponent implements OnInit {
     this.formSerie = { codigo: ser.codigo, serie: ser.serie, departamento_id: ser.departamento_id ?? null };
     this.selectedTipoDocSerieIds.set((ser.tipo_documental_ids ?? []).filter((x): x is number => x !== null));
     this.serieContextId.set(ser.id);
-    this.precargarCascada(
-      ser.departamento_id,
-      id => this.idDireccionSerie.set(id),
-      v => this.cargandoAreas.set(v),
-      a => this.areasAdministrativas.set(a),
-    );
+    if (!this.esComun()) {
+      this.precargarCascada(
+        ser.departamento_id,
+        id => this.idDireccionSerie.set(id),
+        v => this.cargandoAreas.set(v),
+        a => this.areasAdministrativas.set(a),
+      );
+    }
     this.drawerMode.set('serie-edit');
     this.drawerOpen.set(true);
   }
@@ -341,12 +337,14 @@ export class SeccionDetalleComponent implements OnInit {
     this.formSubserie = { codigo: sub.codigo, subserie: sub.subserie, id_Departamento: sub.id_Departamento ?? null };
     this.selectedTipoDocSubserieIds.set((sub.tipo_documental_ids ?? []).filter((x): x is number => x !== null));
     this.serieContextId.set(sub.id);
-    this.precargarCascada(
-      sub.id_Departamento,
-      id => this.idDireccionSubserie.set(id),
-      v => this.cargandoAreasSub.set(v),
-      a => this.areasAdministrativasSub.set(a),
-    );
+    if (!this.esComun()) {
+      this.precargarCascada(
+        sub.id_Departamento,
+        id => this.idDireccionSubserie.set(id),
+        v => this.cargandoAreasSub.set(v),
+        a => this.areasAdministrativasSub.set(a),
+      );
+    }
     this.drawerMode.set('subserie-edit');
     this.drawerOpen.set(true);
   }
@@ -376,12 +374,14 @@ export class SeccionDetalleComponent implements OnInit {
     this.formSubsubserie = { codigo: sss.codigo, subsubserie: sss.subsubserie, id_departamento: sss.id_departamento ?? null };
     this.selectedTipoDocSubsubserieIds.set((sss.tipo_documental_ids ?? []).filter((x): x is number => x !== null));
     this.subserieContextId.set(sss.id);
-    this.precargarCascada(
-      sss.id_departamento,
-      id => this.idDireccionSubsubserie.set(id),
-      v => this.cargandoAreasSubsub.set(v),
-      a => this.areasAdministrativasSubsub.set(a),
-    );
+    if (!this.esComun()) {
+      this.precargarCascada(
+        sss.id_departamento,
+        id => this.idDireccionSubsubserie.set(id),
+        v => this.cargandoAreasSubsub.set(v),
+        a => this.areasAdministrativasSubsub.set(a),
+      );
+    }
     this.drawerMode.set('subsubserie-edit');
     this.drawerOpen.set(true);
   }

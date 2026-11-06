@@ -39,7 +39,7 @@ export class LoginComponent {
           this.error.set('Tu usuario no tiene roles asignados. Contacta al administrador.');
           return;
         }
-        void this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/home']);
       },
       error: (err: { error?: { message?: string } }) => {
         this.loading.set(false);

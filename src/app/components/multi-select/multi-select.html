@@ -1,0 +1,40 @@
+<div class="ms-wrap">
+  <div class="ms-box" [class.ms-open]="open()" (click)="abrir()">
+    @for (opt of seleccionadas; track opt.value) {
+      <span class="ms-chip">
+        <i class="bi bi-x-lg ms-chip-remove" (click)="quitar(opt.value, $event)" title="Quitar"></i>
+        {{ opt.label }}
+      </span>
+    }
+    <input
+      #inputRef
+      type="text"
+      class="ms-input"
+      [placeholder]="seleccionadas.length === 0 ? placeholder : ''"
+      [ngModel]="filtro()"
+      (ngModelChange)="filtro.set($event)"
+      (focus)="abrir()"
+      (keydown.backspace)="onBackspace()"
+      (click)="$event.stopPropagation()"
+    />
+  </div>
+
+  @if (open()) {
+    <div class="ms-panel">
+      @if (options.length === 0) {
+        <div class="ms-empty">{{ emptyLabel }}</div>
+      } @else if (disponibles.length === 0) {
+        <div class="ms-empty">Sin resultados.</div>
+      } @else {
+        <div class="ms-list">
+          @for (opt of disponibles; track opt.value) {
+            <button type="button" class="ms-option" (click)="seleccionar(opt)">
+              <span class="ms-option-label">{{ opt.label }}</span>
+              @if (opt.sublabel) { <span class="ms-option-sub">{{ opt.sublabel }}</span> }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -77,14 +77,47 @@ export class SeccionService {
       String(d.c_presup ?? '').endsWith('01'),
     );
     return filtrados.map((d) => ({
-      id: d.id_Direccion,
+      id: d.id_Departamento,
       label: d.nombre_completo,
     }));
   }
 
-  async getAreaAdministrativa(idDireccion: number) {
+  // Cuando el subfondo pertenece a la dependencia 3 (SAF), el checkbox "Dirección" lista
+  // registros de t_direccion, no de t_departamento. Hay que traducir cada id_Direccion
+  // seleccionado al id_Departamento real (mismo criterio que usa el sistema Laravel:
+  // buscar en t_departamento por id_Direccion + c_presup), porque secciones_dir.id_Departamento
+  // siempre debe apuntar a t_departamento.
+  private async resolveDepartamentoIds(idDependencia: number | undefined, direccionIds: number[]): Promise<number[]> {
+    if (idDependencia !== 3) return direccionIds;
+
+    const direcciones = await this.direccionModel.findAll({ where: { id_Direccion: direccionIds } });
+    const resueltos: number[] = [];
+    for (const dir of direcciones) {
+      const depto = await this.departamentoModel.findOne({
+        where: { id_Direccion: dir.id_Direccion, c_presup: dir.c_presup },
+      });
+      if (depto) resueltos.push(depto.id_Departamento);
+    }
+    return resueltos;
+  }
+
+  // idSeleccionado es el "id" que entregó getDirecciones(): si el subfondo es de dependencia 3
+  // ya es un id_Direccion real; en cualquier otro caso es el id_Departamento de la "cabecera"
+  // que representa esa dirección, así que primero resolvemos su id_Direccion real antes de buscar
+  // los departamentos (áreas administrativas) que cuelgan de ella.
+  async getAreaAdministrativa(idSeleccionado: number, subfondoId?: number) {
+    let idDireccionReal = idSeleccionado;
+
+    if (subfondoId) {
+      const subfondo = await this.subfondoModel.findByPk(subfondoId);
+      if (subfondo?.id_Dependencia !== 3) {
+        const cabecera = await this.departamentoModel.findByPk(idSeleccionado);
+        idDireccionReal = cabecera?.id_Direccion ?? idSeleccionado;
+      }
+    }
+
     const deptos = await this.departamentoModel.findAll({
-      where: { id_Direccion: idDireccion },
+      where: { id_Direccion: idDireccionReal },
       order: [['nombre_completo', 'ASC']],
     });
     return deptos.map((d) => ({
@@ -93,10 +126,25 @@ export class SeccionService {
     }));
   }
 
-  async getDepartamentoInfo(id: number) {
+  // Devuelve el id que hay que preseleccionar en el <select> "Dirección" para este departamento:
+  // en dependencia 3 (catálogo real de t_direccion) es su id_Direccion tal cual; en cualquier otra
+  // dependencia el <select> "Dirección" lista id_Departamento de las "cabeceras" (c_presup termina en '01'),
+  // así que hay que ubicar cuál de sus hermanos (mismo id_Direccion) es la cabecera.
+  async getDepartamentoInfo(id: number, subfondoId?: number) {
     const depto = await this.departamentoModel.findByPk(id);
     if (!depto) return null;
-    return { id_Direccion: depto.id_Direccion, label: depto.nombre_completo };
+
+    let idParaSelect = depto.id_Direccion;
+    if (subfondoId && depto.id_Direccion) {
+      const subfondo = await this.subfondoModel.findByPk(subfondoId);
+      if (subfondo?.id_Dependencia !== 3) {
+        const hermanos = await this.departamentoModel.findAll({ where: { id_Direccion: depto.id_Direccion } });
+        const cabecera = hermanos.find((h) => String(h.c_presup ?? '').endsWith('01'));
+        idParaSelect = cabecera?.id_Departamento ?? depto.id_Direccion;
+      }
+    }
+
+    return { id_Direccion: idParaSelect, label: depto.nombre_completo };
   }
 
   async getAreaNames(ids: number[]) {
@@ -230,8 +278,10 @@ export class SeccionService {
     const sec = await this.seccionModel.create({ ...data, status: 1 });
 
     if (direccion_ids && direccion_ids.length > 0) {
+      const subfondo = await this.subfondoModel.findByPk(dto.id_subfondo);
+      const departamentoIds = await this.resolveDepartamentoIds(subfondo?.id_Dependencia, direccion_ids);
       await this.seccionDirModel.bulkCreate(
-        direccion_ids.map((id_Departamento) => ({ id_seccion: sec.id, id_Departamento })),
+        departamentoIds.map((id_Departamento) => ({ id_seccion: sec.id, id_Departamento })),
       );
     }
 
@@ -253,8 +303,11 @@ export class SeccionService {
     if (direccion_ids !== undefined) {
       await this.seccionDirModel.destroy({ where: { id_seccion: id } });
       if (direccion_ids.length > 0) {
+        const seccion = await this.seccionModel.findByPk(id);
+        const subfondo = seccion ? await this.subfondoModel.findByPk(seccion.id_subfondo) : null;
+        const departamentoIds = await this.resolveDepartamentoIds(subfondo?.id_Dependencia, direccion_ids);
         await this.seccionDirModel.bulkCreate(
-          direccion_ids.map((id_Departamento) => ({ id_seccion: id, id_Departamento })),
+          departamentoIds.map((id_Departamento) => ({ id_seccion: id, id_Departamento })),
         );
       }
     }

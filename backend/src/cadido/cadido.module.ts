@@ -2,9 +2,28 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { CadidoController } from './cadido.controller';
 import { CadidoService } from './cadido.service';
+import { ValorDocumentalSerieSubserieModel } from 'src/models/valor_documental_serie_subserie.model';
+import { ValorDocumentalsModel } from 'src/models/valor_documentals.model';
+import { DestinoFinalModel } from 'src/models/destino_final.model';
+import { SubfondoModel } from 'src/models/subfondo.model';
+import { TDependencia } from 'src/models/t-dependencia.model';
+import { TecnicaSeleccionModel } from 'src/models/tecnica-seleccion.model';
+import { BitacoraClasificacionModel } from 'src/models/bitacora-clasificacion.model';
+import { SubsubSerieModel } from 'src/models/subsub-serie.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([])],
+  imports: [
+    SequelizeModule.forFeature([
+      ValorDocumentalSerieSubserieModel,
+      ValorDocumentalsModel,
+      DestinoFinalModel,
+      SubfondoModel,
+      TecnicaSeleccionModel,
+      BitacoraClasificacionModel,
+      SubsubSerieModel,
+    ]),
+    SequelizeModule.forFeature([TDependencia], 'saf'),
+  ],
   controllers: [CadidoController],
   providers: [CadidoService],
 })
