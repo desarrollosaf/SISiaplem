@@ -136,7 +136,9 @@ export class AuthService {
     try {
       // JWT usa Base64URL; atob solo acepta Base64 estándar → convertir antes de decodificar
       const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(b64)) as {
+      // atob devuelve bytes, no texto: hay que decodificar UTF-8 para conservar acentos y ñ
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const payload = JSON.parse(new TextDecoder().decode(bytes)) as {
         sub: number; rfc: string; name: string; email: string; roles: string[]; permissions: string[]; exp: number;
       };
       if (payload.exp * 1000 < Date.now()) {
