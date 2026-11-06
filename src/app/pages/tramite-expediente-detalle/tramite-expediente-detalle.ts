@@ -112,19 +112,24 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.id = +(this.route.snapshot.paramMap.get('id') ?? 0);
-    this.cargar();
     this.guia.getTiposTratamiento().subscribe({ next: (data) => this.tiposTratamiento.set(data), error: (e) => console.error(e) });
     this.guia.getServidoresPublicos().subscribe({ next: (data) => this.servidoresPublicos.set(data), error: (e) => console.error(e) });
-    this.guia.getTipoDocumental(this.id).subscribe({ 
-      next: (data) =>
-        {
+
+    // Angular reutiliza el componente al pasar de un expediente a otro (p. ej. desde la búsqueda global)
+    this.route.paramMap.subscribe((params) => {
+      this.id = +(params.get('id') ?? 0);
+      this.busca.set('');
+      this.expandidos.set(new Set());
+      this.cargar();
+      this.guia.getTipoDocumental(this.id).subscribe({
+        next: (data) => {
           this.tipoDocumento.set(data);
           if (data.length > 0) {
             this.formularioAdd.get('tipo_documento')?.setValue(0);
           }
-        }, 
-      error: (e) => console.error(e) 
+        },
+        error: (e) => console.error(e),
+      });
     });
   }
 

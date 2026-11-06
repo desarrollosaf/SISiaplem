@@ -24,16 +24,15 @@ export interface LoginResponse {
 
 
 export interface Documento{
-  id: number;
+  clave: string;
   folio: string | null;
-  titulo_doc: string | null;
-  referencia_documento: string | null;
-  expediente_id: number  | null;
-  path: string | null;
-  tipo: {
-    id: number;
-    tipo_doc: string;
-  }
+  titulo: string | null;
+  tipo: string | null;
+  archivo: string | null;
+  expediente_id: number;
+  expediente_nombre: string | null;
+  expediente_anio: string | null;
+  expediente_cerrado: boolean;
 }
 
 export interface respuestaBusqueda{
