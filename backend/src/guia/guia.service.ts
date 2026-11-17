@@ -23,6 +23,9 @@ import { HEADER_LOGO_BASE64, capitalizar } from '../common/pdf-utils';
 import { TipoDocs } from 'src/models/tipo_docs';
 import { TipoDocSerieModel } from 'src/models/tipo-doc-serie.model';
 import moment from 'moment';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+
 
 pdfMake.setFonts({
   Roboto: {
@@ -59,6 +62,7 @@ export class GuiaService {
     private departamentoModel: typeof TDepartamento,
     @InjectModel(TDependencia, 'saf')
     private dependenciaModel: typeof TDependencia,
+    private readonly http: HttpService,
   ) {}
 
   private async getDeptIds(rfc: string): Promise<number[]> {
@@ -1703,6 +1707,38 @@ export class GuiaService {
       })),
     };
   }
+
+    async validarPsw(rfc:string, psw: string){
+    const datos = {
+      'rfc': rfc,
+      'password': psw
+    }
+
+    const feplemUrl = process.env.FEPLEM_URL;
+    try {
+      const response = await firstValueFrom(
+        this.http.post<any>(
+          feplemUrl+'/api/validaCertificados',
+          datos,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      console.log('response. ',response)
+      const resp = {
+        hash: String(response.data)
+      }
+
+      console.log('respuesta ', resp)
+      return resp;
+    } catch (error: any) {
+      return error.response?.data;
+    } 
+  }
+
 
   
 
