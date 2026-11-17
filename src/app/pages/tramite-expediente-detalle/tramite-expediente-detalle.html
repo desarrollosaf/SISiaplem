@@ -365,6 +365,16 @@
       <label class="field-label">Documento <span class="required-star">*</span></label>
       <input type="file" class="field-input" name="path" (change)="seleccionarArchivo($event)"/>
     </div>
+
+    <div class="field-group">
+      <label class="field-label">Contraseña de certificado </label>
+      <input type="password" class="field-input"  formControlName="psw" name="psw" placeholder="Ingresa tu contraseña"/>
+      @if (pswIncorrecta) {
+        <small class="text-danger">
+          La contraseña ingresada es incorrecta.
+        </small>
+      }
+    </div>
   </div>
   </form>
   <div class="drawer-footer">

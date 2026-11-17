@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { respuestaBusqueda } from './auth.service';
+import { Observable } from 'rxjs';
 
 const API = `${environment.endpoint}api/guia`;
 
@@ -171,6 +172,10 @@ export interface addDoc {
   path?: string;
 }
 
+export type respuesta = {
+  hash: string
+}
+
 @Injectable({ providedIn: 'root' })
 export class GuiaService {
   private http = inject(HttpClient);
@@ -283,5 +288,9 @@ export class GuiaService {
         },
       },
     );
+  }
+
+  validarPsw(psw: string): Observable<respuesta>{
+    return this.http.get<respuesta>(`${API}/validarPsw/${psw}`);
   }
 }
