@@ -49,6 +49,17 @@ export class GuiaController {
     res.send(buffer);
   }
 
+  @Get('validarPsw/:psw')
+  @UseGuards(JwtAuthGuard)
+  validarPsw(
+    @Param('psw') psw: string,
+    @Request() req: any 
+  ){
+    const rfc = req.user.rfc;
+    return this.guiaService.validarPsw(rfc, psw);
+  }
+
+
   // GET /api/guia/inventario-general/pdf?rfc=XXXX
   @Get('inventario-general/pdf')
   async inventarioGeneralPdf(@Query('rfc') rfc: string, @Res() res: Response) {

@@ -29,7 +29,7 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   guardandoAdd = signal(false);
   detalleAdd = signal<addDoc | null>(null);
   archivoSeleccionado: File | null = null;
-
+  psw: string = '' ;
   servidoresOptions = computed<SearchableOption[]>(() =>
     this.servidoresPublicos().map((sp) => ({ value: sp.N_Usuario, label: sp.Nombre, sublabel: sp.N_Usuario })),
   );
@@ -93,6 +93,7 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   editTipoExpediente: number | 0 = 0;
   asignacionDirecta = false;
   editResponsable: string | null = null;
+  pswIncorrecta = false;
 
   private id = 0;
   formularioAdd: FormGroup; 
@@ -109,7 +110,8 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
       fecha_documento: ['', Validators.required],
       tipo_documento: [null, Validators.required],
       descripcion_doc: [''],
-      path: ['', Validators.required]
+      path: ['', Validators.required],
+      psw: ['', Validators.required]
     });
   }
 
@@ -285,6 +287,29 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
     this.drawerOpenAdd.set(false);
   }
 
+   async validarPsw(): Promise<boolean>{
+    this.psw = this.formularioAdd.get('psw')?.value ?? '';
+    return new Promise((resolve) => {
+      this.guia.validarPsw(this.psw).subscribe({
+          next: (respuesta:any) => {
+            console.log(respuesta)
+            if(respuesta == null || respuesta.hash === 0){          
+              this.pswIncorrecta = true;  
+              this.formularioAdd.get('psw')?.reset();
+              resolve(false);
+            } else {
+              this.pswIncorrecta = false;
+              resolve(true);
+            }
+          },
+          error: () => {
+            return this.formularioAdd?.valid ?? false;
+          } 
+        });
+      });
+  }
+
+
   seleccionarArchivo(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -301,17 +326,24 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
       return this.formularioAdd?.valid ?? false;
   }
 
-   guardarAdd() {
+  async guardarAdd() {
     if (this.formularioAdd.invalid) {
       this.formularioAdd.markAllAsTouched();
-
       console.log('Formulario inválido');
       return;
-  }
+    }
 
     this.guardandoAdd.set(true);
+
     const datos = this.formularioAdd.getRawValue();
     const formData = new FormData();
+
+    const valido = await this.validarPsw();
+    if (!valido) {
+      console.log('psw inválido');
+      this.guardandoAdd.set(false);
+      return; 
+    }
 
     Object.entries(datos).forEach(([key, value]) => {
     if (key !== 'path' && value !== null && value !== undefined) {
@@ -329,6 +361,7 @@ export class TramiteExpedienteDetalleComponent implements OnInit {
   }
 
     this.guia.addDocExpediente(this.id, formData).subscribe({
+      
       next: (data) => {
         this.detalleAdd.set(data);
         this.guardandoAdd.set(false);

@@ -16,6 +16,7 @@ import { SolicitudTransferenciaModel } from '../models/solicitud-transferencia.m
 import { SUsuario } from '../models/s-usuario.model';
 import { TDepartamento } from '../models/t-departamento.model';
 import { TDependencia } from '../models/t-dependencia.model';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TDependencia } from '../models/t-dependencia.model';
       SolicitudTransferenciaModel,
     ]),
     SequelizeModule.forFeature([SUsuario, TDepartamento, TDependencia], 'saf'),
+    HttpModule,
   ],
   controllers: [GuiaController],
   providers: [GuiaService],
